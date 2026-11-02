@@ -52,7 +52,8 @@ export async function serve(directory,{port=4174}={}){
       }
       check(['GET','HEAD'].includes(req.method),'METHOD','Use GET or POST.');
       if(pathname==='/api/snapshot'){
-        const project=await d.store.read(),observation=await d.observe({view:'director'});let plan=null;try{plan=compileProject(project,d.packs);}catch{}
+        const project=await d.store.read(),observation=await d.observe({view:'director'});let plan=null;
+        try{plan=compileProject(project,d.packs);}catch{}
         json(res,200,{project,observation,plan,patterns:patterns(),locales:Object.keys(d.packs),dictionaries:d.packs,dictionary:d.packs[project.output.locale],job,voice:await d.voice({action:'status'})});return;
       }
       if(pathname==='/api/plan'){json(res,200,{plan:await d.export({kind:'plan'}),observation:await d.observe()});return;}

@@ -1,5 +1,5 @@
 import {ProjectStore,receiptFor} from './project/store.mjs';
-import {keys,projectSchema,sceneSchema,voiceSchema,voiceProfile,actionTimingSchema} from './project/schema.mjs';
+import {keys,projectSchema,sceneSchema,voiceSchema,voiceProfile,actionTimingSchema,courseSchema} from './project/schema.mjs';
 import {compileProject,stateInBB,route,validateProject} from './compiler.mjs';
 import {importAudio} from './media/audio.mjs';
 import {localePacks} from './locales.mjs';
@@ -7,6 +7,11 @@ import {clone,hash} from './util.mjs';
 import {check,errorJSON} from './errors.mjs';
 import {VoiceController} from './media/voice.mjs';
 import {selectDirection,patterns,effectiveDirection} from './direction/index.mjs';
+import {analysisSchema,confirmAnalysis} from './analysis/index.mjs';
+import {bindEvidence} from './analysis/evidence.mjs';
+import {presentationSchema,presentationCueSchema} from './presentation.mjs';
+import {variantReviewHash} from './project/variants.mjs';
+import {putBranch} from './project/branches.mjs';
 
 export class Director {
   constructor(store,packs){this.store=store;this.packs=packs;this.cursor=null;this.previewUrl=null;this.speech=new VoiceController(this);}
@@ -17,7 +22,7 @@ export class Director {
     const project=await this.store.read();
     try{
       const plan=compileProject(project,this.packs,{view}),frame=plan.frames.find(f=>f.id===this.cursor)||plan.frames[0];
-      return {projectId:project.projectId,revision:project.revision,output:project.output,previewUrl:this.previewUrl,sceneId:frame.sceneId,entryId:frame.entryId,beat:frame.beatId,frame:frame.id,duration:plan.duration,narration:frame.narration,direction:effectiveDirection(project,project.lesson.scenes.find(s=>s.id===frame.sceneId)),state:frame.state,readiness:{ready:plan.issues.length===0,issues:plan.issues}};
+      return {projectId:project.projectId,revision:project.revision,output:project.output,previewUrl:this.previewUrl,sceneId:frame.sceneId,entryId:frame.entryId,beat:frame.beatId,frame:frame.id,duration:plan.duration,narration:frame.narration,direction:effectiveDirection(project,project.lesson.scenes.find(s=>s.id===frame.sceneId)),state:frame.state,...(frame.presentation?{presentation:frame.presentation}:{}),...(plan.advisories?{advisories:plan.advisories}:{}),readiness:{ready:plan.issues.length===0,issues:plan.issues}};
     }catch(e){return {projectId:project.projectId,revision:project.revision,output:project.output,previewUrl:this.previewUrl,state:null,readiness:{ready:false,issues:[errorJSON(e)]}};}
   }
   async seek({beatId,view='player',frameId,sceneId,entryId}={}){
@@ -48,10 +53,26 @@ export class Director {
       for(const [i,c]of commands.entries()){
         const path=`commands/${i}`;
         const allowed={
-          'output.set':['type','value'],'scene.put':['type','value'],'branch.put':['type','sceneId','value'],
-          'narration.set':['type','sceneId','beatId','locale','text'],'audio.attach':['type','sceneId','beatId','value'],'voice.set':['type','sceneId','beatId','value'],'direction.set':['type','sceneId','value'],'captions.set':['type','sceneId','beatId','value'],'timing.set':['type','sceneId','beatId','value']
+          'output.set':['type','value'],'scene.put':['type','value'],'branch.put':['type','sceneId','value','copyFrom'],
+          'narration.set':['type','sceneId','beatId','locale','text'],'audio.attach':['type','sceneId','beatId','value'],'voice.set':['type','sceneId','beatId','value'],'direction.set':['type','sceneId','value'],'captions.set':['type','sceneId','beatId','value'],'timing.set':['type','sceneId','beatId','value'],
+          'analysis.put':['type','sceneId','value'],'analysis.confirm':['type','sceneId','analysisId'],
+          'presentation.set':['type','sceneId','beatId','value'],'presentation.cues':['type','sceneId','beatId','value'],
+          'scene.variant':['type','sourceSceneId','value'],'scene.review':['type','sceneId'],'course.set':['type','value']
         }[c?.type];check(allowed,'COMMAND_UNKNOWN','Unknown editing command.',path+'/type');keys(c,allowed,path);
         for(const key of ['sceneId','beatId'])if(c[key]!==undefined)check(typeof c[key]==='string'&&c[key].trim(),'SCHEMA','Use a nonempty scope ID.',path+'/'+key);
+        if(c.type==='course.set'){
+          if(c.value===null)delete project.lesson.course;else{courseSchema(c.value,path+'/value');project.lesson.course=clone(c.value);}continue;
+        }
+        if(c.type==='scene.variant'){
+          keys(c.value,['id','title','change'],path+'/value');keys(c.value.change,['beatId','actionIndex','action'],path+'/value/change');
+          const source=project.lesson.scenes.find(s=>s.id===c.sourceSceneId);check(source,'SCENE_UNKNOWN','Unknown source scene.',path+'/sourceSceneId');
+          check(typeof c.value.id==='string'&&c.value.id.trim()&&!project.lesson.scenes.some(s=>s.id===c.value.id),'VARIANT','Choose a new scene ID.',path+'/value/id');
+          const scene=clone(source),change=c.value.change,beat=[...scene.beats,...(scene.branches??[]).flatMap(b=>b.beats)].find(b=>b.id===change.beatId);
+          check(beat&&Number.isSafeInteger(change.actionIndex)&&change.actionIndex>=0&&beat.actions?.[change.actionIndex],'VARIANT','Choose an existing action to replace.',path+'/value/change');
+          const before=clone(beat.actions[change.actionIndex]);beat.actions[change.actionIndex]=clone(change.action);
+          scene.id=c.value.id;scene.title=clone(c.value.title);scene.variant={sourceSceneId:source.id,sourceHash:hash(source),change:{beatId:change.beatId,actionIndex:change.actionIndex,before,after:clone(change.action)},reviewHash:null};
+          sceneSchema(scene,path+'/value');project.lesson.scenes.push(scene);mark(scene,null,true);continue;
+        }
         if(c.type==='direction.set'){
           const target=c.sceneId?project.lesson.scenes.find(s=>s.id===c.sceneId):project;check(target,'SCENE_UNKNOWN','Unknown scene.',path+'/sceneId');
           const value=selectDirection(c.value);if(value===null)delete target.direction;else target.direction=value;continue;
@@ -80,13 +101,31 @@ export class Director {
           mark(c.value,null,true);continue;
         }
         const scene=project.lesson.scenes.find(s=>s.id===(c.sceneId??project.output.sceneId));check(scene,'SCENE_UNKNOWN','Unknown scene.',path+'/sceneId');
+        if(c.type==='scene.review'){
+          check(scene.variant,'VARIANT','This scene has no recorded condition change.',path+'/sceneId');scene.variant.reviewHash=variantReviewHash(scene);continue;
+        }
+        if(c.type==='analysis.put'){
+          analysisSchema([c.value],path+'/value');scene.analysis??=[];const index=scene.analysis.findIndex(a=>a.id===c.value.id);
+          const value=clone(c.value);delete value.review;
+          if(index<0)scene.analysis.push(value);else scene.analysis[index]=value;continue;
+        }
+        if(c.type==='analysis.confirm'){
+          const index=scene.analysis?.findIndex(a=>a.id===c.analysisId)??-1;check(index>=0,'ANALYSIS_UNKNOWN','Unknown analysis record.',path+'/analysisId');
+          scene.analysis[index]=confirmAnalysis(scene,scene.analysis[index],{evidenceHash:await bindEvidence(this.store.directory,scene.analysis[index])});continue;
+        }
         if(c.type==='branch.put'){
-          keys(c.value,['id','from','label','beats'],path+'/value');
-          scene.branches??=[];const index=scene.branches.findIndex(b=>b.id===c.value?.id);if(index<0)scene.branches.push(clone(c.value));else scene.branches[index]=clone(c.value);mark(scene,c.value.id);continue;
+          putBranch(scene,c.value,c.copyFrom,path);mark(scene,c.value.id);continue;
         }
         const beat=[...scene.beats,...(scene.branches??[]).flatMap(b=>b.beats)].find(b=>b.id===c.beatId);check(beat,'BEAT_UNKNOWN','Unknown beat.',path+'/beatId');
         const locale=c.locale??c.value?.locale??project.output.locale;check(this.packs[locale],'LOCALE','Install a locale dictionary first.',path+'/locale');
-        if(c.type==='narration.set'){
+        if(c.type==='presentation.set'){
+          if(c.value===null)delete beat.presentation;
+          else{keys(c.value,['surface','analysisId','title','question','focus','show'],path+'/value');presentationSchema(c.value,path+'/value');beat.presentation={...clone(c.value),...(beat.presentation?.cues?{cues:beat.presentation.cues}:{})};}
+        }else if(c.type==='presentation.cues'){
+          keys(c.value,['locale','cues'],path+'/value');check(beat.presentation,'PRESENTATION','Set the base presentation before cues.',path+'/beatId');
+          if(c.value.cues===null){if(beat.presentation.cues)delete beat.presentation.cues[locale];}
+          else{presentationCueSchema(c.value.cues,path+'/value/cues');beat.presentation.cues??={};beat.presentation.cues[locale]={audioHash:beat.audio?.[locale]?.assetId??null,cues:clone(c.value.cues)};}
+        }else if(c.type==='narration.set'){
           check(typeof c.text==='string'&&c.text.trim(),'NARRATION','Use nonempty narration. To remove narration replace the beat through scene.put.',path+'/text');
           beat.narration??={};if(beat.narration[locale]!==c.text&&beat.captionCues?.[locale])beat.captionCues[locale]={audioHash:null,cues:[]};beat.narration[locale]=c.text;if(beat.audio)delete beat.audio[locale];
         }else if(c.type==='timing.set'){

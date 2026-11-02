@@ -1,6 +1,8 @@
 import {check} from '../errors.mjs';
 import {loadState} from '../poker/rules.mjs';
 import {directionSchema} from '../direction/index.mjs';
+import {analysisSchema} from '../analysis/index.mjs';
+import {presentationSchema} from '../presentation.mjs';
 const object=(x,p)=>check(x&&typeof x==='object'&&!Array.isArray(x),'SCHEMA','Expected an object.',p);
 export function keys(value,allowed,path){object(value,path);for(const key of Object.keys(value))check(allowed.includes(key),'UNKNOWN_FIELD',`Unknown field: ${key}`,`${path}/${key}`,{allowed});}
 const string=(x,p)=>check(typeof x==='string'&&x.trim().length>0,'SCHEMA','Expected a nonempty string.',p);
@@ -36,7 +38,8 @@ export function outputSchema(output){
   }
 }
 function beatSchema(beat,path){
-  keys(beat,['id','label','actions','hold','actionHold','narration','audio','view','delivery','timing','speaker','captionCues'],path);string(beat.id,path+'/id');
+  keys(beat,['id','label','actions','hold','actionHold','narration','audio','view','delivery','timing','speaker','captionCues','presentation'],path);string(beat.id,path+'/id');
+  if(beat.presentation!==undefined)presentationSchema(beat.presentation,path+'/presentation');
   if(beat.speaker!==undefined)string(beat.speaker,path+'/speaker');
   if(beat.captionCues!==undefined){
     object(beat.captionCues,path+'/captionCues');
@@ -74,7 +77,16 @@ function beatSchema(beat,path){
   }}
 }
 export function sceneSchema(scene,path='scene'){
-  keys(scene,['id','title','start','beats','branches','appearance','direction'],path);string(scene.id,path+'/id');textMap(scene.title,path+'/title');
+  keys(scene,['id','title','start','beats','branches','appearance','direction','analysis','variant'],path);string(scene.id,path+'/id');textMap(scene.title,path+'/title');
+  if(scene.analysis!==undefined)analysisSchema(scene.analysis,path+'/analysis');
+  if(scene.variant!==undefined){
+    const p=path+'/variant',v=scene.variant;keys(v,['sourceSceneId','sourceHash','change','reviewHash'],p);string(v.sourceSceneId,p+'/sourceSceneId');
+    check(/^[a-f0-9]{64}$/.test(v.sourceHash),'VARIANT','Invalid source fingerprint.',p+'/sourceHash');
+    check(v.reviewHash===null||/^[a-f0-9]{64}$/.test(v.reviewHash),'VARIANT','Review state must be explicit.',p+'/reviewHash');
+    keys(v.change,['beatId','actionIndex','before','after'],p+'/change');string(v.change.beatId,p+'/change/beatId');
+    check(Number.isSafeInteger(v.change.actionIndex)&&v.change.actionIndex>=0,'VARIANT','Use a zero-based action index.',p+'/change/actionIndex');
+    beatSchema({id:'variant-audit',label:{},actions:[v.change.before,v.change.after]},p+'/change');
+  }
   if(scene.direction!==undefined)directionSchema(scene.direction,path+'/direction');
   keys(scene.start,['street','board','button','hero','actor','bigBlind','lastFullRaise','actedAt','seats','roundClosed'],path+'/start');
   const start=scene.start;
@@ -105,9 +117,11 @@ export function projectSchema(project){
   keys(project,['format','version','projectId','revision','lesson','output','assets','receipts','voice','direction'],'project');
   check(project.format==='river.project'&&project.version===2,'SCHEMA_VERSION','Expected river.project version 2.','project/version');
   string(project.projectId,'project/projectId');check(Number.isSafeInteger(project.revision)&&project.revision>=0,'REVISION','Invalid revision.','project/revision');
-  keys(project.lesson,['scenes','title'],'lesson');list(project.lesson.scenes,'lesson/scenes');check(project.lesson.scenes.length>0,'EMPTY_PROJECT','Add a scene.','lesson/scenes');
+  keys(project.lesson,['scenes','title','course'],'lesson');list(project.lesson.scenes,'lesson/scenes');check(project.lesson.scenes.length>0,'EMPTY_PROJECT','Add a scene.','lesson/scenes');
+  if(project.lesson.course!==undefined)courseSchema(project.lesson.course);
   if(project.lesson.title!==undefined)textMap(project.lesson.title,'lesson/title');
   unique(project.lesson.scenes,'lesson/scenes');project.lesson.scenes.forEach(s=>sceneSchema(s,'lesson/scenes/'+s.id));
+  for(const episode of project.lesson.course?.episodes??[])check(project.lesson.scenes.some(s=>s.id===episode.sceneId),'SCENE_UNKNOWN','Course episode references an unknown scene.','lesson/course/episodes/'+episode.id+'/sceneId');
   outputSchema(project.output);check(project.lesson.scenes.some(s=>s.id===project.output.sceneId),'SCENE_UNKNOWN','Selected scene does not exist.','output/sceneId');
   const selected=project.lesson.scenes.find(s=>s.id===project.output.sceneId);
   check(project.output.branchId===null||selected.branches?.some(b=>b.id===project.output.branchId),'BRANCH_UNKNOWN','Selected branch does not exist.','output/branchId');
@@ -132,4 +146,14 @@ export function projectSchema(project){
     previousRevision=r.value.revision;outputSchema(r.value.output);
   }
   return project;
+}
+
+export function courseSchema(course,path='lesson/course'){
+  keys(course,['id','title','prerequisites','objectives','episodes'],path);string(course.id,path+'/id');textMap(course.title,path+'/title');
+  for(const key of ['prerequisites','objectives'])if(course[key]!==undefined)textMap(course[key],path+'/'+key);
+  list(course.episodes,path+'/episodes');unique(course.episodes,path+'/episodes');
+  for(const [i,episode]of course.episodes.entries()){
+    const p=path+'/episodes/'+i;keys(episode,['id','sceneId','objective','conditions','check'],p);string(episode.sceneId,p+'/sceneId');textMap(episode.objective,p+'/objective');
+    for(const key of ['conditions','check'])if(episode[key]!==undefined)textMap(episode[key],p+'/'+key);
+  }
 }

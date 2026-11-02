@@ -93,6 +93,9 @@ export async function renderVideo(directory,options={}){
     await page.evaluate(plan=>window.riverFrame.load(plan),plan);await page.evaluate(()=>document.fonts.ready);
     const video=command('ffmpeg',['-y','-hide_banner','-loglevel','error','-f','image2pipe','-framerate',String(plan.fps),'-vcodec','png','-i','pipe:0','-an','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p',join(stage,'silent.mp4')],{pipe:true});
     const keyframes=new Set([0,plan.totalFrames-1,...plan.frames.slice(0,62).map(f=>Math.min(f.endFrame-1,f.startFrame+Math.ceil(.4*plan.fps)))]),keyframeHashes=[];
+    // Preserve the exact frames on both sides of each teaching reveal. Sampling
+    // only 400 ms into a segment cannot prove that an answer was not shown early.
+    for(const frame of plan.frames)if(frame.presentation){keyframes.add(Math.max(0,frame.startFrame-1));keyframes.add(frame.startFrame);}
     let pixels;
     for(let frame=0;frame<plan.totalFrames;frame++){
       running();const changed=await page.evaluate(i=>{window.riverFrame.render(i);return window.riverFrame.changed;},frame);

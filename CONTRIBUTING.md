@@ -13,6 +13,7 @@
 | `src/studio/`、`src/server.mjs` | 导演台、本地接口与制作交互 |
 | `src/media/` | 音频导入、语音调用和视频渲染 |
 | `src/direction/`、`locales/` | 讲解模式与界面语言 |
+| `src/analysis/`、`src/presentation.mjs` | 只读决策资料、证据绑定与确定性的表现编译 |
 | `.agents/skills/poker-director/` | Agent 制作契约、写稿与验收流程 |
 | `examples/`、`tests/` | 可分发输入样例与自动回归 |
 

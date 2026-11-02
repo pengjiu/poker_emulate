@@ -8,6 +8,8 @@ Run `python3 scripts/setup-index-tts.py` from the repository root. It requires u
 
 `RIVER_INDEXTTS_HOME` selects another installed engine directory; `RIVER_INDEXTTS_PYTHON` optionally selects its Python executable. Machine paths stay outside project manifests. Voice references are copied into project assets, so exported courses retain their speaker reference and generated audio.
 
+Setup prepares the official text-normalizer caches in a separate process before loading speech weights. On an existing CPU installation, run `python3 scripts/setup-index-tts.py --warmup-only` once if first generation is killed while compiling the normalizer. This avoids the combined startup memory peak; it does not guarantee that every host has enough memory for synthesis. CPU production can be much slower than playback, so measure one real passage and preserve completed episodes in separate voice batches.
+
 ```json
 {"method":"voice","params":{"action":"status"}}
 ```

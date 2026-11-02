@@ -2,6 +2,8 @@
 
 本地、Agent 优先的德州扑克内容制作工具。通过结构化场景控制牌、筹码、行动、旁白和路线，以真实客户端布局生成横版/竖版视频。默认集成官方 IndexTTS2.5 本地语音，同时支持导入外部 TTS 或其他本地模型的音频。
 
+**决策教学扩展**增加引用真实决策的分析资料、稳定研究画布、语义聚焦、按配音逐步揭示、指定动作替换重放和课程创作记录。它仍使用 v2 项目和六方法；旧工程无需迁移。改造取舍见[实施计划](docs/TEACHING_IMPLEMENTATION_PLAN.md)，本轮实际验证与限制见[教学验收](docs/TEACHING_ACCEPTANCE.md)。
+
 **v1.2.0 增加可组合讲解模式和连续制作。** 10 个中英日模式、自定义约定、跨动作旁白、多手/分支顺序、独立说话者与精确字幕复用现有六方法；详见 [模式设计与验收](docs/STYLE_MODES_REVIEW.md)，机器入口为 [release.json](release.json)。[本地语音与六人桌课程](docs/VOICE_AND_SIX_MAX_REVIEW.md)、[原始发布验收](docs/RELEASE_VALIDATION.md)和[执行计划](docs/EXECUTION_PLAN.md)保留历史证据。
 
 本轮模式样片、分类和使用方式见[讲解模式验收](docs/STYLE_MODES_REVIEW.md)。此前[六人桌 K9 完整课程](docs/VOICE_AND_SIX_MAX_REVIEW.md)保留 2 分 14 秒横竖视频：翻前六人、翻后两人、持续第一视角与 IndexTTS 配音。[客户端精修](docs/LOCALIZED_CLIENT_REVIEW.md)和[首次 GTO 任务](docs/REAL_SCENARIO_REVIEW.md)也保留原视频、失败和修复记录。
@@ -10,7 +12,7 @@
 
 从 GitHub 克隆安装。仓库包含源码、项目 skill 和带三语音频的必要示例；本机模型、可编辑项目、视频和完整验收产物由 `.gitignore` 排除，保留在原工作目录。
 
-需要 Node.js 24、npm、FFmpeg/ffprobe，以及中文/日文字体。参考验收环境为 macOS；Linux 可安装 Noto CJK 字体，其他系统尚未进行同等媒体验收。
+需要 Node.js 24、npm、FFmpeg/ffprobe，以及中文/日文字体。历史参考验收环境为 macOS；本轮另外在 Linux 完成了本地回归与真实 IndexTTS 视频的编码检查，具体规格与边界见教学验收记录。Linux 可安装 Noto CJK 字体；其他系统尚未进行同等媒体验收。
 
 ```sh
 git clone https://github.com/pengjiu/poker_emulate.git
@@ -23,7 +25,7 @@ npm run doctor -- --json
 npm start
 ```
 
-首次启动自动从 `examples/legacy/` 创建 `projects/demo`，后续启动保留已有编辑。终端会给出本地地址（通常 http://127.0.0.1:4174）。浏览器和 CLI 共用项目与修订状态。`?view=client` 是纯客户端窗口；成片始终只包含客户端。
+首次启动自动从 `examples/legacy/` 创建 `projects/demo`，后续启动保留已有编辑。终端会给出本地地址（通常 http://127.0.0.1:4174）。浏览器和 CLI 共用项目与修订状态。`?view=client` 是干净的牌桌窗口；`?view=output` 显示实际教学输出，与编码视频使用同一个渲染器。没有表现编排的旧项目仍输出原有牌桌画面。
 
 macOS 可用 `brew install ffmpeg` 安装媒体工具；Ubuntu 可用 `sudo apt-get install ffmpeg fonts-noto-cjk`，并把浏览器安装步骤改为 `npx playwright install --with-deps chromium`。Node.js 版本可通过仓库 `.nvmrc` 切换。
 
@@ -42,10 +44,26 @@ node bin/river.mjs render --project projects/my-hand --profile final --out artif
 - [项目、场景、音频及批次格式](.agents/skills/poker-director/references/lesson-format.md)
 - [六种制作流程](.agents/skills/poker-director/references/task-recipes.md)
 - [IndexTTS 安装、音色、情绪、语速与发音控制](.agents/skills/poker-director/references/voice.md)
+- [分析资料、画布、提示点与条件变式](.agents/skills/poker-director/references/teaching-canvas.md)
 
 启用默认语音需要 uv。运行 `python3 scripts/setup-index-tts.py`，安装脚本会隔离官方 Python 环境，下载并校验约 7.1GB 必要模型文件；不修改系统 Python。随后在导演台点击“生成本段”或“补全本路线”。可以更换参考音色，设置本语言默认表达，也可勾选“仅本段”调整关键段落的语速和情绪。首次生成先试听一个自然段。`.river/` 是本机模型目录，不随课程或源码包分发；其他机器可先使用外部音频制作，再安装模型。
 
 音频通过 `audio.attach` 接收本地文件或浏览器 data URL，自动探测时长并复制到项目。项目目录包含 project.json、assets/、evidence/，可以完整复制迁移。旧 v1 JSON 用 `migrate --lesson <file> --project <new-directory>` 单向迁移，不覆盖原件。
+
+## 制作决策教学
+
+导演台的片段检查器可选择牌桌或分析画布、绑定分析资料、突出牌张/玩家/底池、编辑问题与显示顺序，并确认本语言的配音提示点。分析暂停只读取节点；返回后，仍由后续的实际行动推进牌局。修改下注或范围后，旧结论需要复核；更换音频后，旧图解提示点需要重新确认。
+
+可复用课程输入包含六人桌完整路线、受限河牌均衡推导、另一手牌的条件迁移，以及中英日短片。先创建可编辑的原生工程：
+
+```sh
+node scripts/build-teaching-demo.mjs --kind slice --project projects/teaching-slice
+node bin/river.mjs serve --project projects/teaching-slice
+# 已安装官方 IndexTTS 后，新建带真实语音的工程并正式渲染：
+node scripts/build-teaching-demo.mjs --kind course --project projects/teaching-course --voice --render --out artifacts/teaching-course
+```
+
+未配音的草稿不能冒充完整课程，也不能通过正式渲染检查。课程中的均衡只针对写明先验和动作限制的有限河牌游戏；独立枚举最佳回应的依据与节点指纹随工程保存，不代表完整无限注德州求解器。课程资料记录目标、前提和检验题，实际学习效果需要另行观察与作答数据。
 
 ## 导出与恢复
 

@@ -72,6 +72,12 @@ Bet/raise to is total current-street commitment. legalActions gives min/max. Cal
 
 branches:[{id,from,label,beats}] is one level. from names a main beat; prefix INCLUDES it, branch replaces continuation. Do not duplicate shared-prefix beats. Shared edits validate affected routes. Selected valid branches do not execute unused main tails; validate --all reports other routes separately.
 
+To continue an existing branch without changing it, give `branch.put` an optional `copyFrom:{branchId,beatId}` and a new `value.id`. Keep `value.from` equal to the source branch's main-line origin; `value.beats` contains only the new continuation. Runtime copies the source branch through the named beat, remaps copied beat IDs and their referenced analysis, and keeps main-line analysis shared. Copied IDs use `<new-branch-id>-<old-id>`; collisions reject the entire batch. Existing valid reviews survive a pure reference rename only when the decision fingerprint is unchanged. Stale/unreviewed analysis stays pending, and evidence hashes remain bound to the original bytes.
+
+```json
+{"type":"branch.put","sceneId":"river-example","copyFrom":{"branchId":"check-back","beatId":"cb"},"value":{"id":"check-back-copy","from":"decision","label":{"en-US":"Review this line"},"beats":[]}}
+```
+
 Beat view:{reveal:["oop"]} exposes those seats until a later cue; view:{reveal:[]} clears explicit reveals (normal showdown remains revealed). Presentation changes only. For first-person narration use player observation at that moment, director observation for authoring.
 
 ## Editing/audio
@@ -120,3 +126,5 @@ For timed narration, confirm the schedule **after** measuring the actual languag
 Entry IDs are unique and cannot contain `::`. Repetition is allowed; compiled IDs gain an entry prefix. Every frame includes sceneId, entryId and branchId. Seek with frameId, or beatId plus entryId; ambiguous repeated beats are rejected. Use narration to explain time jumps and counterfactuals while the client stays clean. `output.set` choosing sceneId or branchId exits sequence playback unless that same command supplies sequence. `sequence:null` also returns to one scene. Aspect, language and profile changes preserve the programme. Invocation overrides `--scene` or `--branch` inspect/render one route; default validation/render/voice process the programme. `validate --all` still audits each scene/branch/language separately.
 
 Optional beat.speaker labels a stable role for authoring and provenance; it is not shown on the clean table. Set its actual independent reference using scoped voice.set. Project direction is a frozen creative brief; scene.direction overrides it. Select, customize and review it through [narrative modes](narrative-modes.md); it never changes legal actions or invents narration.
+
+Optional scene analysis, beat presentation, condition variants and course records use the same manifest and compiler. Read [teaching canvas](teaching-canvas.md) for their reference, review and cue-binding contracts.
