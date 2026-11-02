@@ -29,7 +29,7 @@ git diff --check
 
 测试包含真实 Chromium、FFmpeg、音视频导入/渲染、取消和故障恢复。语音测试采用隔离的受控引擎验证集成契约；它不代表真实 IndexTTS 音质通过。涉及实际配音或画面质量的修改，还应检查真实输出并保存新证据。
 
-GitHub Actions 在 Ubuntu 上安装 FFmpeg、Noto CJK 和 Chromium 后运行同一组日常检查。`test:acceptance` 是额外的 macOS A01–A17 历史验收入口，依赖 `say` 的 Tingting 音色，渲染正式语言/画幅矩阵与性能基准；人工语言内容、实际画面和独立冷启动任务仍需另外验收。
+日常检查在本地运行。`test:acceptance` 是额外的 macOS A01–A17 历史验收入口，依赖 `say` 的 Tingting 音色，渲染正式语言/画幅矩阵与性能基准；人工语言内容、实际画面和独立冷启动任务仍需另外验收。
 
 ## Git 边界
 

@@ -65,7 +65,7 @@ npm run test:media
 npm run test:acceptance -- --out artifacts/acceptance/my-run
 ```
 
-`npm test` 运行全部自动回归，GitHub Actions 使用相同入口。`test:acceptance` 为额外的 macOS 历史验收，需系统 `say` 的 Tingting 音色，会实际渲染正式样片和60秒基准，耗时数分钟至数十分钟。自动脚本保留语言内容/实际帧 review 待办，附加相应证据与独立 Agent 冷启动结果后才形成最终 qualification，未执行不算通过。
+`npm test` 在本地运行全部自动回归。`test:acceptance` 为额外的 macOS 历史验收，需系统 `say` 的 Tingting 音色，会实际渲染正式样片和60秒基准，耗时数分钟至数十分钟。自动脚本保留语言内容/实际帧 review 待办，附加相应证据与独立 Agent 冷启动结果后才形成最终 qualification，未执行不算通过。
 
 维护、模块职责与 Git 文件边界见 [CONTRIBUTING.md](CONTRIBUTING.md)。`release.json` 和文档中的历史媒体/源码包路径对应原工作目录，视频、模型和归档二进制未纳入 Git；历史验收记录继续保留，新克隆无需这些文件即可启动与测试。
 
