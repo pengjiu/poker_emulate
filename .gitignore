@@ -1,0 +1,35 @@
+# Dependencies, local models and Python environments.
+node_modules/
+/.river/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Mutable projects and generated media/evidence stay on this machine.
+/projects/
+/artifacts/
+/dist/
+/exports/
+/prototype/
+/archive/*.tgz
+/archive/*.zip
+coverage/
+*.log
+
+# Local server credentials, project locks and interrupted atomic writes.
+**/.runtime.json
+**/.runtime/
+**/.runtime.lock/
+**/project.json.tmp-*
+**/project.json.lock/
+
+# Secrets and machine-specific files.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.DS_Store
+._*
+.idea/
+.vscode/

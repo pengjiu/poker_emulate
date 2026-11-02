@@ -8,11 +8,14 @@
 
 ## 安装与打开
 
-可安装源码包为 `dist/river-studio-v1.2.0.tgz`，旁边提供 SHA-256。解压后按下方步骤安装；模型、正式样片与完整验收证据保留在工作目录，不塞入源码包。
+从 GitHub 克隆安装。仓库包含源码、项目 skill 和带三语音频的必要示例；本机模型、可编辑项目、视频和完整验收产物由 `.gitignore` 排除，保留在原工作目录。
 
 需要 Node.js 24、npm、FFmpeg/ffprobe，以及中文/日文字体。参考验收环境为 macOS；Linux 可安装 Noto CJK 字体，其他系统尚未进行同等媒体验收。
 
 ```sh
+git clone https://github.com/pengjiu/poker_emulate.git
+cd poker_emulate
+# 使用 nvm 时可先运行 nvm use（.nvmrc 固定 Node.js 24）。
 npm ci
 npx playwright install chromium
 npm run build
@@ -20,7 +23,9 @@ npm run doctor -- --json
 npm start
 ```
 
-默认打开现有示例项目 `projects/demo`，终端会给出本地地址（通常 http://127.0.0.1:4174）。浏览器和 CLI 共用项目与修订状态。`?view=client` 是纯客户端窗口；成片始终只包含客户端。
+首次启动自动从 `examples/legacy/` 创建 `projects/demo`，后续启动保留已有编辑。终端会给出本地地址（通常 http://127.0.0.1:4174）。浏览器和 CLI 共用项目与修订状态。`?view=client` 是纯客户端窗口；成片始终只包含客户端。
+
+macOS 可用 `brew install ffmpeg` 安装媒体工具；Ubuntu 可用 `sudo apt-get install ffmpeg fonts-noto-cjk`，并把浏览器安装步骤改为 `npx playwright install --with-deps chromium`。Node.js 版本可通过仓库 `.nvmrc` 切换。
 
 自建项目：
 
@@ -53,13 +58,15 @@ node bin/river.mjs render --project projects/my-hand --profile final --out artif
 ## 验证
 
 ```sh
+npm test
 npm run test:core
 npm run test:contract
 npm run test:media
 npm run test:acceptance -- --out artifacts/acceptance/my-run
 ```
 
-完整验收会实际渲染正式样片和60秒基准，耗时数分钟至数十分钟。自动脚本保留语言内容/实际帧 review 待办，附加相应证据与独立 Agent 冷启动结果后才形成最终 qualification，未执行不算通过。首次原型已保存只读归档 `archive/prototype-v0.1.0.tgz` 与 SHA-256；历史失败证据保留。
+`npm test` 运行全部自动回归，GitHub Actions 使用相同入口。`test:acceptance` 为额外的 macOS 历史验收，需系统 `say` 的 Tingting 音色，会实际渲染正式样片和60秒基准，耗时数分钟至数十分钟。自动脚本保留语言内容/实际帧 review 待办，附加相应证据与独立 Agent 冷启动结果后才形成最终 qualification，未执行不算通过。
+
+维护、模块职责与 Git 文件边界见 [CONTRIBUTING.md](CONTRIBUTING.md)。`release.json` 和文档中的历史媒体/源码包路径对应原工作目录，视频、模型和归档二进制未纳入 Git；历史验收记录继续保留，新克隆无需这些文件即可启动与测试。
 
 维护时只改变承担该职责的模块：Project 管持久化、回执与资产索引，Poker 管规则，Compiler 管时序，客户端只绘制 RenderPlan。VoiceController 批量调用一个临时官方 Python 进程，生成后复用项目原子提交；没有额外 TTS 服务、队列、数据库或第二套规则。预览与导出共用画面；外部求解器留在 Agent 工作流。
-# poker_emulate

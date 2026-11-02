@@ -1,0 +1,156 @@
+{
+  "format": "river.release",
+  "version": "1.0.0",
+  "status": "ACCEPTED_LOCAL_V1",
+  "releasedAt": "2026-11-01T03:59:52.120047+00:00",
+  "scope": "Local single-operator poker lesson production; Apple Silicon macOS acceptance",
+  "milestones": {
+    "M1": "COMPLETE",
+    "M2": "COMPLETE",
+    "M3": "COMPLETE",
+    "M4": "COMPLETE",
+    "M5": "COMPLETE",
+    "M6": "COMPLETE",
+    "M7": "COMPLETE",
+    "M8": "COMPLETE"
+  },
+  "acceptance": {
+    "runId": "v1-20261101-final",
+    "status": "PASS",
+    "report": "artifacts/acceptance/v1-20261101-final/qualification.json",
+    "gates": {
+      "A01": "PASS",
+      "A02": "PASS",
+      "A03": "PASS",
+      "A04": "PASS",
+      "A05": "PASS",
+      "A06": "PASS",
+      "A07": "PASS",
+      "A08": "PASS",
+      "A09": "PASS",
+      "A10": "PASS",
+      "A11": "PASS",
+      "A12": "PASS",
+      "A13": "PASS",
+      "A14": "PASS",
+      "A15": "PASS",
+      "A16": "PASS",
+      "A17": "PASS"
+    },
+    "productSourceHash": "a9c359076be063dfe201bc2fde653ddc9cc0990cd03c7a4d6599c305f2dff2bd",
+    "sourceManifest": "artifacts/acceptance/v1-20261101-final/source-fingerprint.json",
+    "automaticNodeTests": 61,
+    "visualChecks": 302,
+    "formalMediaOutputs": 7,
+    "actualDecodedKeyframesReviewed": 93,
+    "coldStartSummary": {
+      "delivered": 6,
+      "total": 6,
+      "firstSemanticPass": 5,
+      "maximumEditBatches": 6,
+      "maximumCorrectiveBatches": 1,
+      "humanInterventions": 0,
+      "implementationSourceReads": 0
+    }
+  },
+  "entrypoints": {
+    "director": "node bin/river.mjs serve --project projects/demo",
+    "agent": "node bin/river.mjs session --project projects/demo",
+    "skill": ".agents/skills/poker-director/SKILL.md",
+    "readme": "README.md",
+    "validation": "docs/RELEASE_VALIDATION.md",
+    "localPreview": "http://127.0.0.1:4174",
+    "cleanClient": "http://127.0.0.1:4174/?view=client"
+  },
+  "media": [
+    {
+      "locale": "zh-CN",
+      "aspect": "landscape",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/a59ade212e34c1c5d64bc596afeb261b53a372559798c397d574c010357b5453/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/a59ade212e34c1c5d64bc596afeb261b53a372559798c397d574c010357b5453/receipt.json",
+      "videoSha256": "fd5d98e6465cae78515f4acbb914c9357bed29083c9dd215687dddac976a1b64"
+    },
+    {
+      "locale": "zh-CN",
+      "aspect": "portrait",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/39b0aad608ae9dd5d38def8f9644a5fb6d383dabea9c154a51402b2eb554ad89/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/39b0aad608ae9dd5d38def8f9644a5fb6d383dabea9c154a51402b2eb554ad89/receipt.json",
+      "videoSha256": "ebb161ff434fe38cf5214c06a020110eb95a1106d7d9cd0a086c77da42e4184e"
+    },
+    {
+      "locale": "en-US",
+      "aspect": "landscape",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/4320327b40c2f54dc5c831204d39fbc09216a58a2dd7077e07d638c87f97691b/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/4320327b40c2f54dc5c831204d39fbc09216a58a2dd7077e07d638c87f97691b/receipt.json",
+      "videoSha256": "ac902a105a10236504cd8a5bef6257e0d709f03ad3be57846574e2f42199f8cc"
+    },
+    {
+      "locale": "en-US",
+      "aspect": "portrait",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/9648894d886fdb7c7c7e1edaf6586d735a109df368c00ac0a0b9a48832f9ca1f/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/9648894d886fdb7c7c7e1edaf6586d735a109df368c00ac0a0b9a48832f9ca1f/receipt.json",
+      "videoSha256": "e5e2039c02b935da41d38b9d3e9255121ebcc960b9022043a66f8af1d2243b13"
+    },
+    {
+      "locale": "ja-JP",
+      "aspect": "landscape",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/053722ec1421abda0437cb6f3d0c0e0b859115823b30ca0a870e77951154ebd3/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/053722ec1421abda0437cb6f3d0c0e0b859115823b30ca0a870e77951154ebd3/receipt.json",
+      "videoSha256": "221294270307c3b0bc89eb36924d334c25ebf85d712ef8d431d2d42f5acb9ca4"
+    },
+    {
+      "locale": "ja-JP",
+      "aspect": "portrait",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/227fc3ae1191d54b0972ac4ad087ccb62e8ca2de1aaae032f4128ac415162213/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/227fc3ae1191d54b0972ac4ad087ccb62e8ca2de1aaae032f4128ac415162213/receipt.json",
+      "videoSha256": "f6b285498f7bf1cbf17df33169a33d803df5c336b626d2b6a661be9a83bf3466"
+    },
+    {
+      "locale": "zh-CN",
+      "aspect": "portrait",
+      "kind": "complex",
+      "video": "artifacts/acceptance/v1-20261101-final/media/430a987bad48de3a8fc59a5026e5057e66f79c9ce1110c1a18f665c9b4cc2c79/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/430a987bad48de3a8fc59a5026e5057e66f79c9ce1110c1a18f665c9b4cc2c79/receipt.json",
+      "videoSha256": "9b4fa2c13a3996d8e0c1390be0fce7844e88fe798b44ddf2e9be9fad2d8cf65d"
+    }
+  ],
+  "performance": {
+    "wallSeconds": 382.853010209,
+    "peakRSSBytes": 1552498688,
+    "peakTemporaryBytes": 16822397,
+    "sampleIntervalMs": 200,
+    "limits": {
+      "wallSeconds": 600,
+      "rssBytes": 3221225472,
+      "temporaryBytes": 1073741824
+    }
+  },
+  "history": {
+    "originalPrototype": "archive/prototype-v0.1.0.tgz",
+    "retiredPrototype": "archive/prototype-retired-20261101.tgz",
+    "recovery": "artifacts/rollback-check.json",
+    "retirement": "artifacts/acceptance/v1-20261101-final/retirement.json",
+    "originalAutomatedFailure": "artifacts/acceptance/v1-20261101-final/report.json",
+    "correctedHarnessContinuation": "artifacts/acceptance/v1-20261101-final/continuation-report.json"
+  },
+  "unresolvedP1": 0,
+  "unsupported": [
+    "Real multiplayer or payments",
+    "ICM and built-in GTO solver",
+    "Automatic rake and multiple runouts",
+    "Nested branches and cloud queue",
+    "Other-OS acceptance"
+  ],
+  "voiceQualityScope": "External audio preserved; actual audio language/content and source alignment reviewed with ASR plus agent inspection. No human subjective pronunciation certification.",
+  "distribution": {
+    "archive": "dist/river-studio-v1.0.0.tgz",
+    "integrity": "dist/river-studio-v1.0.0.sha256",
+    "contents": "Installable source, locked dependencies, demo and legacy input assets, skill, tests and docs. Full acceptance media/evidence stay in the workspace."
+  }
+}

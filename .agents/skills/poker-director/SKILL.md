@@ -1,0 +1,52 @@
+---
+name: poker-director
+description: Author, validate, voice, preview and render River Studio poker lessons through structured commands. Use for controlled Texas Hold'em scenes, alternative lines, localized narration, reusable commentary modes, multi-hand sequences, continuous speech over actions, IndexTTS or external audio, and landscape or portrait output in this project.
+---
+
+Run from the repository root, three directories above this skill. Use `node bin/river.mjs`. This is a local content production tool for standard no-limit Hold'em, 2–9 seats, controlled through six methods. It integrates the official local IndexTTS2.5 engine and also imports external audio. There are no accounts, real players or strategy solver.
+
+## Create and deliver
+
+1. Match the requested teaching outcome before generating speech: the chosen scene and reasoning must demonstrate what the user asked to learn. **For GTO or quantitative strategy teaching, read [strategy evidence](references/strategy-evidence.md) before choosing the scene.** Distinguish a designed model from a sourced hand review, and the original table size from players remaining in a pot. Choose the topic, narrative, length and model freely within that outcome. **Before writing a styled lesson, read [narrative modes](references/narrative-modes.md), discover the catalog and save the chosen brief.** Use a custom or combined brief when it better fits the request; style is independent of table size, hand selection and language. For authentic-client output, use plausible table/player names; course headings belong in narration or director labels.
+2. Read [project format](references/lesson-format.md) before authoring a scene or editing a snapshot. Write one scene JSON in your task directory. Set starting street, cards, remaining stacks, prior contributions and clockwise seats. Include localized title/beat labels and narration. First-person decision reasoning uses current public information; keep future runouts and unrevealed opponent cards out of it. For a multi-player hand that becomes heads-up, preserve the original seats, hero and chip history through the streets; folding players remain at the same table. Narrate from the requested player's knowledge throughout.
+3. Run `node bin/river.mjs doctor --json`. Follow root README installation instructions for missing dependencies. Initialize with `node bin/river.mjs init --scene <scene.json> --project <new-directory> --locale zh-CN --aspect landscape`. Init creates a persistent draft; `validate` checks the actions, translations and audio. Correct rule issues before generating audio.
+4. `node bin/river.mjs session --project <directory>` accepts newline-delimited JSON. Observe revision and legal actions (BB), then submit related edits in one apply. Success is already saved. Each new batch needs a new request ID and current revision; uncertain retries use the EXACT original request ID/body.
+5. **Read [localized poker narration](references/localized-narration.md) for the selected language; for mainland Chinese also read [Chinese poker narration](references/zh-cn-narration.md) before writing/voicing.** Use actual players' terms; subtitles and pronunciation are separate choices. Group complete thoughts and action boundaries; automatic caption paging handles long text. For new/combined modes or programmes with quizzes/knowledge shifts, complete the [editorial preflight](references/narrative-modes.md) before a full voice batch. Use integrated IndexTTS2.5 by default: [voice generation](references/voice.md) covers installation, references, emotion, speed and pronunciation. Check a short passage first. External TTS/local-model audio remains supported through audio.attach. Never silently substitute an engine or claim generated speech is a human recording. Runtime measures/imports audio; never hand-fill asset hashes/durations.
+6. Run `node bin/river.mjs validate --project <directory> --render`. Proceed only on `ready:true` for the selected output. Check authored titles and beat/branch labels in the director as well as narration and client wording: a nonempty translation field can still contain an untranslated label. Retain natural poker loanwords and proper names. `--all` separately audits every scene, route and installed language. Incomplete unrelated drafts do not block a ready selected output. `inspect --view player --beat <id>` checks visible information; `seek` also addresses action frame IDs from the exported plan.
+7. Render with `node bin/river.mjs render --project <directory> --profile final --out <result-directory>`. It returns a fingerprint directory with `video.mp4`, optional `captions.srt`, receipt, validation and keyframes. Check actual encoded frames at decisions/actions/reveals, client wording, the complete caption timeline, and a continuous passage. Inspect nicknames as real client usernames; express “I” through narration. Keep the **whole pending decision episode**, including conditions and alternatives across beats, before committing that action. Afterward, distinguish next-decision planning from an explicit look back at the earlier choice. Confirm explanation cuts preserve the actual decision and animation clocks. Export the portable project too. Delivery requires both a valid video and the requested teaching outcome. Fix unmet requirements and recheck affected output; if unresolved, report the delivery as incomplete with the actual artifacts.
+
+Validate/render options `--locale`, `--aspect`, `--scene`, `--branch`, `--profile` override that invocation. Persist selections with `output.set` when they should survive reopening. Use `--branch main` for main line. Profiles: draft720p/24fps, final1080p/30fps. **--out is a directory.** One local render runs at a time. On RENDER_BUSY retry after the active task ends. Ctrl-C/SIGTERM cancels and cleans up. Identical completed inputs reuse a verified result.
+
+## Six methods
+
+```json
+{"method":"observe","params":{"view":"player"}}
+{"method":"apply","params":{"requestId":"select-ja-1","expectedRevision":0,"commands":[{"type":"output.set","value":{"locale":"ja-JP","aspect":"portrait","profile":"final","captions":true}}]}}
+{"method":"seek","params":{"beatId":"decision","view":"player"}}
+{"method":"seek","params":{"frameId":"bet::0","view":"player"}}
+{"method":"export","params":{"kind":"plan"}}
+{"method":"export","params":{"destination":"/absolute/new-portable-project"}}
+{"method":"voice","params":{"action":"status"}}
+{"method":"voice","params":{"action":"generate","requestId":"voice-batch-1","expectedRevision":1}}
+```
+
+`load` reopens the same project's saved state, takes no parameters, adds no revision. `seek.beatId` takes an authored beat ID; `seek.frameId` takes a compiled frame ID such as `bet::0`. Use exactly one. `observe`/`seek` default to player visibility; use `view:"director"` for authoring. `apply` is atomic across commands. `export` defaults to the whole v2 manifest; a destination copies manifest/assets/evidence into a new directory. Move project directories normally while their studio is stopped.
+
+`node bin/river.mjs serve --project <directory> --port 4174` opens the director UI. CLI sessions detect this runtime and share its Director/cursor. Observe returns `previewUrl`; `?view=client` opens a clean client. Edits pause playback and save the canonical project.
+
+## Repair and verify
+
+- REVISION_CONFLICT: observe again, reconsider edit, use a new ID. The last128 exact committed requests return their original receipt across restarts. REQUEST_CONFLICT forbids different content with the same ID; RETRY_WINDOW_EXPIRED requires inspection rather than blind replay.
+- TRANSLATION_MISSING/AUDIO_MISSING/AUDIO_STALE: error path names beat/locale. Add translation or regenerate/attach that language only. Incomplete drafts save; they do not render.
+- Rule errors: inspect the previous state and legalActions, then replace the affected scene/branch in one batch. Bet/raise `to` is the total commitment this street. For unknown historical rights, start at an earlier explicit state.
+- ASSET_MISSING/ASSET_CHANGED: restore original content or reattach its source through audio.attach. Exported projects carry their audio. Render checks actual files again.
+- CAPTION_STALE/CAPTION_TIMING: inspect the current measured speech and rebuild/rebind precise cues through captions.set; see the format reference. Keep answer/reveal text behind its intended moment. Use cues:null only when automatic paragraph paging is appropriate.
+- TIMING_STALE: compare the complete spoken passage with table actions, adjust and confirm through timing.set for that language. Different language takes can use different offsets; see the format reference. A draft schedule is not a synchronized final output.
+- Fields/options are strict. `node bin/river.mjs help` lists commands. NDJSON returns one response per request; any rejected request gives the completed process nonzero status. Account for expected negative tests.
+- Voice jobs use the same revision/receipt discipline as editing. Generate outside the project lock, commit the complete batch only if its revision still matches, and preserve prior audio on failure/cancellation. Read the [voice reference](references/voice.md) for retries and voice-specific errors.
+
+Default multi-action beats expose `beatId::0`, `beatId::1`, etc., then narration. For commentary during advancing play, use beat.timing; one narration clock spans its action segments. For multi-hand or alternative-line programmes, use output.sequence. Read the format reference for timing, exact frame IDs and unambiguous seeking. UI action controls are available at the last frame of a beat; scene editing permits finer composition.
+
+For strategy claims, keep the matched evidence and model boundaries in project `evidence/` as described in the strategy reference. ICM, automatic rake, multiple runouts and nested branches are outside v1.
+
+Read [six task recipes](references/task-recipes.md) for production workflows. Migrate v1 with `node bin/river.mjs migrate --lesson <old.json> --project <new-directory>` and explicit output options; source is preserved and defaults recorded in evidence/migration.json.

@@ -1,0 +1,716 @@
+{
+  "version": 1,
+  "patterns": [
+    {
+      "id": "think-aloud",
+      "name": {
+        "zh-CN": "跟打思考",
+        "en-US": "Think aloud",
+        "ja-JP": "プレー中の思考"
+      },
+      "summary": {
+        "zh-CN": "陪观众站在同一位置，边打边更新判断。",
+        "en-US": "Reason from one player’s available information as the hand develops.",
+        "ja-JP": "同じ席の情報だけで、進行に合わせて判断を更新する。"
+      },
+      "perspective": "current player information",
+      "structure": [
+        "stakes",
+        "read",
+        "options",
+        "choice",
+        "reassess"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "每个决定先说现在最在意什么，再比较一个真实备选，最后落到行动和下一街计划。",
+          "只根据当前已知信息推理；对手底牌与后续发牌到揭晓时才进入解说。",
+          "口气像在桌边带朋友看牌，关键决定放慢，常规弃牌一带而过。",
+          "把理由落到当前牌面上哪些更差的牌会跟、哪些会弃，以及后街出现什么牌、尺度或读数时你会改主意；短语本身不代替这个比较。"
+        ],
+        "en-US": [
+          "At decisions name the concern, compare a credible alternative, then choose and plan the next street.",
+          "Use only current information; introduce hole cards and runouts when revealed.",
+          "Sound like a player talking a friend through the hand; vary pace with decision weight.",
+          "Ground the comparison in weaker hands that call or fold and the runout, size or read that would change the next decision."
+        ],
+        "ja-JP": [
+          "判断のたびに懸念、現実的な別案、選択と次のストリートの計画を話す。",
+          "未公開のハンドや後のカードは、公開されるまで推論に使わない。",
+          "友人と卓を見ているように話し、重要な判断に時間を使う。",
+          "弱いハンドがどれならコールし、どれなら降りるか、次のカード・サイズ・読みで判断がどう変わるかを具体化する。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "视角有没有偷看未来？",
+          "关键选择有没有理由、备选和后续计划？"
+        ],
+        "en-US": [
+          "Does reasoning respect current information?",
+          "Do key choices include a reason, alternative and follow-up?"
+        ],
+        "ja-JP": [
+          "未来の情報を先取りしていないか。",
+          "重要な選択に理由、別案、次の計画があるか。"
+        ]
+      },
+      "delivery": {
+        "speed": 1,
+        "emotion": [
+          0.18,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://www.pokernews.com/strategy/when-you-should-go-for-a-check-raise-holding-river-nuts-38361.htm",
+        "https://cms.worldpokertour.com/article/brad-owens-must-see-vlog-takes-you-inside-wpt-world-championship/"
+      ]
+    },
+    {
+      "id": "hand-story",
+      "name": {
+        "zh-CN": "悬念复盘",
+        "en-US": "Hand story",
+        "ja-JP": "ハンドの物語"
+      },
+      "summary": {
+        "zh-CN": "围绕一处真正的难题，逐街铺垫并兑现悬念。",
+        "en-US": "Build and resolve an actual decision tension through one hand.",
+        "ja-JP": "一つの難しい判断を軸に、伏線を回収する。"
+      },
+      "perspective": "retrospective with staged reveals",
+      "structure": [
+        "hook",
+        "context",
+        "escalation",
+        "decision",
+        "reveal",
+        "takeaway"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "开头抛出这手最难的问题，先交代位置、有效筹码和必要背景。",
+          "把事实、当时想法、事后评价说清楚；悬念来自行动与范围，不能捏造读心或结果。",
+          "揭牌后回到决策依据，给一个观众能在下一手用上的判断。"
+        ],
+        "en-US": [
+          "Open with the genuine dilemma, then establish position, effective stacks and relevant context.",
+          "Separate facts, thoughts at the time and hindsight; earn suspense through ranges and actions.",
+          "After the reveal return to decision quality and one transferable observation."
+        ],
+        "ja-JP": [
+          "本当の迷いを冒頭に置き、ポジション、有効スタック、背景を示す。",
+          "事実、当時の考え、事後評価を分け、レンジとアクションで緊張を作る。",
+          "ショーダウン後は勝敗だけでなく判断の質と応用点に戻る。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "开头的问题最后是否得到回答？",
+          "有没有用输赢代替决策评价？"
+        ],
+        "en-US": [
+          "Is the opening question resolved?",
+          "Is decision quality distinguished from the result?"
+        ],
+        "ja-JP": [
+          "冒頭の問いを回収したか。",
+          "結果と判断の質を区別したか。"
+        ]
+      },
+      "delivery": {
+        "speed": 1,
+        "emotion": [
+          0.3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://cms.worldpokertour.com/article/brad-owens-must-see-vlog-takes-you-inside-wpt-world-championship/",
+        "https://cms.worldpokertour.com/article/wpt-world-championship-wpt-raw-deal-tony-dunst/"
+      ]
+    },
+    {
+      "id": "decision-quiz",
+      "name": {
+        "zh-CN": "决策竞猜",
+        "en-US": "Decision quiz",
+        "ja-JP": "判断クイズ"
+      },
+      "summary": {
+        "zh-CN": "先让观众下注自己的判断，再公开推理和答案。",
+        "en-US": "Let viewers commit to a decision before revealing the analysis.",
+        "ja-JP": "先に視聴者に選ばせ、その後で理由を開示する。"
+      },
+      "perspective": "current information until answer",
+      "structure": [
+        "spot",
+        "question",
+        "thinking-space",
+        "answer",
+        "alternatives",
+        "transfer"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "提问前给齐位置、筹码、行动、牌面与必要假设，选项要可执行。",
+          "留下真实思考空白，答案前保持牌面和信息边界；不插假倒计时。",
+          "答案解释为什么，也解释最有诱惑的错误选项错在哪里。",
+          "检查整条播放顺序：新判断题的答案在留白后首次出现。重复已讲过的牌例时，明确做复习，或改变真正影响选择的条件再提问。"
+        ],
+        "en-US": [
+          "Provide stacks, position, action, board and assumptions before asking; choices must be legal.",
+          "Leave actual thinking time and preserve information until the answer.",
+          "Explain the answer and why the most tempting alternative fails.",
+          "Audit the whole programme: a new decision answer first appears after the thinking pause. Mark a solved example as recall, or change a decision-relevant condition."
+        ],
+        "ja-JP": [
+          "質問前にスタック、位置、経緯、ボード、前提を提示し、合法な選択肢を用意する。",
+          "考える無音時間を確保し、答えまでは情報を増やさない。",
+          "正解の理由と、魅力的な誤答が成立しない理由を示す。",
+          "全編の情報順を確認する。新しい問題の答えは考える時間の後に初めて示す。既出の問題は復習と明示するか、判断に関わる条件を変える。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "思考空白期间是否没有提前揭答案？",
+          "选项与引擎合法动作是否一致？"
+        ],
+        "en-US": [
+          "Does the thinking pause avoid leaking the answer?",
+          "Are choices consistent with legal actions?"
+        ],
+        "ja-JP": [
+          "考える時間に答えを先出ししていないか。",
+          "選択肢は合法なアクションか。"
+        ]
+      },
+      "delivery": {
+        "speed": 0.97,
+        "emotion": [
+          0.18,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://blog.gtowizard.com/a-beginners-guide-to-poker-combinatorics/",
+        "https://blog.gtowizard.com/probing-out-of-position-in-3-way-pots/"
+      ]
+    },
+    {
+      "id": "fundamentals",
+      "name": {
+        "zh-CN": "基础陪练",
+        "en-US": "Guided fundamentals",
+        "ja-JP": "基礎コーチング"
+      },
+      "summary": {
+        "zh-CN": "一手只解决一个新手最容易误解的概念。",
+        "en-US": "Teach one foundational idea through a concrete hand.",
+        "ja-JP": "一つの基礎概念を具体的なハンドで学ぶ。"
+      },
+      "perspective": "guided player perspective",
+      "structure": [
+        "concrete",
+        "problem",
+        "explain",
+        "demonstrate",
+        "retry",
+        "recap"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "先说眼前的问题，再引入必要术语，用眼前筹码和牌面说明。",
+          "一次只增加一个概念；先示范，再换个小条件让观众重新判断。",
+          "术语按当地牌友的说法说，首次出现用一句人话解释，避免连续下定义。"
+        ],
+        "en-US": [
+          "Start with the immediate problem and introduce terminology only when useful.",
+          "Add one concept at a time; demonstrate, then test a small variation.",
+          "Use local table language and one plain explanation on first use."
+        ],
+        "ja-JP": [
+          "目の前の問題から始め、必要になってから用語を導入する。",
+          "一度に一概念を扱い、実演後に条件を少し変えて再判断する。",
+          "現地の自然なポーカー用語を使い、初出だけ簡潔に説明する。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "是否只围绕一个核心概念？",
+          "观众是否获得一次独立判断的机会？"
+        ],
+        "en-US": [
+          "Does the lesson stay on one core concept?",
+          "Can the viewer make an independent follow-up decision?"
+        ],
+        "ja-JP": [
+          "中心概念は一つか。",
+          "視聴者が自分で判断する機会があるか。"
+        ]
+      },
+      "delivery": {
+        "speed": 0.96,
+        "emotion": [
+          0.18,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://blog.gtowizard.com/a-beginners-guide-to-poker-combinatorics/",
+        "https://www.travispoker.com/free"
+      ]
+    },
+    {
+      "id": "range-lab",
+      "name": {
+        "zh-CN": "范围实验",
+        "en-US": "Range lab",
+        "ja-JP": "レンジ分析"
+      },
+      "summary": {
+        "zh-CN": "用明确条件解释范围、组合和下注逻辑。",
+        "en-US": "Explain ranges, combinations and sizing under explicit assumptions.",
+        "ja-JP": "明確な前提の下でレンジ、コンボ、サイズを分析する。"
+      },
+      "perspective": "analytical review",
+      "structure": [
+        "question",
+        "model",
+        "evidence",
+        "mechanism",
+        "contrast",
+        "boundary"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "先固定模型与待解释的问题，再从牌型分布、阻断和下注目标推出逻辑。",
+          "精确频率、EV 与 GTO 最优性需要匹配的求解或解析证据；定性示例明确按定性讲。",
+          "换一个可控条件做对照，说明结论何时变化；旁白承载范围解释，桌面仍是正常客户端。"
+        ],
+        "en-US": [
+          "Fix the model and question, then explain distribution, blockers and betting objectives.",
+          "Exact frequencies, EV and optimality require matched solver or analytical evidence.",
+          "Vary one condition to expose the boundary; keep the client authentic."
+        ],
+        "ja-JP": [
+          "モデルと問いを固定し、ハンド分布、ブロッカー、ベット目的を説明する。",
+          "正確な頻度、EV、最適性には対応する計算根拠を付ける。",
+          "一条件だけ変え、結論が変わる境界を示す。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "数值是否有匹配证据？",
+          "是否讲清模型与适用边界？"
+        ],
+        "en-US": [
+          "Are numerical claims backed by matched evidence?",
+          "Are model assumptions and limits stated?"
+        ],
+        "ja-JP": [
+          "数値に対応した根拠があるか。",
+          "モデルと適用範囲を明示したか。"
+        ]
+      },
+      "delivery": {
+        "speed": 0.98,
+        "emotion": [
+          0.08,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://blog.gtowizard.com/why-so-much-an-exploration-of-larger-than-geometric-bet-sizing/",
+        "https://blog.gtowizard.com/probing-out-of-position-in-3-way-pots/",
+        "https://blog.gtowizard.com/playing-in-position-against-two-callers/"
+      ]
+    },
+    {
+      "id": "exploit-clinic",
+      "name": {
+        "zh-CN": "针对性剥削",
+        "en-US": "Exploit clinic",
+        "ja-JP": "エクスプロイト"
+      },
+      "summary": {
+        "zh-CN": "把可观察的对手偏差，转成有条件的调整。",
+        "en-US": "Turn an observable opponent tendency into a conditional adjustment.",
+        "ja-JP": "観察できる相手の偏りから、条件付きの調整を組み立てる。"
+      },
+      "perspective": "conditional player read",
+      "structure": [
+        "baseline",
+        "observation",
+        "hypothesis",
+        "adjustment",
+        "counter-read",
+        "boundary"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "先给正常打法基线，再交代观察到了什么，以及样本有多有限。",
+          "把调整写成如果……那么……；区分读牌假设与事实。",
+          "演示对手不配合时如何退回基线，避免拿一次摊牌给人永久贴标签。"
+        ],
+        "en-US": [
+          "State the baseline, the observed tendency and how limited the sample is.",
+          "Phrase deviations as conditional hypotheses and distinguish reads from facts.",
+          "Show when to return to baseline if the opponent does not cooperate."
+        ],
+        "ja-JP": [
+          "基準戦略、観察した傾向、サンプルの限界を示す。",
+          "調整を条件付きで述べ、リードと事実を区別する。",
+          "読みが外れたときに基準へ戻る条件を示す。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "调整依赖的观察/假设是否明确？",
+          "有没有反例和撤回条件？"
+        ],
+        "en-US": [
+          "Are the read and assumptions explicit?",
+          "Is there a counterexample and a reset condition?"
+        ],
+        "ja-JP": [
+          "調整の観察と仮定が明確か。",
+          "反例と撤回条件があるか。"
+        ]
+      },
+      "delivery": {
+        "speed": 1,
+        "emotion": [
+          0.18,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://jonathanlittlepoker.com/wph-428-how-to-destroy-recreational-poker-players-ft-jaman-burton%EF%BF%BC/",
+        "https://www.bilibili.com/video/BV1FXkPBQEHe/"
+      ]
+    },
+    {
+      "id": "table-commentary",
+      "name": {
+        "zh-CN": "现场牌局解说",
+        "en-US": "Table commentary",
+        "ja-JP": "実況解説"
+      },
+      "summary": {
+        "zh-CN": "动作不中断，抓住筹码压力和关键转折。",
+        "en-US": "Keep action moving while explaining pressure and turning points.",
+        "ja-JP": "進行を止めず、プレッシャーと分岐点を伝える。"
+      },
+      "perspective": "observer; declare cards-up or cards-down",
+      "structure": [
+        "orientation",
+        "action",
+        "context",
+        "turning-point",
+        "consequence"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "开场说明能看到哪些信息；底牌公开型与未知底牌型解说保持各自信息契约。",
+          "常规动作简短交代，重要下注、加注和发牌处再补原因；用 timing 让旁白跨动作连续。",
+          "多人底池点名行动者和位置，局势升温时提高能量，结算后自然回落。"
+        ],
+        "en-US": [
+          "Declare visible information and consistently use cards-up or cards-down knowledge.",
+          "Call routine action briefly, add reasons at meaningful bets and runouts; time narration across actions.",
+          "Identify actors in multiway pots and let vocal energy follow actual stakes."
+        ],
+        "ja-JP": [
+          "見える情報を宣言し、ハンド公開型と非公開型を混ぜない。",
+          "通常の進行は短く、重要なベットやカードで理由を補い、音声はアクションをまたいで続ける。",
+          "マルチウェイでは行動者を明確にし、局面に応じて声の熱量を変える。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "旁白是否连续覆盖真实推进的动作？",
+          "未知信息有没有被当成已知？"
+        ],
+        "en-US": [
+          "Does narration continue over advancing action?",
+          "Is commentary consistent with its information contract?"
+        ],
+        "ja-JP": [
+          "進行中も音声が途切れず続くか。",
+          "情報の公開範囲を守っているか。"
+        ]
+      },
+      "delivery": {
+        "speed": 1.04,
+        "emotion": [
+          0.3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://www.pokerstars.uk/poker/learn/news/watch-the-irish-poker-open-main-event/",
+        "https://www.pokerstars.com/poker/learn/news/ept-monte-carlo-joe-stapleton-looks-back-on-his-sensational-time-with-pokerstars/"
+      ]
+    },
+    {
+      "id": "dialogue",
+      "name": {
+        "zh-CN": "双声对谈",
+        "en-US": "Two-voice dialogue",
+        "ja-JP": "二人の対話"
+      },
+      "summary": {
+        "zh-CN": "让提问者替观众追问，专家用牌局回答。",
+        "en-US": "Use a questioner to surface uncertainty and an analyst to answer with the hand.",
+        "ja-JP": "聞き手の疑問に、解説者がハンドを使って答える。"
+      },
+      "perspective": "declared shared knowledge; two distinct speakers",
+      "structure": [
+        "question",
+        "answer",
+        "challenge",
+        "example",
+        "resolution"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "为两人定义稳定角色、称呼与独立音色参考，每个 beat 标出 speaker。",
+          "提问要推进理解：追问条件、反例或动作意义；专家回应当前问题，不轮流念同一段。",
+          "两人轮次依次播放，避免配音互相盖住；若需重叠对白，预混外部音频后导入。"
+        ],
+        "en-US": [
+          "Define stable roles, names and distinct speaker references; label each beat with speaker.",
+          "Questions should ask about conditions, alternatives or meaning; answers address them directly.",
+          "Sequence turns cleanly; import externally mixed audio for overlapping dialogue."
+        ],
+        "ja-JP": [
+          "役割、呼び名、別々の話者参照を固定し、各ビートに speaker を付ける。",
+          "条件、別案、意味を掘り下げる質問と、それに直接答える説明を組む。",
+          "発話は順番に置き、重ねる会話は外部でミックスして取り込む。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "是否真有两个固定的说话者/独立声源？",
+          "追问有没有带来新信息？"
+        ],
+        "en-US": [
+          "Are two stable speakers and distinct references present?",
+          "Does the question add useful information?"
+        ],
+        "ja-JP": [
+          "二人の話者と別音源があるか。",
+          "質問が理解を前進させるか。"
+        ]
+      },
+      "delivery": {
+        "speed": 1,
+        "emotion": [
+          0.18,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://www.pokerstars.uk/poker/learn/news/watch-the-irish-poker-open-main-event/"
+      ]
+    },
+    {
+      "id": "line-comparison",
+      "name": {
+        "zh-CN": "对照纠错",
+        "en-US": "Line comparison",
+        "ja-JP": "ライン比較"
+      },
+      "summary": {
+        "zh-CN": "固定决策起点，对比两条合法行动线。",
+        "en-US": "Compare legal lines from a matched decision state.",
+        "ja-JP": "同じ判断地点から合法な二つのラインを比べる。"
+      },
+      "perspective": "review with explicit counterfactual labels",
+      "structure": [
+        "actual-line",
+        "decision-point",
+        "alternative",
+        "tradeoff",
+        "transfer"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "先把实际线走清楚，指出真正分歧的决定；对照保持有效筹码、底池和已知信息一致。",
+          "用分支或重复场景播放备选线，旁白明确这是如果换一种打法；原始事实与假设分开。",
+          "评价比较下注目标、后续局面与证据，不能只比较谁最后赢。"
+        ],
+        "en-US": [
+          "Establish the actual line and divergence; keep stack, pot and information matched at the decision.",
+          "Play alternatives as branches or repeated scenes and name the counterfactual.",
+          "Compare betting objectives and later decisions, not simply showdown winners."
+        ],
+        "ja-JP": [
+          "実際のラインと分岐点を示し、スタック、ポット、情報を揃える。",
+          "代案は分岐や再生シーンで示し、仮定であることを言葉で示す。",
+          "勝敗だけでなくベット目的と後続判断を比較する。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "对照起点是否一致、变量是否明确？",
+          "反事实是否被说成真实发生？"
+        ],
+        "en-US": [
+          "Are comparison state and changed variables explicit?",
+          "Is the alternative identified as counterfactual?"
+        ],
+        "ja-JP": [
+          "比較の起点と変更条件が明確か。",
+          "仮定を実話として扱っていないか。"
+        ]
+      },
+      "delivery": {
+        "speed": 1,
+        "emotion": [
+          0.18,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://jonathanlittlepoker.com/fourmistakes/",
+        "https://upswingpoker.com/wp-content/uploads/2016/09/Upswing-Poker-Strategy-Digest-August.pdf"
+      ]
+    },
+    {
+      "id": "theme-series",
+      "name": {
+        "zh-CN": "主题多例",
+        "en-US": "Theme series",
+        "ja-JP": "テーマ別の複数例"
+      },
+      "summary": {
+        "zh-CN": "用几手不同例子，教会观众识别同一种局面。",
+        "en-US": "Use contrasting hands to teach a recurring decision pattern.",
+        "ja-JP": "対照的な複数ハンドで、共通の判断を学ぶ。"
+      },
+      "perspective": "chaptered review or live sequence",
+      "structure": [
+        "question",
+        "example",
+        "variation",
+        "counterexample",
+        "transfer"
+      ],
+      "guidance": {
+        "zh-CN": [
+          "先给贯穿问题，再选最能体现差异的几手：一个标准例、一个变化例、一个边界或反例。",
+          "每手只补新的变量，章节之间点明筹码、桌型和假设变化；通过 output.sequence 串联。",
+          "结尾提炼识别条件与行动触发点，不把所有例子压成统一口诀。"
+        ],
+        "en-US": [
+          "Choose a recurring question and a standard example, variation and boundary or counterexample.",
+          "Each hand adds a variable; announce changes in stacks, format and assumptions between chapters.",
+          "End with recognition conditions and action triggers, not a universal slogan."
+        ],
+        "ja-JP": [
+          "共通の問いを立て、標準例、変化例、境界や反例を選ぶ。",
+          "各ハンドで変える条件を明示し、スタック、形式、前提の変化をつなぐ。",
+          "最後は普遍的な決まり文句でなく、見分ける条件と行動の契機を示す。"
+        ]
+      },
+      "checks": {
+        "zh-CN": [
+          "各例是否真的新增变量或反例？",
+          "多手切换时是否重新交代必要背景？"
+        ],
+        "en-US": [
+          "Does each example add a variable or counterexample?",
+          "Are relevant conditions re-established between hands?"
+        ],
+        "ja-JP": [
+          "各例が条件や反例を追加しているか。",
+          "ハンド間で必要な前提を説明したか。"
+        ]
+      },
+      "delivery": {
+        "speed": 1,
+        "emotion": [
+          0.18,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.06,
+          0.65
+        ],
+        "emotionStrength": 0.5
+      },
+      "sources": [
+        "https://www.travispoker.com/free",
+        "https://www.andypoker.com/cn/%E7%BF%BB%E7%89%8C%E4%B8%AD%E9%A1%BA%E4%B8%BA%E4%BD%95%E4%B8%8D%E6%85%A2%E6%89%93/"
+      ]
+    }
+  ]
+}

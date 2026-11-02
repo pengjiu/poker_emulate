@@ -1,0 +1,38 @@
+{
+  "name": "river-studio",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Agent-first local Texas Hold'em video studio with controlled scenes and localized narration.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pengjiu/poker_emulate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pengjiu/poker_emulate/issues"
+  },
+  "homepage": "https://github.com/pengjiu/poker_emulate#readme",
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "dependencies": {
+    "playwright": "1.62.1",
+    "proper-lockfile": "4.1.2"
+  },
+  "bin": {
+    "river": "bin/river.mjs"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "doctor": "node bin/river.mjs doctor",
+    "setup:demo": "node scripts/setup-demo.mjs",
+    "prestart": "node scripts/setup-demo.mjs",
+    "start": "node bin/river.mjs serve --project projects/demo",
+    "test:core": "node --test tests/core.test.mjs",
+    "test:contract": "node --test tests/contract.test.mjs",
+    "test:media": "node --test --test-concurrency=1 tests/media.test.mjs tests/render-contract.test.mjs",
+    "test:acceptance": "node scripts/acceptance.mjs",
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "test:studio": "node --test tests/studio.test.mjs"
+  }
+}

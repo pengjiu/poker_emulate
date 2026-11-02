@@ -1,0 +1,255 @@
+{
+  "format": "river.release",
+  "version": "1.1.0",
+  "status": "ACCEPTED_LOCAL_V1",
+  "releasedAt": "2026-11-01T20:58:58.159184+00:00",
+  "scope": "Local single-operator poker lesson production; Apple Silicon macOS acceptance",
+  "milestones": {
+    "M1": "COMPLETE",
+    "M2": "COMPLETE",
+    "M3": "COMPLETE",
+    "M4": "COMPLETE",
+    "M5": "COMPLETE",
+    "M6": "COMPLETE",
+    "M7": "COMPLETE",
+    "M8": "COMPLETE"
+  },
+  "acceptance": {
+    "status": "PASS",
+    "report": "artifacts/six-max-index-tts-20261102/qualification-1.1.0.json",
+    "scope": "Changed-path acceptance for localized narration, official local IndexTTS generation, six-max continuous first person, client dealer geometry and verification tooling. Historical seven-film matrix and60-second reference benchmark not rerun.",
+    "baselineVersion": "1.0.0",
+    "baselineRelease": "archive/release-v1.0.0.json",
+    "previousVersion": "1.0.2",
+    "previousRelease": "archive/release-v1.0.2.json",
+    "sourceManifest": "artifacts/six-max-index-tts-20261102/source-1.1.0.json",
+    "automaticNodeTests": 90,
+    "visualChecks": 302,
+    "actualEncodedFrameSamples": 373
+  },
+  "entrypoints": {
+    "director": "node bin/river.mjs serve --project projects/demo",
+    "agent": "node bin/river.mjs session --project projects/demo",
+    "skill": ".agents/skills/poker-director/SKILL.md",
+    "readme": "README.md",
+    "validation": "docs/RELEASE_VALIDATION.md",
+    "localPreview": "http://127.0.0.1:4174",
+    "cleanClient": "http://127.0.0.1:4174/?view=client"
+  },
+  "media": [
+    {
+      "locale": "zh-CN",
+      "aspect": "landscape",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/a59ade212e34c1c5d64bc596afeb261b53a372559798c397d574c010357b5453/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/a59ade212e34c1c5d64bc596afeb261b53a372559798c397d574c010357b5453/receipt.json",
+      "videoSha256": "fd5d98e6465cae78515f4acbb914c9357bed29083c9dd215687dddac976a1b64",
+      "createdForVersion": "1.0.0"
+    },
+    {
+      "locale": "zh-CN",
+      "aspect": "portrait",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/39b0aad608ae9dd5d38def8f9644a5fb6d383dabea9c154a51402b2eb554ad89/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/39b0aad608ae9dd5d38def8f9644a5fb6d383dabea9c154a51402b2eb554ad89/receipt.json",
+      "videoSha256": "ebb161ff434fe38cf5214c06a020110eb95a1106d7d9cd0a086c77da42e4184e",
+      "createdForVersion": "1.0.0"
+    },
+    {
+      "locale": "en-US",
+      "aspect": "landscape",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/4320327b40c2f54dc5c831204d39fbc09216a58a2dd7077e07d638c87f97691b/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/4320327b40c2f54dc5c831204d39fbc09216a58a2dd7077e07d638c87f97691b/receipt.json",
+      "videoSha256": "ac902a105a10236504cd8a5bef6257e0d709f03ad3be57846574e2f42199f8cc",
+      "createdForVersion": "1.0.0"
+    },
+    {
+      "locale": "en-US",
+      "aspect": "portrait",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/9648894d886fdb7c7c7e1edaf6586d735a109df368c00ac0a0b9a48832f9ca1f/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/9648894d886fdb7c7c7e1edaf6586d735a109df368c00ac0a0b9a48832f9ca1f/receipt.json",
+      "videoSha256": "e5e2039c02b935da41d38b9d3e9255121ebcc960b9022043a66f8af1d2243b13",
+      "createdForVersion": "1.0.0"
+    },
+    {
+      "locale": "ja-JP",
+      "aspect": "landscape",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/053722ec1421abda0437cb6f3d0c0e0b859115823b30ca0a870e77951154ebd3/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/053722ec1421abda0437cb6f3d0c0e0b859115823b30ca0a870e77951154ebd3/receipt.json",
+      "videoSha256": "221294270307c3b0bc89eb36924d334c25ebf85d712ef8d431d2d42f5acb9ca4",
+      "createdForVersion": "1.0.0"
+    },
+    {
+      "locale": "ja-JP",
+      "aspect": "portrait",
+      "kind": "main",
+      "video": "artifacts/acceptance/v1-20261101-final/media/227fc3ae1191d54b0972ac4ad087ccb62e8ca2de1aaae032f4128ac415162213/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/227fc3ae1191d54b0972ac4ad087ccb62e8ca2de1aaae032f4128ac415162213/receipt.json",
+      "videoSha256": "f6b285498f7bf1cbf17df33169a33d803df5c336b626d2b6a661be9a83bf3466",
+      "createdForVersion": "1.0.0"
+    },
+    {
+      "locale": "zh-CN",
+      "aspect": "portrait",
+      "kind": "complex",
+      "video": "artifacts/acceptance/v1-20261101-final/media/430a987bad48de3a8fc59a5026e5057e66f79c9ce1110c1a18f665c9b4cc2c79/video.mp4",
+      "receipt": "artifacts/acceptance/v1-20261101-final/media/430a987bad48de3a8fc59a5026e5057e66f79c9ce1110c1a18f665c9b4cc2c79/receipt.json",
+      "videoSha256": "9b4fa2c13a3996d8e0c1390be0fce7844e88fe798b44ddf2e9be9fad2d8cf65d",
+      "createdForVersion": "1.0.0"
+    },
+    {
+      "locale": "zh-CN",
+      "aspect": "landscape",
+      "kind": "gto-analytic-lesson",
+      "video": "artifacts/real-gto-zh-sol-low-20261101/attempt-2/render/0606b7ecc5ad1f29d4c74b68a01e14feb5e4f92a5ca2310f9c40ad592c4e1b86/video.mp4",
+      "receipt": "artifacts/real-gto-zh-sol-low-20261101/attempt-2/render-result.json",
+      "videoSha256": "b5bf6111ab8abc1a3946101ac08cfcc5417500bb8a10a1f6f3b26bd53877e12a",
+      "compatibility": "Original receipt preserved; all6224 frame markups match1.0.1 renderer",
+      "createdForVersion": "1.0.1",
+      "recommended": false
+    },
+    {
+      "locale": "zh-CN",
+      "aspect": "landscape",
+      "kind": "gto-analytic-lesson",
+      "createdForVersion": "1.0.2",
+      "recommended": false,
+      "video": "artifacts/localized-client-review-20261101/render/d1d6f8082dcabd195395714dd243dafb642f56d7ee9c8e9a1f0042906458af5d/video.mp4",
+      "receipt": "artifacts/localized-client-review-20261101/render-result.json",
+      "videoSha256": "e71251b9d9fd722c00ed267bd889c01d5b4947f8cf0e724268c28aea02d4ca18",
+      "rendererHash": "8864b6ea2d00b8fb446bde9b09ed40b5f9fca3ddb9caacd610001320471ae80c",
+      "actualReview": "artifacts/localized-client-review-20261101/actual-video-review.json"
+    },
+    {
+      "kind": "six-max-first-person-lesson",
+      "locale": "zh-CN",
+      "aspect": "landscape",
+      "createdForVersion": "1.1.0",
+      "recommended": true,
+      "video": "artifacts/six-max-index-tts-20261102/lesson-landscape.mp4",
+      "receipt": "artifacts/six-max-index-tts-20261102/render-landscape.json",
+      "videoSha256": "76a410ecd97d81bd4a132aee968f0716e20f4d5de32effe2841236fea6daafcb",
+      "rendererHash": "e06beb248ddad682b8fe0bf3f6defc910a29cf76966c4fac39850c0b1ab84ff5",
+      "review": "artifacts/six-max-index-tts-20261102/actual-landscape-review.json"
+    },
+    {
+      "kind": "six-max-first-person-lesson",
+      "locale": "zh-CN",
+      "aspect": "portrait",
+      "createdForVersion": "1.1.0",
+      "recommended": true,
+      "video": "artifacts/six-max-index-tts-20261102/lesson-portrait.mp4",
+      "receipt": "artifacts/six-max-index-tts-20261102/render-portrait.json",
+      "videoSha256": "c9a41f67a30ce3f49a758c2ab96a8bb0939237a12697ce92feee84798abdbdf7",
+      "rendererHash": "e06beb248ddad682b8fe0bf3f6defc910a29cf76966c4fac39850c0b1ab84ff5",
+      "review": "artifacts/six-max-index-tts-20261102/actual-portrait-review.json"
+    },
+    {
+      "kind": "independent-voice-skill-trial",
+      "locale": "en-US",
+      "aspect": "landscape",
+      "createdForVersion": "1.1.0",
+      "candidateReceiptPreserved": true,
+      "video": "artifacts/six-max-index-tts-20261102/cold-skill-trial/render-en/9497d809b7045426c55a18e75bd8193b210cea6833ed89e888ec4078ee9ae413/video.mp4",
+      "receipt": "artifacts/six-max-index-tts-20261102/cold-skill-trial/render-en/9497d809b7045426c55a18e75bd8193b210cea6833ed89e888ec4078ee9ae413/receipt.json",
+      "videoSha256": "6918e2532a539d35faf31e48580336fa5d7ca9b54ab95c29d2f47c62d550d137"
+    },
+    {
+      "kind": "independent-voice-skill-trial",
+      "locale": "ja-JP",
+      "aspect": "landscape",
+      "createdForVersion": "1.1.0",
+      "candidateReceiptPreserved": true,
+      "video": "artifacts/six-max-index-tts-20261102/cold-skill-trial/render-ja-localized/ef89f9eb1e7ce7468337c7624addbe64808586c1d8c7d8c145d321c612777cfd/video.mp4",
+      "receipt": "artifacts/six-max-index-tts-20261102/cold-skill-trial/render-ja-localized/ef89f9eb1e7ce7468337c7624addbe64808586c1d8c7d8c145d321c612777cfd/receipt.json",
+      "videoSha256": "21a549278293a2fafcfa8084ac937d3f415fa26ef49a1f3366d97fb97159c5da"
+    }
+  ],
+  "performance": {
+    "wallSeconds": 382.853010209,
+    "peakRSSBytes": 1552498688,
+    "peakTemporaryBytes": 16822397,
+    "sampleIntervalMs": 200,
+    "limits": {
+      "wallSeconds": 600,
+      "rssBytes": 3221225472,
+      "temporaryBytes": 1073741824
+    },
+    "scope": "Original v1.0.0 reference benchmark, not remeasured for subsequent versions."
+  },
+  "history": {
+    "originalPrototype": "archive/prototype-v0.1.0.tgz",
+    "retiredPrototype": "archive/prototype-retired-20261101.tgz",
+    "recovery": "artifacts/rollback-check.json",
+    "retirement": "artifacts/acceptance/v1-20261101-final/retirement.json",
+    "originalAutomatedFailure": "artifacts/acceptance/v1-20261101-final/report.json",
+    "correctedHarnessContinuation": "artifacts/acceptance/v1-20261101-final/continuation-report.json"
+  },
+  "unresolvedP1": 0,
+  "unsupported": [
+    "Real multiplayer or payments",
+    "ICM and built-in GTO solver",
+    "Automatic rake and multiple runouts",
+    "Nested branches and cloud queue",
+    "Other-OS acceptance"
+  ],
+  "voiceQualityScope": "Official local IndexTTS2.5; actual zh/en/ja MP4 ASR and source alignment. No human listening, professional endorsement or audience-retention certification.",
+  "distribution": {
+    "archive": "dist/river-studio-v1.1.0.tgz",
+    "integrity": "dist/river-studio-v1.1.0.sha256",
+    "contents": "Current source, locked Node dependencies, accepted demo fixture, voice installer/bridge, skill, tests and docs; models/media/evidence remain local",
+    "lessonPortableProject": "artifacts/six-max-index-tts-20261102/six-max-lesson-project.zip"
+  },
+  "refinements": {
+    "voice": "Official local IndexTTS2.5 batch worker, language defaults and beat delivery, safe cancellation/retry/repair",
+    "language": "Native poker terminology and separate pronunciation controls; authored labels reviewed",
+    "lesson": "Six-max preflop through heads-up postflop with fixed BB first person",
+    "client": "Dealer badge faces table interior at every seat count/button position",
+    "review": "docs/VOICE_AND_SIX_MAX_REVIEW.md"
+  },
+  "currentLessonPerformance": {
+    "scope": "This exact134-second lesson on the recorded host; rendering only, not TTS memory",
+    "landscape": {
+      "wallSeconds": 49.606146791,
+      "peakRSSBytes": 1622736896,
+      "peakTemporaryBytes": 45224748,
+      "sampleIntervalMs": 200,
+      "capturedFrames": 175,
+      "reusedFrames": 3845
+    },
+    "portrait": {
+      "wallSeconds": 51.698666833000004,
+      "peakRSSBytes": 1620525056,
+      "peakTemporaryBytes": 43196878,
+      "sampleIntervalMs": 200,
+      "capturedFrames": 196,
+      "reusedFrames": 3824
+    }
+  },
+  "currentVoicePerformance": {
+    "scope": "Actual MPS jobs; no voice-memory peak certification",
+    "jobs": [
+      {
+        "engine": "IndexTTS-2.5",
+        "device": "mps",
+        "seconds": 225.50858929101378,
+        "clips": 11
+      },
+      {
+        "engine": "IndexTTS-2.5",
+        "device": "mps",
+        "seconds": 251.5897567080101,
+        "clips": 3
+      },
+      {
+        "engine": "IndexTTS-2.5",
+        "device": "mps",
+        "seconds": 64.98981499997899,
+        "clips": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "reviewDate": "2026-11-01",
+  "scope": "Current source snapshot, not a git diff; targeted local reproductions, no application fixes.",
+  "sourceSha256": {
+    "prototype/engine.mjs": "bf62243c7beef2028aa291fc126394d895bf89bac51beaa3e05cd11a19d5248a",
+    "prototype/cli.mjs": "386567bb85b65ea048920100c3d675ba3d4fc9dea31d4bcfec8a168fd6419564",
+    "prototype/render.mjs": "ed23c27f6fda3c864d9b561e2f18c9b043da98553b9453e2cef6f102af1a45cf",
+    "prototype/runtime.mjs": "bb684afc08be14956d186458bae569891dec300288b308ef594f5c669c9569e1",
+    "prototype/build.mjs": "9051d0df438fc94e1ebcc1942859879328f58cf8a8fc362bac079cea3be6dcff",
+    "prototype/view.js": "de003b1ebc3f47d7c9f3d339878f80c12abb491d9fc3b6acd1dd1a843907b1fc",
+    "prototype/i18n.mjs": "5c8274b08f0735e949df4aa6ad6232a5b22f07bdcb85b1e4f5b0cb925a64a30b",
+    "prototype/style.css": "8c5690480dddf582dcaee5d134f8258de859e1abb5a1d568207044ddb083defd",
+    "prototype/examples.mjs": "1a8a92bee39727c7df507a2bedda883159292fda711822cf0c77d6675857ba22",
+    "prototype/lesson.json": "4d0457616a8ae2faec70a38deeb3c17fb9d2c1510ff4715d55a8d8bfde145d34",
+    "prototype/validate.mjs": "41110d9666c92cd0530bf0152b140da13bfd4142dc97ef4877592a141daf6087",
+    "prototype/stress.mjs": "3ca1dd0235f8e11d30c46b8bce1a619fea8c59af2b0e3921441d34eebb8bcd08"
+  },
+  "baseline": {
+    "rules": {
+      "passed": 40,
+      "failed": 0
+    },
+    "simulation": {
+      "seedRange": [
+        1,
+        256
+      ],
+      "completeHands": 256,
+      "seatCounts": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "actions": 2718,
+      "showdowns": 205,
+      "handsWithMultipleEligiblePots": 146,
+      "maximumActionsInOneHand": 27,
+      "checks": [
+        "every hand terminates",
+        "chip conservation after every action",
+        "only engine-advertised legal actions",
+        "unique dealt cards"
+      ],
+      "scope": "Deterministic controlled simulations; not independent poker-rule certification"
+    }
+  },
+  "probes": [
+    {
+      "id": "R01",
+      "title": "Saving and reopening loses selected output",
+      "status": "REPRODUCED",
+      "detail": {
+        "selected": {
+          "locale": "ja-JP",
+          "aspect": "portrait",
+          "sceneId": "side-pots",
+          "branchId": null
+        },
+        "reopened": {
+          "locale": "zh-CN",
+          "aspect": "landscape",
+          "sceneId": "button-vs-blind",
+          "branchId": null
+        },
+        "outputPersisted": false
+      }
+    },
+    {
+      "id": "R02",
+      "title": "Browser-style embedded audio is rejected by the renderer",
+      "status": "REPRODUCED",
+      "detail": {
+        "acceptedByCompile": true,
+        "renderError": "For CLI export, materialize external audio as a local file and reference it in the lesson.",
+        "scope": "The browser audio picker produces this source kind; the renderer rejects it before media decoding."
+      }
+    },
+    {
+      "id": "R03",
+      "title": "Selected-branch missing audio is absent from CLI validation report",
+      "status": "REPRODUCED",
+      "detail": {
+        "validateExit": 0,
+        "reportedValid": true,
+        "reportedMissingAudio": [],
+        "renderCompileError": "AUDIO_MISSING"
+      }
+    },
+    {
+      "id": "R04",
+      "title": "Duplicate beat IDs across branches edit the wrong branch",
+      "status": "REPRODUCED",
+      "detail": {
+        "selectedBranch": "b",
+        "acceptedDuplicateIds": true,
+        "after": [
+          {
+            "branch": "a",
+            "narration": "changed"
+          },
+          {
+            "branch": "b",
+            "narration": "b"
+          }
+        ]
+      }
+    },
+    {
+      "id": "R05",
+      "title": "Unused main-line tail blocks an otherwise valid selected branch",
+      "status": "REPRODUCED",
+      "detail": {
+        "branch": "check-line",
+        "previousBranchFrames": [
+          "flop",
+          "bb-check",
+          "decision",
+          "branch-check",
+          "branch-turn",
+          "branch-bet",
+          "branch-fold"
+        ],
+        "corruptedUnusedBeat": "bet",
+        "error": "OUT_OF_TURN"
+      }
+    },
+    {
+      "id": "R06",
+      "title": "Closed snapshot can skip an unpaid live-player response",
+      "status": "REPRODUCED",
+      "detail": {
+        "input": {
+          "street": "flop",
+          "board": [
+            "2c",
+            "3d",
+            "4h"
+          ],
+          "button": "a",
+          "hero": "a",
+          "actor": null,
+          "roundClosed": true,
+          "seats": [
+            {
+              "id": "a",
+              "stack": 90,
+              "contributed": 10,
+              "streetBet": 10,
+              "hole": [
+                "As",
+                "Ad"
+              ]
+            },
+            {
+              "id": "b",
+              "stack": 100,
+              "contributed": 0,
+              "streetBet": 0,
+              "hole": [
+                "Ks",
+                "Kd"
+              ]
+            }
+          ]
+        },
+        "accepted": true,
+        "dealtNextStreet": "turn",
+        "refunds": [],
+        "unansweredBetBB": 10
+      }
+    },
+    {
+      "id": "R07",
+      "title": "One multi-action beat collapses both visible actions into its final state",
+      "status": "REPRODUCED",
+      "detail": {
+        "scriptedActions": 2,
+        "renderedStates": 1,
+        "onlyVisualEvent": {
+          "seat": "btn",
+          "type": "check"
+        },
+        "roundClosed": true
+      }
+    },
+    {
+      "id": "R08",
+      "title": "Unknown CLI option silently falls back to Chinese",
+      "status": "REPRODUCED",
+      "detail": {
+        "command": "inspect --loclae en-US",
+        "exitCode": 0,
+        "output": {
+          "locale": "zh-CN",
+          "aspect": "landscape",
+          "sceneId": "button-vs-blind",
+          "branchId": null
+        }
+      }
+    },
+    {
+      "id": "R09",
+      "title": "Build overwrites a corrupt lesson with the example",
+      "status": "REPRODUCED",
+      "detail": {
+        "exitCode": 0,
+        "originalPreserved": false,
+        "replacementScenes": [
+          "button-vs-blind",
+          "side-pots",
+          "short-raise",
+          "nine-seats"
+        ],
+        "scope": "Executed only in the isolated temporary copy."
+      }
+    },
+    {
+      "id": "R10",
+      "title": "Duplicate scene IDs are accepted on load",
+      "status": "REPRODUCED",
+      "detail": {
+        "accepted": true,
+        "sceneIds": [
+          "button-vs-blind",
+          "button-vs-blind"
+        ]
+      }
+    }
+  ],
+  "sourceUnchanged": true
+}

@@ -1,0 +1,807 @@
+{
+  "version": 1,
+  "title": {
+    "zh-CN": "河牌工作室",
+    "en-US": "River Studio",
+    "ja-JP": "リバースタジオ"
+  },
+  "scenes": [
+    {
+      "id": "button-vs-blind",
+      "title": {
+        "zh-CN": "按钮位对大盲",
+        "en-US": "Button versus big blind",
+        "ja-JP": "ボタン対ビッグブラインド"
+      },
+      "start": {
+        "street": "flop",
+        "board": [
+          "Qd",
+          "7c",
+          "2s"
+        ],
+        "button": "btn",
+        "hero": "btn",
+        "actor": "bb",
+        "seats": [
+          {
+            "id": "utg",
+            "name": "AceRoutine",
+            "stack": 100,
+            "folded": true,
+            "hole": [
+              "Kh",
+              "9h"
+            ]
+          },
+          {
+            "id": "hj",
+            "name": "momo_88",
+            "stack": 100,
+            "folded": true,
+            "hole": [
+              "Jc",
+              "Tc"
+            ]
+          },
+          {
+            "id": "co",
+            "name": "Kai_17",
+            "stack": 100,
+            "folded": true,
+            "hole": [
+              "8s",
+              "8h"
+            ]
+          },
+          {
+            "id": "btn",
+            "name": "riverpilot",
+            "stack": 97.5,
+            "contributed": 2.5,
+            "hole": [
+              "As",
+              "Qs"
+            ]
+          },
+          {
+            "id": "sb",
+            "name": "blueorbit",
+            "stack": 99.5,
+            "contributed": 0.5,
+            "folded": true,
+            "hole": [
+              "5c",
+              "4c"
+            ]
+          },
+          {
+            "id": "bb",
+            "name": "northstar22",
+            "stack": 97.5,
+            "contributed": 2.5,
+            "hole": [
+              "7d",
+              "6d"
+            ]
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "flop",
+          "label": {
+            "zh-CN": "翻牌",
+            "en-US": "Flop",
+            "ja-JP": "フロップ"
+          },
+          "actions": [],
+          "hold": 1
+        },
+        {
+          "id": "bb-check",
+          "label": {
+            "zh-CN": "大盲过牌",
+            "en-US": "Big blind checks",
+            "ja-JP": "BBがチェック"
+          },
+          "actions": [
+            {
+              "seat": "bb",
+              "type": "check"
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "decision",
+          "label": {
+            "zh-CN": "决策讲解",
+            "en-US": "Decision",
+            "ja-JP": "判断の解説"
+          },
+          "actions": [],
+          "hold": 4,
+          "narration": {
+            "zh-CN": "我们在按钮位。对手过牌后，先考虑他的继续范围，再决定下注的目的和尺度。接下来观察不同选择如何改变后续局面。",
+            "en-US": "We are on the button. After the big blind checks, consider their continuing range and the purpose of betting. Let us see how different choices change the hand.",
+            "ja-JP": "私たちはボタンです。相手のチェックに対して、まず相手が続けるハンドを考え、ベットの目的を整理します。それぞれの選択で、その後の局面がどう変わるかを見てみましょう。"
+          },
+          "audio": {
+            "zh-CN": {
+              "src": "assets/audio/zh-CN.wav",
+              "locale": "zh-CN",
+              "duration": 10.606083,
+              "source": "macOS speech adapter",
+              "voice": "Tingting"
+            },
+            "en-US": {
+              "src": "assets/audio/en-US.wav",
+              "locale": "en-US",
+              "duration": 8.524083,
+              "source": "macOS speech adapter",
+              "voice": "Samantha"
+            },
+            "ja-JP": {
+              "src": "assets/audio/ja-JP.wav",
+              "locale": "ja-JP",
+              "duration": 12.343146,
+              "source": "macOS speech adapter",
+              "voice": "Kyoko"
+            }
+          }
+        },
+        {
+          "id": "bet",
+          "label": {
+            "zh-CN": "下注 1.8",
+            "en-US": "Bet 1.8",
+            "ja-JP": "1.8をベット"
+          },
+          "actions": [
+            {
+              "seat": "btn",
+              "type": "bet",
+              "to": 1.8
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "call",
+          "label": {
+            "zh-CN": "跟注",
+            "en-US": "Call",
+            "ja-JP": "コール"
+          },
+          "actions": [
+            {
+              "seat": "bb",
+              "type": "call"
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "turn",
+          "label": {
+            "zh-CN": "转牌",
+            "en-US": "Turn",
+            "ja-JP": "ターン"
+          },
+          "actions": [
+            {
+              "type": "deal",
+              "cards": [
+                "2h"
+              ]
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "turn-bb",
+          "label": {
+            "zh-CN": "大盲过牌",
+            "en-US": "Big blind checks",
+            "ja-JP": "BBがチェック"
+          },
+          "actions": [
+            {
+              "seat": "bb",
+              "type": "check"
+            }
+          ],
+          "hold": 0.8
+        },
+        {
+          "id": "turn-btn",
+          "label": {
+            "zh-CN": "按钮过牌",
+            "en-US": "Button checks",
+            "ja-JP": "ボタンがチェック"
+          },
+          "actions": [
+            {
+              "seat": "btn",
+              "type": "check"
+            }
+          ],
+          "hold": 0.8
+        },
+        {
+          "id": "river",
+          "label": {
+            "zh-CN": "河牌",
+            "en-US": "River",
+            "ja-JP": "リバー"
+          },
+          "actions": [
+            {
+              "type": "deal",
+              "cards": [
+                "9d"
+              ]
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "river-bb",
+          "label": {
+            "zh-CN": "大盲过牌",
+            "en-US": "Big blind checks",
+            "ja-JP": "BBがチェック"
+          },
+          "actions": [
+            {
+              "seat": "bb",
+              "type": "check"
+            }
+          ],
+          "hold": 0.8
+        },
+        {
+          "id": "river-btn",
+          "label": {
+            "zh-CN": "按钮过牌",
+            "en-US": "Button checks",
+            "ja-JP": "ボタンがチェック"
+          },
+          "actions": [
+            {
+              "seat": "btn",
+              "type": "check"
+            }
+          ],
+          "hold": 0.8
+        },
+        {
+          "id": "showdown",
+          "label": {
+            "zh-CN": "摊牌",
+            "en-US": "Showdown",
+            "ja-JP": "ショーダウン"
+          },
+          "actions": [
+            {
+              "type": "showdown"
+            }
+          ],
+          "hold": 2.5
+        }
+      ],
+      "branches": [
+        {
+          "id": "check-line",
+          "from": "decision",
+          "label": {
+            "zh-CN": "过牌路线",
+            "en-US": "Check line",
+            "ja-JP": "チェックのルート"
+          },
+          "beats": [
+            {
+              "id": "branch-check",
+              "label": {
+                "zh-CN": "过牌",
+                "en-US": "Check",
+                "ja-JP": "チェック"
+              },
+              "actions": [
+                {
+                  "seat": "btn",
+                  "type": "check"
+                }
+              ],
+              "hold": 1.2
+            },
+            {
+              "id": "branch-turn",
+              "label": {
+                "zh-CN": "另一张转牌",
+                "en-US": "Alternative turn",
+                "ja-JP": "別のターン"
+              },
+              "actions": [
+                {
+                  "type": "deal",
+                  "cards": [
+                    "8c"
+                  ]
+                }
+              ],
+              "hold": 1.2
+            },
+            {
+              "id": "branch-bet",
+              "label": {
+                "zh-CN": "对手下注",
+                "en-US": "Opponent bets",
+                "ja-JP": "相手がベット"
+              },
+              "actions": [
+                {
+                  "seat": "bb",
+                  "type": "bet",
+                  "to": 4
+                }
+              ],
+              "hold": 1.2
+            },
+            {
+              "id": "branch-fold",
+              "label": {
+                "zh-CN": "弃牌收尾",
+                "en-US": "Fold to finish",
+                "ja-JP": "フォールド"
+              },
+              "actions": [
+                {
+                  "seat": "btn",
+                  "type": "fold"
+                }
+              ],
+              "hold": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "side-pots",
+      "title": {
+        "zh-CN": "三人全下与边池",
+        "en-US": "Three-way all-in & side pots",
+        "ja-JP": "3人のオールインとサイドポット"
+      },
+      "start": {
+        "street": "river",
+        "board": [
+          "Ac",
+          "Kd",
+          "7h",
+          "2s",
+          "3c"
+        ],
+        "button": "c",
+        "hero": "c",
+        "actor": "a",
+        "seats": [
+          {
+            "id": "a",
+            "name": "ShortStack",
+            "stack": 30,
+            "contributed": 10,
+            "hole": [
+              "Ah",
+              "Ad"
+            ]
+          },
+          {
+            "id": "b",
+            "name": "MidStack",
+            "stack": 60,
+            "contributed": 10,
+            "hole": [
+              "Kh",
+              "Ks"
+            ]
+          },
+          {
+            "id": "c",
+            "name": "riverpilot",
+            "stack": 100,
+            "contributed": 10,
+            "hole": [
+              "Qh",
+              "Qd"
+            ]
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "river-start",
+          "label": {
+            "zh-CN": "不同有效筹码",
+            "en-US": "Unequal stacks",
+            "ja-JP": "異なるスタック"
+          },
+          "actions": [],
+          "hold": 1.5
+        },
+        {
+          "id": "short-shove",
+          "label": {
+            "zh-CN": "短筹码全下",
+            "en-US": "Short stack shoves",
+            "ja-JP": "ショートがオールイン"
+          },
+          "actions": [
+            {
+              "seat": "a",
+              "type": "allin"
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "middle-call",
+          "label": {
+            "zh-CN": "中筹码跟注",
+            "en-US": "Middle stack calls",
+            "ja-JP": "ミドルがコール"
+          },
+          "actions": [
+            {
+              "seat": "b",
+              "type": "call"
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "deep-shove",
+          "label": {
+            "zh-CN": "深筹码全下",
+            "en-US": "Deep stack shoves",
+            "ja-JP": "ディープがオールイン"
+          },
+          "actions": [
+            {
+              "seat": "c",
+              "type": "allin"
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "middle-allin",
+          "label": {
+            "zh-CN": "全下跟注",
+            "en-US": "All-in call",
+            "ja-JP": "オールインコール"
+          },
+          "actions": [
+            {
+              "seat": "b",
+              "type": "call"
+            }
+          ],
+          "hold": 2
+        },
+        {
+          "id": "split-pots",
+          "label": {
+            "zh-CN": "按资格分配底池",
+            "en-US": "Award each eligible pot",
+            "ja-JP": "ポットごとに配分"
+          },
+          "actions": [
+            {
+              "type": "showdown"
+            }
+          ],
+          "hold": 3
+        }
+      ]
+    },
+    {
+      "id": "short-raise",
+      "title": {
+        "zh-CN": "不足额全下与加注权",
+        "en-US": "Short all-in and raise rights",
+        "ja-JP": "ショートオールインとレイズ権"
+      },
+      "start": {
+        "street": "flop",
+        "board": [
+          "Ts",
+          "8h",
+          "3c"
+        ],
+        "button": "d",
+        "hero": "a",
+        "actor": "a",
+        "seats": [
+          {
+            "id": "a",
+            "name": "riverpilot",
+            "stack": 100,
+            "contributed": 2,
+            "hole": [
+              "As",
+              "Ad"
+            ]
+          },
+          {
+            "id": "b",
+            "name": "northstar22",
+            "stack": 100,
+            "contributed": 2,
+            "hole": [
+              "Kh",
+              "Ks"
+            ]
+          },
+          {
+            "id": "c",
+            "name": "ShortStack",
+            "stack": 15,
+            "contributed": 2,
+            "hole": [
+              "Qh",
+              "Qd"
+            ]
+          },
+          {
+            "id": "d",
+            "name": "blueorbit",
+            "stack": 100,
+            "contributed": 2,
+            "hole": [
+              "9c",
+              "9d"
+            ]
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "setup",
+          "label": {
+            "zh-CN": "翻牌局面",
+            "en-US": "Flop setup",
+            "ja-JP": "フロップの局面"
+          },
+          "actions": [],
+          "hold": 1.2
+        },
+        {
+          "id": "open-ten",
+          "label": {
+            "zh-CN": "下注 10",
+            "en-US": "Bet 10",
+            "ja-JP": "10をベット"
+          },
+          "actions": [
+            {
+              "seat": "a",
+              "type": "bet",
+              "to": 10
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "flat-ten",
+          "label": {
+            "zh-CN": "跟注 10",
+            "en-US": "Call 10",
+            "ja-JP": "10をコール"
+          },
+          "actions": [
+            {
+              "seat": "b",
+              "type": "call"
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "short-fifteen",
+          "label": {
+            "zh-CN": "全下到 15",
+            "en-US": "All-in to 15",
+            "ja-JP": "15へオールイン"
+          },
+          "actions": [
+            {
+              "seat": "c",
+              "type": "allin"
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "flat-fifteen",
+          "label": {
+            "zh-CN": "跟注 15",
+            "en-US": "Call 15",
+            "ja-JP": "15をコール"
+          },
+          "actions": [
+            {
+              "seat": "d",
+              "type": "call"
+            }
+          ],
+          "hold": 3
+        },
+        {
+          "id": "a-call",
+          "label": {
+            "zh-CN": "只可跟注或弃牌",
+            "en-US": "Call or fold only",
+            "ja-JP": "コールかフォールド"
+          },
+          "actions": [
+            {
+              "seat": "a",
+              "type": "call"
+            }
+          ],
+          "hold": 1.2
+        },
+        {
+          "id": "b-call",
+          "label": {
+            "zh-CN": "完成本轮",
+            "en-US": "Close the round",
+            "ja-JP": "ラウンド終了"
+          },
+          "actions": [
+            {
+              "seat": "b",
+              "type": "call"
+            }
+          ],
+          "hold": 1.2
+        }
+      ]
+    },
+    {
+      "id": "nine-seats",
+      "title": {
+        "zh-CN": "九人桌与竖屏排布",
+        "en-US": "Nine seats, portrait layout",
+        "ja-JP": "9人テーブルの縦向き表示"
+      },
+      "start": {
+        "street": "flop",
+        "board": [
+          "Qd",
+          "7c",
+          "2s"
+        ],
+        "button": "p6",
+        "hero": "p6",
+        "actor": "p0",
+        "seats": [
+          {
+            "id": "p0",
+            "name": "RiverFox",
+            "stack": 100,
+            "contributed": 5,
+            "hole": [
+              "2c",
+              "2d"
+            ],
+            "folded": false
+          },
+          {
+            "id": "p1",
+            "name": "Nori_8",
+            "stack": 110,
+            "contributed": 5,
+            "hole": [
+              "2h",
+              "3c"
+            ],
+            "folded": true
+          },
+          {
+            "id": "p2",
+            "name": "BlueOrbit",
+            "stack": 120,
+            "contributed": 5,
+            "hole": [
+              "3d",
+              "3h"
+            ],
+            "folded": true
+          },
+          {
+            "id": "p3",
+            "name": "northstar22",
+            "stack": 130,
+            "contributed": 5,
+            "hole": [
+              "3s",
+              "4c"
+            ],
+            "folded": false
+          },
+          {
+            "id": "p4",
+            "name": "Kai_17",
+            "stack": 140,
+            "contributed": 5,
+            "hole": [
+              "4d",
+              "4h"
+            ],
+            "folded": true
+          },
+          {
+            "id": "p5",
+            "name": "Mika",
+            "stack": 150,
+            "contributed": 5,
+            "hole": [
+              "4s",
+              "5c"
+            ],
+            "folded": true
+          },
+          {
+            "id": "p6",
+            "name": "riverpilot",
+            "stack": 160,
+            "contributed": 5,
+            "hole": [
+              "5d",
+              "5h"
+            ],
+            "folded": false
+          },
+          {
+            "id": "p7",
+            "name": "AceRoutine",
+            "stack": 170,
+            "contributed": 5,
+            "hole": [
+              "5s",
+              "6c"
+            ],
+            "folded": true
+          },
+          {
+            "id": "p8",
+            "name": "momo_88",
+            "stack": 180,
+            "contributed": 5,
+            "hole": [
+              "6d",
+              "6h"
+            ],
+            "folded": true
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "nine-start",
+          "label": {
+            "zh-CN": "九人桌",
+            "en-US": "Nine seats",
+            "ja-JP": "9人テーブル"
+          },
+          "actions": [],
+          "hold": 2
+        }
+      ]
+    }
+  ]
+}
