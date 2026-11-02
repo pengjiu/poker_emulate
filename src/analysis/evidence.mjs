@@ -3,10 +3,11 @@ import {constants} from 'node:fs';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {check, fail, RiverError} from '../errors.mjs';
+import {hash} from '../util.mjs';
 
 const local = source => typeof source === 'string' && source.startsWith('evidence/');
 
-async function fingerprint(directory, source) {
+async function fingerprint(directory, source, {json = false} = {}) {
   // Evidence paths are portable project paths. Never interpret traversal or a URL.
   const parts = source.split('/');
   check(!source.includes('\\') && !source.includes('\0') && parts.every(part => part && part !== '.' && part !== '..'), 'EVIDENCE_PATH', 'Use a project-relative evidence/ file without traversal.', source);
@@ -24,9 +25,16 @@ async function fingerprint(directory, source) {
     }
     handle = await open(target, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
     check((await handle.stat()).isFile(), 'EVIDENCE_MISSING', 'Evidence must be a readable regular file.', source);
-    const digest = createHash('sha256');
-    for await (const chunk of handle.createReadStream({autoClose: false})) digest.update(chunk);
-    return digest.digest('hex');
+    const digest = createHash('sha256'), chunks = []; let size = 0;
+    for await (const chunk of handle.createReadStream({autoClose: false})) {
+      digest.update(chunk);
+      if (json) { size += chunk.length; check(size <= 16 * 1024 * 1024, 'EVIDENCE_SIZE', 'Structured evidence cannot exceed 16 MiB.', source); chunks.push(chunk); }
+    }
+    const sha256 = digest.digest('hex');
+    if (!json) return sha256;
+    const bytes = Buffer.concat(chunks); let value;
+    try { value = JSON.parse(bytes.toString('utf8')); } catch { fail('EVIDENCE_JSON', 'Structured solver evidence must be valid JSON.', source); }
+    return {sha256, bytes, json: value};
   } catch (error) {
     if (error instanceof RiverError) throw error;
     if (error.code === 'ELOOP') fail('EVIDENCE_PATH', linkMessage, source);
@@ -34,6 +42,11 @@ async function fingerprint(directory, source) {
   } finally {
     await handle?.close();
   }
+}
+
+export async function readEvidenceJSON(directory, source) {
+  check(local(source), 'EVIDENCE_PATH', 'Use a project-relative evidence/ JSON file.', source);
+  return fingerprint(directory, source, {json: true});
 }
 
 /** Bind bytes, not truth. Descriptive attribution and URLs are never fetched. */
@@ -46,6 +59,8 @@ export async function bindEvidence(directory, item) {
 export async function verifyEvidence(directory, evidence) {
   if (!local(evidence?.source)) return;
   check(typeof evidence.sha256 === 'string' && /^[a-f0-9]{64}$/.test(evidence.sha256), 'EVIDENCE_UNBOUND', 'Confirm analysis to bind the local evidence file before export.', evidence.source);
-  const actual = await fingerprint(directory, evidence.source);
+  const structured = evidence.solverDataHash ? await readEvidenceJSON(directory, evidence.source) : null;
+  const actual = structured?.sha256 ?? await fingerprint(directory, evidence.source);
   check(actual === evidence.sha256, 'EVIDENCE_CHANGED', 'Local evidence changed after analysis confirmation; review it and confirm again.', evidence.source);
+  if (structured) check(hash(structured.json) === evidence.solverDataHash, 'SOLVER_EVIDENCE', 'Embedded solver data does not match the bound attachment.', evidence.source);
 }

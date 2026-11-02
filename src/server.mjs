@@ -10,6 +10,9 @@ import {Director} from './director.mjs';
 import {atomicJSON} from './project/store.mjs';
 import {compileProject,validateProject} from './compiler.mjs';
 import {renderVideo} from './media/render.mjs';
+import {renderMixedAudio} from './media/mix.mjs';
+import {produce} from './media/produce.mjs';
+import {practiceHTML} from './project/practice.mjs';
 import {keys} from './project/schema.mjs';
 import {check,errorJSON,fail} from './errors.mjs';
 import {hash,id} from './util.mjs';
@@ -26,7 +29,7 @@ async function fileResponse(req,res,path,download){
 export async function serve(directory,{port=4174}={}){
   const d=await Director.open(directory),runtime=join(d.store.directory,'.runtime');await mkdir(runtime,{recursive:true});
   let release;try{release=await lockfile.lock(runtime,{stale:10000,update:2000,retries:0});}catch(e){fail('RUNTIME_BUSY','This project already has a running studio.','project',{},true);}
-  const token=id(),runtimePath=join(d.store.directory,'.runtime.json');let url,job=null,jobPromise=null,jobAbort=null;
+  const token=id(),runtimePath=join(d.store.directory,'.runtime.json');let url,job=null,jobPromise=null,jobAbort=null,previewPromise=null,previewAbort=null;
   const json=(res,status,value)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
   const server=http.createServer(async(req,res)=>{
     try{
@@ -36,10 +39,18 @@ export async function serve(directory,{port=4174}={}){
         let raw='',size=0;for await(const chunk of req){size+=chunk.length;check(size<=32*1024*1024,'REQUEST_SIZE','Request exceeds 32 MiB; import large audio through the local CLI.');raw+=chunk.toString();}
         let body;try{body=JSON.parse(raw||'{}');}catch{fail('JSON','Request JSON is invalid.');}
         if(pathname==='/api/rpc'){json(res,200,{ok:true,value:await d.dispatch(body)});return;}
+        if(pathname==='/api/audio'){
+          keys(body,[],'audio');if(!previewPromise){previewAbort=new AbortController();previewPromise=renderMixedAudio(d.store.directory,{signal:previewAbort.signal}).finally(()=>{previewPromise=null;previewAbort=null;});}
+          json(res,200,{ok:true,value:await previewPromise});return;
+        }
         if(pathname==='/api/render'){
-          keys(body,[],'render');check(!jobPromise,'RENDER_BUSY','A render is already running.');
+          keys(body,['rehearsal'],'render');check(body.rehearsal===undefined||typeof body.rehearsal==='boolean','SCHEMA','rehearsal must be boolean.','render/rehearsal');check(!jobPromise,'RENDER_BUSY','A render is already running.');
           jobAbort=new AbortController();job={status:'running',progress:null};
-          jobPromise=renderVideo(d.store.directory,{signal:jobAbort.signal,onProgress:p=>{job.progress=p;}}).then(result=>{job={status:'complete',result,videoUrl:`/artifacts/${result.fingerprint}/video.mp4`};},error=>{job={status:'failed',error:errorJSON(error)};}).finally(()=>{jobPromise=null;jobAbort=null;});json(res,202,{ok:true,value:job});return;
+          jobPromise=renderVideo(d.store.directory,{rehearsal:!!body.rehearsal,signal:jobAbort.signal,onProgress:p=>{job.progress=p;}}).then(result=>{job={status:'complete',result,videoUrl:`/artifacts/${result.fingerprint}/video.mp4`};},error=>{job={status:'failed',error:errorJSON(error)};}).finally(()=>{jobPromise=null;jobAbort=null;});json(res,202,{ok:true,value:job});return;
+        }
+        if(pathname==='/api/produce'){
+          keys(body,['rehearsal','only'],'produce');check(!jobPromise,'RENDER_BUSY','A production job is already running.');check(body.rehearsal===undefined||typeof body.rehearsal==='boolean','SCHEMA','rehearsal must be boolean.','produce/rehearsal');jobAbort=new AbortController();job={status:'running',progress:null};
+          jobPromise=produce(d.store.directory,{out:join(dirname(d.store.directory),'deliveries'),rehearsal:!!body.rehearsal,only:body.only,signal:jobAbort.signal,onProgress:p=>{job.progress=p;}}).then(result=>{job={status:'complete',result,videoUrl:'/deliveries/'+result.directory.split('/').pop()+'/index.html'};},error=>{job={status:'failed',error:errorJSON(error)};}).finally(()=>{jobPromise=null;jobAbort=null;});json(res,202,{ok:true,value:job});return;
         }
         if(pathname==='/api/cancel'){keys(body,[],'cancel');jobAbort?.abort();json(res,200,{ok:true});return;}
         if(pathname==='/api/export'){
@@ -57,13 +68,16 @@ export async function serve(directory,{port=4174}={}){
         json(res,200,{project,observation,plan,patterns:patterns(),locales:Object.keys(d.packs),dictionaries:d.packs,dictionary:d.packs[project.output.locale],job,voice:await d.voice({action:'status'})});return;
       }
       if(pathname==='/api/plan'){json(res,200,{plan:await d.export({kind:'plan'}),observation:await d.observe()});return;}
+      if(pathname==='/practice'){const p=await d.store.read();res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(practiceHTML(p,p.output.locale));return;}
       if(pathname==='/'){
         const html=await readFile(root+'src/studio/index.html','utf8');res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(html.replace('__SESSION_TOKEN__',JSON.stringify(token)));return;
       }
-      const staticFiles={'/studio.js':'src/studio/app.mjs','/style.css':'src/client/style.css','/client/render.mjs':'src/client/render.mjs'};
+      const staticFiles={'/studio.js':'src/studio/app.mjs','/style.css':'src/client/style.css','/studio/advanced.mjs':'src/studio/advanced.mjs','/studio/workflow.mjs':'src/studio/workflow.mjs','/studio/style.css':'src/studio/style.css','/client/render.mjs':'src/client/render.mjs'};
       if(staticFiles[pathname]){await fileResponse(req,res,root+staticFiles[pathname]);return;}
       if(/^\/assets\/[a-f0-9]{64}\.[a-z0-9]+$/.test(pathname)){const p=await d.store.read();check(Object.values(p.assets).some(a=>'/'+a.path===pathname),'ASSET_MISSING','Unknown asset.');await fileResponse(req,res,d.store.directory+pathname);return;}
       if(/^\/artifacts\/[a-f0-9]{64}\/(video\.mp4|captions\.srt|receipt\.json)$/.test(pathname)){await fileResponse(req,res,d.store.directory+pathname);return;}
+      if(/^\/preview-audio\/[a-f0-9]{64}\.m4a$/.test(pathname)){await fileResponse(req,res,join(runtime,'audio',pathname.split('/').pop()));return;}
+      if(/^\/deliveries\/delivery-[a-f0-9]{16}\/[a-zA-Z0-9_-]+\.(html|mp4|srt|json)$/.test(pathname)){await fileResponse(req,res,join(dirname(d.store.directory),pathname.slice(1)));return;}
       if(/^\/export\/[a-f0-9-]+\.tar\.gz$/.test(pathname)){await fileResponse(req,res,join(dirname(d.store.directory),'exports',pathname.split('/').pop()),'river-project.tar.gz');return;}
       json(res,404,{ok:false,error:{code:'NOT_FOUND'}});
     }catch(error){if(!res.headersSent)json(res,error.code==='PROJECT_BUSY'||error.code==='RENDER_BUSY'?409:400,{ok:false,error:errorJSON(error)});else res.destroy();}
@@ -72,5 +86,5 @@ export async function serve(directory,{port=4174}={}){
     await new Promise((accept,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',accept);});url=`http://127.0.0.1:${server.address().port}`;d.previewUrl=url;
     await atomicJSON(runtimePath,{url,token,pid:process.pid,projectId:(await d.store.read()).projectId});
   }catch(e){await release();throw e;}
-  let closing=false;return {url,director:d,async close(){if(closing)return;closing=true;jobAbort?.abort();await d.voice({action:'cancel'});await jobPromise;server.closeIdleConnections();await new Promise(resolve=>server.close(resolve));await rm(runtimePath,{force:true});await release();}};
+  let closing=false;return {url,director:d,async close(){if(closing)return;closing=true;jobAbort?.abort();previewAbort?.abort();await d.voice({action:'cancel'});await jobPromise;await previewPromise?.catch(()=>{});server.closeIdleConnections();await new Promise(resolve=>server.close(resolve));await rm(runtimePath,{force:true});await release();}};
 }

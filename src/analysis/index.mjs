@@ -2,6 +2,15 @@ import {check} from '../errors.mjs';
 import {loadState, transition, observe, evaluate} from '../poker/rules.mjs';
 import {clone, hash} from '../util.mjs';
 import {route} from '../project/routes.mjs';
+import {combinations, rangeEntriesSchema, expandRange} from './range.mjs';
+import {equityOptionsSchema, compileMetrics} from './metrics.mjs';
+import {tournamentSchema, compileTournament} from './tournament.mjs';
+import {solverSchema, compileSolver, importSolverData, solverDecision, rangeIdentity} from './solver.mjs';
+import {rakeAmount} from '../poker/rules.mjs';
+
+export {combinations, expandRange, filterRange} from './range.mjs';
+export {equityAgainstRange, nextCardOuts} from './metrics.mjs';
+export {independentChipModel} from './tournament.mjs';
 
 const object = (value, path) => check(value && typeof value === 'object' && !Array.isArray(value), 'ANALYSIS_SCHEMA', 'Expected an object.', path);
 function keys(value, allowed, path) {
@@ -15,31 +24,14 @@ function textMap(value, path) {
   for (const [locale, text] of Object.entries(value)) nonempty(text, `${path}/${locale}`);
 }
 
-const suits = 'cdhs';
 const orderedCombo = cards => [...cards].sort().join('');
-// Shorthand describes a set of candidate combinations, never a probability.
-function combinations(hand) {
-  if (/^[2-9TJQKA][cdhs][2-9TJQKA][cdhs]$/.test(hand)) {
-    const cards = [hand.slice(0, 2), hand.slice(2)];
-    return cards[0] === cards[1] ? [] : [cards];
-  }
-  const match = /^([2-9TJQKA])([2-9TJQKA])([so]?)$/.exec(hand);
-  if (!match || (match[1] === match[2] && match[3])) return [];
-  const [, first, second, suited] = match, result = new Map();
-  for (const a of suits) for (const b of suits) {
-    if (first === second && a === b || suited === 's' && a !== b || suited === 'o' && a === b) continue;
-    const cards = [first + a, second + b];
-    result.set(orderedCombo(cards), cards);
-  }
-  return [...result.values()];
-}
 
 export function analysisSchema(items, path = 'analysis') {
   check(Array.isArray(items), 'ANALYSIS_SCHEMA', 'Analysis must be an array.', path);
   const ids = new Set();
   for (const [index, item] of items.entries()) {
     const p = `${path}/${index}`;
-    keys(item, ['id', 'node', 'title', 'assumptions', 'conditions', 'takeaway', 'objective', 'range', 'calculation', 'evidence', 'review'], p);
+    keys(item, ['id', 'node', 'title', 'assumptions', 'conditions', 'takeaway', 'objective', 'range', 'calculation', 'metrics', 'equityOptions', 'solver', 'tournament', 'evidence', 'review'], p);
     nonempty(item.id, `${p}/id`);
     check(!ids.has(item.id), 'ANALYSIS_DUPLICATE', 'Analysis IDs must be unique within a scene.', `${p}/id`);
     ids.add(item.id);
@@ -49,12 +41,18 @@ export function analysisSchema(items, path = 'analysis') {
     textMap(item.title, `${p}/title`);
     for (const field of ['assumptions', 'conditions', 'takeaway', 'objective']) if (item[field] !== undefined) textMap(item[field], `${p}/${field}`);
     if (item.calculation !== undefined) check(item.calculation === 'potOdds', 'ANALYSIS_CALCULATION', 'Supported calculation: potOdds.', `${p}/calculation`);
+    if (item.metrics !== undefined) check(Array.isArray(item.metrics) && item.metrics.length > 0 && new Set(item.metrics).size === item.metrics.length && item.metrics.every(metric => ['spr', 'equity', 'outs', 'callEV'].includes(metric)), 'ANALYSIS_CALCULATION', 'Use distinct spr, equity, outs or callEV metrics.', `${p}/metrics`);
+    if (item.equityOptions !== undefined) equityOptionsSchema(item.equityOptions, `${p}/equityOptions`);
+    if (item.solver !== undefined) solverSchema(item.solver, `${p}/solver`);
+    if (item.tournament !== undefined) tournamentSchema(item.tournament, `${p}/tournament`);
     if (item.range !== undefined) {
-      keys(item.range, ['seat', 'groups'], `${p}/range`);
+      keys(item.range, ['seat', 'groups', 'entries'], `${p}/range`);
       nonempty(item.range.seat, `${p}/range/seat`);
-      check(Array.isArray(item.range.groups) && item.range.groups.length > 0, 'ANALYSIS_RANGE', 'Provide illustrative range groups.', `${p}/range/groups`);
+      check(item.range.groups !== undefined || item.range.entries !== undefined, 'ANALYSIS_RANGE', 'Provide illustrative groups or explicit weighted entries.', `${p}/range`);
+      if (item.range.groups !== undefined) check(Array.isArray(item.range.groups) && item.range.groups.length > 0, 'ANALYSIS_RANGE', 'Provide illustrative range groups.', `${p}/range/groups`);
+      if (item.range.entries !== undefined) rangeEntriesSchema(item.range.entries, `${p}/range/entries`);
       const groupIds = new Set();
-      for (const [i, group] of item.range.groups.entries()) {
+      for (const [i, group] of (item.range.groups ?? []).entries()) {
         const gp = `${p}/range/groups/${i}`;
         keys(group, ['id', 'label', 'hands'], gp);
         nonempty(group.id, `${gp}/id`);
@@ -83,6 +81,7 @@ function decision(scene, node) {
   const branch = scene.branches?.find(candidate => candidate.beats.some(beat => beat.id === node.beatId));
   const beats = route(scene, branch?.id);
   let state = loadState(scene.start), revealed = [], history = [];
+  const knownRevealed = new Set();
   for (const beat of beats) {
     if (beat.view) {
       revealed = beat.view.reveal;
@@ -90,6 +89,7 @@ function decision(scene, node) {
         const seat = state.seats.find(candidate => candidate.id === id);
         check(seat, 'REVEAL', 'Unknown revealed seat.', `analysis/${node.beatId}`);
         // An earlier reveal remains part of the viewer's knowledge even if hidden later.
+        knownRevealed.add(id);
         history.push({type: 'reveal', seat: id, hole: clone(seat.hole)});
       }
     }
@@ -102,7 +102,7 @@ function decision(scene, node) {
     }
     if (beat.id === node.beatId) {
       const result = clone(state);
-      result.revealed = [...new Set([...state.revealed, ...revealed])];
+      result.revealed = [...new Set([...state.revealed, ...knownRevealed])];
       for (const seat of result.revealed) check(state.seats.some(p => p.id === seat), 'REVEAL', 'Unknown revealed seat.', `analysis/${node.beatId}`);
       return {state: result, history};
     }
@@ -121,7 +121,18 @@ export function decisionFingerprint(scene, node) {
     id, stack, contributed, streetBet, folded,
     hole: id === hero || state.revealed.includes(id) ? hole : null
   }));
-  return hash({street, board, button, actor, hero, bigBlind, lastFullRaise, actedAt, roundClosed, settled, seats, history});
+  const extra = {};
+  for (const name of ['rake', 'rakeTaken', 'deadPot', 'antePaid', 'forcedBet', 'displayUnit']) if (visible[name] !== undefined) extra[name] = clone(visible[name]);
+  return hash({street, board, button, actor, hero, bigBlind, lastFullRaise, actedAt, roundClosed, settled, seats, history, ...extra});
+}
+
+export function solverRequest(scene, node) {
+  const state = resolveDecision(scene, node);
+  return {version: 1, decisionHash: decisionFingerprint(scene, node), decision: solverDecision(state)};
+}
+
+export async function importSolverAnalysis(directory, scene, item, source) {
+  return importSolverData(directory, resolveDecision(scene, item.node), decisionFingerprint(scene, item.node), item, source);
 }
 
 const materialFingerprint = item => { const {review, ...material} = item; return hash(material); };
@@ -145,14 +156,14 @@ function potOdds(state) {
   const visible = observe(state), call = visible.legalActions.find(action => action.type === 'call');
   const base = {kind: 'potOdds', call: call?.amount ?? 0, pot: visible.pot / 100, total: 0, threshold: 0};
   if (state.street !== 'river' || state.settled || state.actor !== state.hero || state.seats.filter(seat => !seat.folded).length !== 2 || !call) {
-    return {...base, applicable: false, reason: 'Requires a pending hero call on the river with two live players and no rake.'};
+    return {...base, applicable: false, reason: 'Requires a pending hero call on the river with two live players.'};
   }
   const after = observe(transition(state, {type: 'call', seat: state.hero}));
   if (!after.roundClosed || after.pots.length !== 1 || after.pots[0].eligible.length !== 2) {
     return {...base, applicable: false, reason: 'Requires one shared pot and no betting after the call.'};
   }
-  const total = after.pot / 100;
-  return {...base, total, threshold: call.amount / total, applicable: true};
+  const grossTotal = after.pot / 100, rake = rakeAmount(after) / 100, total = grossTotal - rake;
+  return {...base, total, threshold: total > 0 ? call.amount / total : null, applicable: total > 0, ...(rake ? {grossTotal, rake} : {}), ...(state.displayUnit ? {unit: state.displayUnit} : {}), ...(total <= 0 ? {reason: 'No contestable pot remains after rake.'} : {})};
 }
 
 /** Localized, derived view; review binds assumptions to a decision, not evidence truth. */
@@ -179,7 +190,7 @@ export function compileAnalysis(scene, item, locale) {
     check(state.seats.some(seat => seat.id === item.range.seat), 'ANALYSIS_RANGE', 'Range seat does not exist.', `analysis/${item.id}/range/seat`);
     const known = observe(state), blocked = new Set([...known.board, ...known.seats.filter(seat => seat.id !== item.range.seat).flatMap(seat => seat.hole).filter(Boolean)]);
     const seen = new Set(); let overlaps = false;
-    const groups = item.range.groups.map(group => {
+    const groups = (item.range.groups ?? []).map(group => {
       const combos = new Set();
       for (const hand of group.hands) {
         const available = combinations(hand).filter(cards => cards.every(card => !blocked.has(card)));
@@ -190,6 +201,28 @@ export function compileAnalysis(scene, item, locale) {
       return {id: group.id, label: text(group.label, `/range/groups/${group.id}/label`), hands: clone(group.hands), combinationCount: combos.size};
     });
     result.range = {seat: item.range.seat, groups, coverage: 'examples', overlaps, combinationCount: seen.size};
+    if (item.range.entries) {
+      const expanded = expandRange(item.range.entries, {blocked: [...blocked], board: known.board, unit: state.displayUnit ?? 'BB'});
+      result.range = {...result.range, ...expanded, overlaps};
+      if (!expanded.weightedCount) issue('ANALYSIS_RANGE_EMPTY', 'The assumed range has no unblocked positive-weight combinations.', '/range/entries');
+    }
+  }
+  if (item.metrics) {
+    result.metrics = compileMetrics(state, item);
+    for (const metric of result.metrics) if (!metric.applicable) issue(metric.errorCode ?? 'ANALYSIS_CALCULATION', metric.reason, '/metrics/' + metric.kind);
+  }
+  if (item.solver) {
+    try {
+      result.solver = compileSolver(state, fingerprint, item.solver);
+      const assumed = item.solver.data.model.ranges?.find(range => range.seat === item.range?.seat);
+      if (assumed && item.range.entries) check(rangeIdentity(state, assumed.seat, assumed.entries) === rangeIdentity(state, assumed.seat, item.range.entries), 'SOLVER_RANGE_MISMATCH', 'The teaching range differs from the solver input range; import a solve for the changed assumption.', 'solver/model/ranges');
+      if (!item.range) result.range = {seat: result.solver.seat, groups: [], overlaps: false, ...result.solver.range};
+    } catch (error) { if (!error.code) throw error; issue(error.code, error.message, '/solver'); }
+    if (item.evidence?.kind !== 'solver' || !item.evidence.source?.startsWith('evidence/')) issue('SOLVER_EVIDENCE', 'Solver results require their imported local evidence attachment.', '/solver');
+  }
+  if (item.tournament) {
+    try { result.tournament = compileTournament(state, item.tournament, locale); }
+    catch (error) { if (!error.code) throw error; issue(error.code, error.message, '/tournament'); }
   }
   if (item.evidence) {
     result.evidence = {kind: item.evidence.kind, authorProvided: true};
@@ -198,6 +231,7 @@ export function compileAnalysis(scene, item, locale) {
       if (item.review?.evidenceHash) result.evidence.sha256 = item.review.evidenceHash;
       else issue('EVIDENCE_UNBOUND', 'Confirm analysis to bind the referenced local evidence file.', '/evidence/source');
     }
+    if (item.solver) result.evidence.solverDataHash = hash(item.solver.data);
     for (const field of ['model', 'detail']) if (item.evidence[field]) result.evidence[field] = text(item.evidence[field], `/evidence/${field}`);
   }
   return result;

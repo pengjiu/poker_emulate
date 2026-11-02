@@ -2,6 +2,8 @@
 
 Use optional analysis material and presentation on the existing v2 project. The six methods, atomic batches and render command remain the entry points.
 
+For weighted matrices, drawing/cameras, route comparisons, condition variants, session continuity and complete deliveries, also read [complete production](full-production.md). This page explains the basic node/review/reveal workflow; the linked contracts own extended field definitions.
+
 ## Inspect a decision, then explain it
 
 1. Seek the pending decision in player view. Keep the hero's action uncommitted throughout the explanation. Read the current pot, call amount, known cards and legal actions.
@@ -40,7 +42,7 @@ These numbers illustrate the command shape; use measured speech in the actual pr
 
 ## Change conditions safely
 
-Choice comparison starts at the same pending node. A different opponent bet starts **before** that action. Use `scene.variant` for one recorded action replacement; the engine replays the changed scene and validates all routes.
+Choice comparison starts at the same pending node. A different opponent bet starts **before** that action. `scene.variant` supports one recorded action, board, hole-card or remaining-stack replacement; the engine replays the changed scene and validates all routes. The following example changes an action; other shapes are in the complete-production reference.
 
 ```json
 {"type":"scene.variant","sourceSceneId":"river-example","value":{"id":"river-larger-bet","title":{"zh-CN":"改为满池下注"},"change":{"beatId":"opponent-bet","actionIndex":0,"action":{"seat":"oop","type":"bet","to":9.1}}}}

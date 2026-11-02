@@ -1,9 +1,11 @@
 ---
 name: poker-director
-description: Author, validate, voice, preview and render River Studio poker lessons through structured commands. Use for controlled Texas Hold'em scenes, decision analysis, teaching canvases, condition variants, course planning, localized narration, multi-hand sequences, IndexTTS or external audio, and landscape or portrait output in this project.
+description: Author, validate, rehearse and render River Studio poker courses through structured commands. Use for Hold'em scenes, weighted ranges and solver evidence, drawing and cameras, route comparisons, continuous sessions, tournament ICM and rake, answerable practice, localized narration, sound mixes and reusable landscape/portrait deliveries.
 ---
 
-Run from the repository root, three directories above this skill. Use `node bin/river.mjs`. This is a local content production tool for standard no-limit Hold'em, 2–9 seats, controlled through six methods. It integrates the official local IndexTTS2.5 engine and also imports external audio. There are no accounts, real players or strategy solver.
+Run from the repository root, three directories above this skill. Use `node bin/river.mjs`. This is a local content production tool for no-limit Hold'em, 2–9 table seats, controlled through six methods. It integrates official local IndexTTS2.5 and external audio, imports external strategy results, and calculates declared equity/ICM models. It does not run a full-game strategy solver or connect to real poker accounts.
+
+**For drawing/cameras, matrices, solver imports, condition variants, continuous sessions, practice, sound or delivery packages, read [complete production](references/full-production.md).** That reference links the exact domain contracts and gives composable commands. Use the same project and six methods; choose creative structure freely.
 
 ## Create and deliver
 
@@ -48,6 +50,6 @@ Validate/render options `--locale`, `--aspect`, `--scene`, `--branch`, `--profil
 
 Default multi-action beats expose `beatId::0`, `beatId::1`, etc., then narration. For commentary during advancing play, use beat.timing; one narration clock spans its action segments. For multi-hand or alternative-line programmes, use output.sequence. Read the format reference for timing, exact frame IDs and unambiguous seeking. UI action controls are available at the last frame of a beat; scene editing permits finer composition.
 
-For strategy claims, keep the matched evidence and model boundaries in project `evidence/` as described in the strategy reference. ICM, automatic rake, multiple runouts and nested branches are outside v1.
+For strategy claims, keep matched evidence and model assumptions in project `evidence/`. Use the supported ICM/ante/rake models with their declared units and limits; read the complete-production reference. Model different runouts or alternative futures as explicit branches or condition variants.
 
 Read [six task recipes](references/task-recipes.md) for production workflows. Migrate v1 with `node bin/river.mjs migrate --lesson <old.json> --project <new-directory>` and explicit output options; source is preserved and defaults recorded in evidence/migration.json.

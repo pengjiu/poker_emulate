@@ -1,0 +1,23 @@
+.workflow-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}.workflow-actions button,.advanced-actions button{white-space:normal;text-align:left;line-height:1.4;min-height:38px;padding:8px 10px}.modal:has([data-range-rows]),.modal:has([data-question]),.modal:has([data-change-fields]),.modal:has([data-player]){width:min(1040px,calc(100vw - 32px));max-width:1040px}.modal fieldset{border:1px solid #37434c;border-radius:10px;padding:12px;margin:12px 0}.modal fieldset legend{color:#9ed9c4;padding:0 6px}.modal select,.modal input{max-width:100%;box-sizing:border-box}.modal [data-range-row]{padding:12px;border:1px solid #37434c;border-radius:8px;margin:8px 0}.modal canvas{touch-action:none;max-width:100%;border:1px solid #52616c;border-radius:8px;background:#102332}.modal input[type=checkbox]{width:auto}.modal label:has(input[type=checkbox]){align-items:center}.advanced-grid label{min-width:0}.modal [data-choice-row]{display:grid;grid-template-columns:minmax(70px,.25fr) 1fr auto;gap:10px;align-items:center;margin:12px 0}.modal .quiet{line-height:1.7}.modal audio{max-width:100%}@media(max-width:600px){.workflow-actions{grid-template-columns:1fr}.modal [data-choice-row]{grid-template-columns:1fr}.modal{max-height:90vh}.advanced-grid{grid-template-columns:1fr!important}}
+
+/* Course and session forms keep each label, choice and control together. */
+.modal-overlay:has([data-episodes]),.modal-overlay:has([data-adjust-seat]){padding:16px}
+.modal:has([data-episodes]),.modal:has([data-adjust-seat]){width:min(1080px,calc(100vw - 32px));max-width:1080px}
+.modal:has([data-episodes]) label,.modal:has([data-adjust-seat]) label{display:grid;gap:6px;min-width:0;font-size:13px;line-height:1.5}
+.modal:has([data-episodes]) fieldset,.modal:has([data-adjust-seat]) fieldset{min-width:0}
+.modal:has([data-episodes]) input:not([type=checkbox]),.modal:has([data-episodes]) select,.modal:has([data-adjust-seat]) input,.modal:has([data-adjust-seat]) select{width:100%;min-width:0}
+.modal [data-member]{flex-wrap:wrap}
+.modal [data-member]>button{flex-shrink:0}
+.modal label:has([data-field=sceneToAdd]){flex:1}
+.modal [data-episode-relations] label.voice-scope{grid-template-columns:18px minmax(0,1fr);align-items:start;gap:8px;margin:10px 0}
+.modal [data-episode-relations] label.voice-scope>span{grid-column:2;grid-row:1;min-width:0;overflow-wrap:anywhere}
+.modal [data-episode-relations] label.voice-scope>input[type=checkbox]{grid-column:1;grid-row:1;align-self:start;width:16px;height:16px;margin:2px 0 0}
+.modal:has([data-adjust-seat]),.modal [data-adjust-seat],.modal:has([data-adjust-seat]) [data-join]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+.modal:has([data-adjust-seat])>.modal-head,.modal:has([data-adjust-seat])>p,.modal:has([data-adjust-seat])>fieldset,.modal:has([data-adjust-seat])>details,.modal:has([data-adjust-seat])>.modal-actions{grid-column:1/-1}
+.modal:has([data-adjust-seat])>.modal-head,.modal:has([data-adjust-seat])>p{margin:0}
+@media(max-width:800px){
+  .modal:has([data-episodes]),.modal:has([data-adjust-seat]){padding:18px}
+  .modal:has([data-adjust-seat]),.modal [data-adjust-seat],.modal:has([data-adjust-seat]) [data-join]{grid-template-columns:minmax(0,1fr)}
+  .modal [data-episode-relations]>.advanced-grid{grid-template-columns:minmax(0,1fr)!important}
+  .modal [data-member]>label{min-width:calc(100% - 28px)}
+}

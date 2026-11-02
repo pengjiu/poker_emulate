@@ -1,6 +1,8 @@
 # Project and scene format
 
-Canonical directory: project.json + assets/ + evidence/. Runtime creates `format:"river.project",version:2,projectId,revision,lesson:{scenes},output,assets,receipts`. Author one **scene** for init; edit through apply. All public amounts are BB with at most two decimal places. Internal rule arithmetic uses integer hundredths. Exported RenderPlan v2, observe and seek all expose BB, with state.unit="BB". RenderPlan v1 from development builds used internal amounts; re-export from the project instead of replaying old plans.
+Canonical directory: project.json + assets/ + evidence/. Runtime creates `format:"river.project",version:2,projectId,revision,lesson:{scenes},output,assets,receipts`. Author one **scene** for init; edit through apply. Public amounts use the declared denomination with at most two decimal places: legacy/default games use BB; tournament or changing blind levels use `start.unit:"chips"`. Internal rule arithmetic uses integer hundredths. RenderPlan v2, observe and seek expose public amounts and `state.unit`. RenderPlan v1 used internal amounts; re-export from its project.
+
+For automatic blind/ante setup, cash rake, continuous sessions, weighted analysis, cameras, practice and delivery versions, read [complete production](full-production.md). Optional `beat.rehearsalDuration:{locale:seconds}` estimates reading time while that language lacks audio; actual speech determines the final schedule.
 
 Minimal complete river scene (needs audio on decision to render):
 

@@ -12,7 +12,9 @@ export async function build(){
   const fingerprint=await buildFingerprint(),renderer=await readFile(root+'src/client/render.mjs','utf8'),style=await readFile(root+'src/client/style.css','utf8');
   const html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>River</title><style>${style}</style></head><body class="viewer"><div id="app"></div><script type="module">${renderer.replace(/^export /gm,'')}
   window.RIVER_BUILD=${JSON.stringify(fingerprint.hash)};let plan,markup;
-  window.riverFrame={load:p=>{if(p.format!=='river.plan'||p.version!==2||p.frames.some(f=>f.state.unit!=='BB'))throw new Error('Expected river.plan v2 with BB amounts');plan=p;markup=null;document.documentElement.lang=p.locale;return window.riverFrame.render(0);},render:i=>{const next=renderFrame(plan,i);window.riverFrame.changed=next!==markup;if(window.riverFrame.changed)document.getElementById('app').innerHTML=next;markup=next;return frameAt(plan,i).id;},inspect:()=>plan};
+  window.riverFrame={load:p=>{if(p.format!=='river.plan'||p.version!==2||p.frames.some(f=>!['BB','chips'].includes(f.state.unit)))throw new Error('Expected river.plan v2 with declared amounts');plan=p;markup=null;document.documentElement.lang=p.locale;return window.riverFrame.render(0);},render:i=>{const next=renderFrame(plan,i);window.riverFrame.changed=next!==markup;if(window.riverFrame.changed){document.getElementById('app').innerHTML=next;if(typeof layoutFrame==='function')layoutFrame(document.getElementById('app'));}markup=next;return frameAt(plan,i).id;},inspect:()=>plan};
+  window.addEventListener('resize',()=>{if(typeof layoutFrame==='function')layoutFrame(document.getElementById('app'));});
+  window.riverFrame.prepare=async()=>{if(typeof prepareArtwork==='function')await prepareArtwork(plan);};
   window.__riverReady=true;
   </script></body></html>`;
   await mkdir(root+'dist',{recursive:true});await writeFile(root+'dist/client.html',html);await writeFile(root+'dist/build.json',JSON.stringify(fingerprint,null,2)+'\n');return fingerprint;
