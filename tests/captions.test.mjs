@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {captionPages,renderFrame} from '../src/client/render.mjs';
+import {captionPages,renderFrame,subtitleCues} from '../src/client/render.mjs';
 import {fixture,packs} from './helpers.mjs';
 import {compileProject} from '../src/compiler.mjs';
 
@@ -29,4 +29,16 @@ test('Frame rendering keeps a longer page visible and clears captions after audi
   Object.assign(base,{start:0,duration:12,startFrame:0,endFrame:360,narration:'先'.repeat(100)+'尾'.repeat(20),audio:{duration:10}});p.frames=[base];p.totalFrames=360;
   assert.match(renderFrame(p,210),new RegExp('先'.repeat(100)));assert.doesNotMatch(renderFrame(p,210),new RegExp('尾'.repeat(20)));
   assert.match(renderFrame(p,285),new RegExp('尾'.repeat(20)));assert.match(renderFrame(p,315),/class="caption-lane"><\/div>/);
+});
+
+test('Exported subtitles match the visible pages in both layouts, preserving precise gaps',()=>{
+  for(const aspect of ['landscape','portrait'])for(const precise of [false,true]){
+    const plan=compileProject(fixture({sceneId:'button-vs-blind',locale:'zh-CN',captions:true,profile:'final',aspect}),packs);
+    const text='先看价格，再看范围。'.repeat(40),frame=structuredClone(plan.frames[0]);
+    Object.assign(frame,{start:0,end:22,duration:22,startFrame:0,endFrame:660,narration:text,narrationStart:0,narrationDuration:20,audio:{duration:20},captionCues:precise?[{start:1,end:9,text:text.slice(0,text.length/2)},{start:11,end:20,text:text.slice(text.length/2)}]:null});
+    plan.frames=[frame];plan.totalFrames=660;
+    const cues=subtitleCues(plan);assert.ok(cues.length>2);assert.equal(cues.map(c=>c.text).join(''),text);
+    for(const cue of cues)assert.ok(renderFrame(plan,Math.floor((cue.start+cue.end)/2*plan.fps)).includes(`class="caption-lane">${cue.text}</div>`));
+    if(precise){assert.ok(cues.every(c=>c.end<=9||c.start>=11));assert.match(renderFrame(plan,300),/class="caption-lane"><\/div>/);}
+  }
 });

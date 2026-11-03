@@ -1,5 +1,6 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
-import {join} from 'node:path';
+import {join,resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import assert from 'node:assert/strict';
@@ -22,6 +23,16 @@ function correlate(source,video,offset,start,length){
     const correlation=aa&&bb?cross/Math.sqrt(aa*bb):0;if(correlation>best.correlation)best={correlation,lagSamples:lag};
   }return {...best,lagSeconds:best.lagSamples/4000};
 }
+function continuousCorrelation(source,video,offset){
+  const windows=[];let fullCross=0,fullAA=0,fullBB=0;
+  for(let start=0;start<source.length;start+=8000){
+    const end=Math.min(start+8000,source.length);let cross=0,aa=0,bb=0;
+    for(let i=start;i<end;i++){const a=source[i],b=video[offset+i]??0;cross+=a*b;aa+=a*a;bb+=b*b;}
+    fullCross+=cross;fullAA+=aa;fullBB+=bb;
+    if(Math.sqrt(aa/(end-start))>.003)windows.push({start:start/4000,correlation:aa&&bb?cross/Math.sqrt(aa*bb):0});
+  }
+  return {correlation:fullAA&&fullBB?fullCross/Math.sqrt(fullAA*fullBB):0,windows};
+}
 export async function verifyMedia(directory,projectDirectory){
   const receipt=JSON.parse(await readFile(join(directory,'receipt.json'),'utf8')),project=JSON.parse(await readFile(join(projectDirectory,'project.json'),'utf8')),video=join(directory,'video.mp4');
   const out=join(directory,'decoded');await mkdir(out,{recursive:true});
@@ -32,14 +43,24 @@ export async function verifyMedia(directory,projectDirectory){
     const file=join(out,String(i+1).padStart(3,'0')+'.png'),{stderr}=await exec('ffmpeg',['-hide_banner','-i',join(directory,k.file),'-i',file,'-lavfi','ssim','-f','null','-'],{timeout:10000,maxBuffer:1024*1024});
     const ssim=Number(stderr.match(/All:([\d.]+)/)?.[1]);assert.ok(ssim>=.97,`Encoded keyframe ${k.frame} SSIM=${ssim}`);frames.push({frame:k.frame,file:'decoded/'+String(i+1).padStart(3,'0')+'.png',ssim});
   }
-  const audio=[];
-  if(receipt.audioSources.length){const decoded=await pcm(video);
-    for(const source of receipt.audioSources){
+  const audio=[],voiceSources=receipt.audioSources.filter(source=>source.kind==='voice'||!source.kind&&source.assetId);
+  if(voiceSources.length){const decoded=await pcm(video);
+    for(const source of voiceSources){
       const input=await pcm(join(projectDirectory,project.assets[source.assetId].path)),offset=Math.round(source.start*4000),head=correlate(input,decoded,offset,0,16000),tail=correlate(input,decoded,offset,Math.max(0,input.length-8000),8000);
       assert.ok(head.correlation>.95&&tail.correlation>.95,'Audio content/tail correlation failed');assert.ok(Math.abs(head.lagSeconds)<=1/receipt.fps&&Math.abs(tail.lagSeconds)<=1/receipt.fps,'Audio lag exceeds one frame');
-      audio.push({...source,head,tail});
+      const continuous=continuousCorrelation(input,decoded,offset+head.lagSamples);
+      assert.ok(continuous.correlation>.97,'Complete narration correlation failed');
+      assert.ok(continuous.windows.every(w=>w.correlation>.90),'Narration interior correlation failed');
+      audio.push({...source,head,tail,continuous});
     }
   }
-  const report={status:'PASS',method:'Decode actual MP4; SSIM against rendered action/key frames; independent PCM cross-correlation against source audio',frames,audio,languageReview:'Requires transcript/audio content review; waveform matching alone does not identify language.'};
+  const report={status:'PASS',method:'Decode actual MP4; SSIM against rendered action/key frames; independent PCM cross-correlation of complete narration, including two-second non-silent interior windows. Generated effects and background tracks are reported separately from speech.',frames,audio,ambientSources:receipt.audioSources.filter(source=>source.kind&&source.kind!=='voice').length,loudness:receipt.validation.loudness??null,languageReview:'Requires transcript/audio content review; waveform matching alone does not identify language or prove that TTS spoke every source clause.'};
   await writeFile(join(directory,'decoded-validation.json'),JSON.stringify(report,null,2)+'\n');return report;
+}
+
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+  try{
+    assert.equal(process.argv.length,4,'Usage: node scripts/verify-media.mjs RENDER_DIRECTORY PROJECT_DIRECTORY');
+    console.log(JSON.stringify(await verifyMedia(resolve(process.argv[2]),resolve(process.argv[3]))));
+  }catch(error){console.error(JSON.stringify({status:'FAIL',message:error.message}));process.exitCode=1;}
 }

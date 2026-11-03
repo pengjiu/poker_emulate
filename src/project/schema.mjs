@@ -1,6 +1,12 @@
 import {check} from '../errors.mjs';
 import {loadState} from '../poker/rules.mjs';
 import {directionSchema} from '../direction/index.mjs';
+import {analysisSchema} from '../analysis/index.mjs';
+import {presentationSchema} from '../presentation.mjs';
+import {soundSchema,beatSoundSchema} from '../media/sound.mjs';
+import {variantSchema} from './variants.mjs';
+import {sessionSchema,continuitySchema} from './session.mjs';
+import {practiceSchema} from './practice.mjs';
 const object=(x,p)=>check(x&&typeof x==='object'&&!Array.isArray(x),'SCHEMA','Expected an object.',p);
 export function keys(value,allowed,path){object(value,path);for(const key of Object.keys(value))check(allowed.includes(key),'UNKNOWN_FIELD',`Unknown field: ${key}`,`${path}/${key}`,{allowed});}
 const string=(x,p)=>check(typeof x==='string'&&x.trim().length>0,'SCHEMA','Expected a nonempty string.',p);
@@ -32,11 +38,14 @@ export function outputSchema(output){
   check(typeof output.captions==='boolean','SCHEMA','captions must be boolean.','output/captions');
   if(output.sequence!==undefined&&output.sequence!==null){
     list(output.sequence,'output/sequence');check(output.sequence.length>0,'SEQUENCE','Provide at least one entry.','output/sequence');unique(output.sequence,'output/sequence');
-    for(const [i,entry]of output.sequence.entries()){const path='output/sequence/'+i;keys(entry,['id','sceneId','branchId'],path);string(entry.sceneId,path+'/sceneId');check(entry.branchId===undefined||entry.branchId===null||typeof entry.branchId==='string','SEQUENCE','Invalid branch ID.',path+'/branchId');}
+    for(const [i,entry]of output.sequence.entries()){const path='output/sequence/'+i;keys(entry,['id','sceneId','branchId','fromBeatId','toBeatId'],path);string(entry.sceneId,path+'/sceneId');check(entry.branchId===undefined||entry.branchId===null||typeof entry.branchId==='string','SEQUENCE','Invalid branch ID.',path+'/branchId');for(const key of ['fromBeatId','toBeatId'])if(entry[key]!==undefined)string(entry[key],path+'/'+key);}
   }
 }
 function beatSchema(beat,path){
-  keys(beat,['id','label','actions','hold','actionHold','narration','audio','view','delivery','timing','speaker','captionCues'],path);string(beat.id,path+'/id');
+  keys(beat,['id','label','actions','hold','actionHold','narration','audio','view','delivery','timing','speaker','captionCues','presentation','sound','rehearsalDuration'],path);string(beat.id,path+'/id');
+  if(beat.rehearsalDuration!==undefined){object(beat.rehearsalDuration,path+'/rehearsalDuration');for(const [locale,seconds]of Object.entries(beat.rehearsalDuration))check(Number.isFinite(seconds)&&seconds>.0&&seconds<=86400,'DURATION','Use a positive reading-time estimate of at most one day.',path+'/rehearsalDuration/'+locale);}
+  if(beat.sound!==undefined)beatSoundSchema(beat.sound,path+'/sound');
+  if(beat.presentation!==undefined)presentationSchema(beat.presentation,path+'/presentation');
   if(beat.speaker!==undefined)string(beat.speaker,path+'/speaker');
   if(beat.captionCues!==undefined){
     object(beat.captionCues,path+'/captionCues');
@@ -74,9 +83,12 @@ function beatSchema(beat,path){
   }}
 }
 export function sceneSchema(scene,path='scene'){
-  keys(scene,['id','title','start','beats','branches','appearance','direction'],path);string(scene.id,path+'/id');textMap(scene.title,path+'/title');
+  keys(scene,['id','title','start','beats','branches','appearance','direction','analysis','variant','continuity'],path);string(scene.id,path+'/id');textMap(scene.title,path+'/title');
+  if(scene.analysis!==undefined)analysisSchema(scene.analysis,path+'/analysis');
+  if(scene.variant!==undefined)variantSchema(scene.variant,path+'/variant');
+  if(scene.continuity!==undefined)continuitySchema(scene.continuity,path+'/continuity');
   if(scene.direction!==undefined)directionSchema(scene.direction,path+'/direction');
-  keys(scene.start,['street','board','button','hero','actor','bigBlind','lastFullRaise','actedAt','seats','roundClosed'],path+'/start');
+  keys(scene.start,['street','board','button','hero','actor','bigBlind','smallBlind','lastFullRaise','actedAt','seats','roundClosed','rake','unit','deadPot','antePaid','forcedBet','blindSeats'],path+'/start');
   const start=scene.start;
   list(start.seats,path+'/start/seats');for(const [i,seat]of start.seats.entries()){
     keys(seat,['id','name','stack','contributed','streetBet','folded','hole','avatar'],path+'/start/seats/'+i);
@@ -87,7 +99,7 @@ export function sceneSchema(scene,path='scene'){
     if(seat.avatar!==undefined)string(seat.avatar,path+'/start/seats/'+i+'/avatar');
   }
   if(start.board!==undefined)list(start.board,path+'/start/board');
-  for(const key of ['bigBlind','lastFullRaise'])if(start[key]!==undefined)finite(start[key],path+'/start/'+key);
+  for(const key of ['bigBlind','smallBlind','lastFullRaise'])if(start[key]!==undefined)finite(start[key],path+'/start/'+key);
   if(start.roundClosed!==undefined)check(typeof start.roundClosed==='boolean','SCHEMA','roundClosed must be boolean.',path+'/start/roundClosed');
   if(start.actedAt!==undefined){object(start.actedAt,path+'/start/actedAt');for(const [k,v]of Object.entries(start.actedAt))finite(v,path+'/start/actedAt/'+k);}
   try{loadState(start);}catch(error){error.path=path+'/start';throw error;}
@@ -102,17 +114,23 @@ export function sceneSchema(scene,path='scene'){
   if(scene.appearance!==undefined){keys(scene.appearance,['tableName','felt'],path+'/appearance');if(scene.appearance.tableName!==undefined)string(scene.appearance.tableName,path+'/appearance/tableName');if(scene.appearance.felt!==undefined)check(/^#[0-9a-f]{6}$/i.test(scene.appearance.felt),'SCHEMA','Use a six-digit hex color.',path+'/appearance/felt');}
 }
 export function projectSchema(project){
-  keys(project,['format','version','projectId','revision','lesson','output','assets','receipts','voice','direction'],'project');
+  keys(project,['format','version','projectId','revision','lesson','output','assets','receipts','voice','direction','sound','deliverables'],'project');
   check(project.format==='river.project'&&project.version===2,'SCHEMA_VERSION','Expected river.project version 2.','project/version');
   string(project.projectId,'project/projectId');check(Number.isSafeInteger(project.revision)&&project.revision>=0,'REVISION','Invalid revision.','project/revision');
-  keys(project.lesson,['scenes','title'],'lesson');list(project.lesson.scenes,'lesson/scenes');check(project.lesson.scenes.length>0,'EMPTY_PROJECT','Add a scene.','lesson/scenes');
+  keys(project.lesson,['scenes','title','course','session','practice'],'lesson');list(project.lesson.scenes,'lesson/scenes');check(project.lesson.scenes.length>0,'EMPTY_PROJECT','Add a scene.','lesson/scenes');
+  if(project.lesson.course!==undefined)courseSchema(project.lesson.course);
+  if(project.lesson.session!==undefined)sessionSchema(project.lesson.session);
+  if(project.lesson.practice!==undefined)practiceSchema(project.lesson.practice);
   if(project.lesson.title!==undefined)textMap(project.lesson.title,'lesson/title');
   unique(project.lesson.scenes,'lesson/scenes');project.lesson.scenes.forEach(s=>sceneSchema(s,'lesson/scenes/'+s.id));
+  for(const episode of project.lesson.course?.episodes??[])for(const sceneId of episode.sceneIds??[episode.sceneId])check(project.lesson.scenes.some(s=>s.id===sceneId),'SCENE_UNKNOWN','Course episode references an unknown scene.','lesson/course/episodes/'+episode.id+'/sceneId');
   outputSchema(project.output);check(project.lesson.scenes.some(s=>s.id===project.output.sceneId),'SCENE_UNKNOWN','Selected scene does not exist.','output/sceneId');
   const selected=project.lesson.scenes.find(s=>s.id===project.output.sceneId);
   check(project.output.branchId===null||selected.branches?.some(b=>b.id===project.output.branchId),'BRANCH_UNKNOWN','Selected branch does not exist.','output/branchId');
   for(const entry of project.output.sequence??[]){const scene=project.lesson.scenes.find(s=>s.id===entry.sceneId);check(scene,'SCENE_UNKNOWN','Sequence scene does not exist.','output/sequence/'+entry.id);check(!entry.branchId||scene.branches?.some(b=>b.id===entry.branchId),'BRANCH_UNKNOWN','Sequence branch does not exist.','output/sequence/'+entry.id);}
   if(project.direction!==undefined)directionSchema(project.direction);
+  if(project.sound!==undefined)soundSchema(project.sound);
+  if(project.deliverables!==undefined){list(project.deliverables,'deliverables');unique(project.deliverables,'deliverables');for(const [i,value]of project.deliverables.entries()){keys(value,['id','title','output'],'deliverables/'+i);textMap(value.title,'deliverables/'+i+'/title');outputSchema(value.output);for(const entry of value.output.sequence??[{sceneId:value.output.sceneId,branchId:value.output.branchId}]){const scene=project.lesson.scenes.find(s=>s.id===entry.sceneId);check(scene,'SCENE_UNKNOWN','Delivery refers to a missing scene.','deliverables/'+i);check(!entry.branchId||scene.branches?.some(b=>b.id===entry.branchId),'BRANCH_UNKNOWN','Delivery refers to a missing branch.','deliverables/'+i);}}}
   object(project.assets,'assets');for(const [id,a]of Object.entries(project.assets)){
     keys(a,['path','sha256','duration','bytes','mime'],'assets/'+id);
     check(id===a.sha256&&/^[a-f0-9]{64}$/.test(id),'ASSET_ID','Asset ID must be its SHA-256.','assets/'+id);
@@ -132,4 +150,17 @@ export function projectSchema(project){
     previousRevision=r.value.revision;outputSchema(r.value.output);
   }
   return project;
+}
+
+export function courseSchema(course,path='lesson/course'){
+  keys(course,['id','title','prerequisites','objectives','episodes','style','terminology','concepts'],path);string(course.id,path+'/id');textMap(course.title,path+'/title');
+  for(const key of ['prerequisites','objectives','style'])if(course[key]!==undefined)textMap(course[key],path+'/'+key);
+  for(const key of ['terminology','concepts'])if(course[key]!==undefined){list(course[key],path+'/'+key);unique(course[key],path+'/'+key);for(const [i,item]of course[key].entries()){const p=path+'/'+key+'/'+i;keys(item,key==='terminology'?['id','term','definition']:['id','description','conditions'],p);textMap(item[key==='terminology'?'term':'description'],p);for(const field of ['definition','conditions'])if(item[field]!==undefined)textMap(item[field],p+'/'+field);}}
+  list(course.episodes,path+'/episodes');unique(course.episodes,path+'/episodes');
+  for(const [i,episode]of course.episodes.entries()){
+    const p=path+'/episodes/'+i;keys(episode,['id','sceneId','sceneIds','objective','conditions','check','requires','introduces','recaps'],p);string(episode.sceneId,p+'/sceneId');textMap(episode.objective,p+'/objective');
+    if(episode.sceneIds!==undefined){list(episode.sceneIds,p+'/sceneIds');check(episode.sceneIds.length>0&&episode.sceneIds.includes(episode.sceneId)&&new Set(episode.sceneIds).size===episode.sceneIds.length,'COURSE_SCENES','Episode members must be distinct and contain its entry scene.',p+'/sceneIds');for(const id of episode.sceneIds)string(id,p+'/sceneIds');}
+    for(const key of ['conditions','check'])if(episode[key]!==undefined)textMap(episode[key],p+'/'+key);
+    for(const key of ['requires','introduces','recaps'])if(episode[key]!==undefined){list(episode[key],p+'/'+key);check(new Set(episode[key]).size===episode[key].length&&episode[key].every(id=>course.concepts?.some(c=>c.id===id)),'COURSE_CONCEPT','Use distinct declared concept IDs.',p+'/'+key);}
+  }
 }

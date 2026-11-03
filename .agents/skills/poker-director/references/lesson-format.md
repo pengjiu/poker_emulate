@@ -1,6 +1,8 @@
 # Project and scene format
 
-Canonical directory: project.json + assets/ + evidence/. Runtime creates `format:"river.project",version:2,projectId,revision,lesson:{scenes},output,assets,receipts`. Author one **scene** for init; edit through apply. All public amounts are BB with at most two decimal places. Internal rule arithmetic uses integer hundredths. Exported RenderPlan v2, observe and seek all expose BB, with state.unit="BB". RenderPlan v1 from development builds used internal amounts; re-export from the project instead of replaying old plans.
+Canonical directory: project.json + assets/ + evidence/. Runtime creates `format:"river.project",version:2,projectId,revision,lesson:{scenes},output,assets,receipts`. Author one **scene** for init; edit through apply. Public amounts use the declared denomination with at most two decimal places: legacy/default games use BB; tournament or changing blind levels use `start.unit:"chips"`. Internal rule arithmetic uses integer hundredths. RenderPlan v2, observe and seek expose public amounts and `state.unit`. RenderPlan v1 used internal amounts; re-export from its project.
+
+For automatic blind/ante setup, cash rake, continuous sessions, weighted analysis, cameras, practice and delivery versions, read [complete production](full-production.md). Optional `beat.rehearsalDuration:{locale:seconds}` estimates reading time while that language lacks audio; actual speech determines the final schedule.
 
 Minimal complete river scene (needs audio on decision to render):
 
@@ -44,7 +46,7 @@ Every beat has stable id and localized label. Beat IDs are unique across ALL mai
 
 An explanation beat does not create a new poker decision or reset a player clock. The client uses a static active-seat indicator and no simulated countdown. Keep one complete thought or meaningful action boundary per narrated beat; sentence-per-beat splitting is not required for captions.
 
-With captions enabled, long narration is paged over that audio's measured duration, preferring sentence/clause boundaries and assigning time proportional to text length. A sentence continuing on a later page is normal; one sampled frame cannot establish lost text. Check all pages across the narrated interval, their fit, and the full SRT against the narration. Timing is an estimate, not word alignment; SRT entries contain whole narrated beats. Shorter beats are useful at natural thought/pause boundaries; paragraphs and longer explanations remain supported.
+With captions enabled, long narration is paged over that audio's measured duration, preferring sentence/clause boundaries and assigning time proportional to text length. A sentence continuing on a later page is normal; one sampled frame cannot establish lost text. Check all pages across the narrated interval, their fit, and the full SRT against the narration. SRT uses the same pages and boundaries as the burned captions, including paging within long precise cues. Automatic timing is an estimate, not word alignment. Shorter beats are useful at natural thought/pause boundaries; paragraphs and longer explanations remain supported.
 
 When a future action, quiz answer or reveal must wait for its spoken moment, use **precise captions** after generating/attaching audio. Automatic paging can display later words in a paragraph early. Submit the whole narration split into ordered, non-overlapping cues through apply:
 
@@ -71,6 +73,12 @@ Runtime stores `beat.captionCues[locale]={audioHash,cues}` and binds it to the c
 Bet/raise to is total current-street commitment. legalActions gives min/max. Call/check/fold/allin have no amount field. Showdown needs river and closed betting; uncontested pots settle automatically on last opponent folding.
 
 branches:[{id,from,label,beats}] is one level. from names a main beat; prefix INCLUDES it, branch replaces continuation. Do not duplicate shared-prefix beats. Shared edits validate affected routes. Selected valid branches do not execute unused main tails; validate --all reports other routes separately.
+
+To continue an existing branch without changing it, give `branch.put` an optional `copyFrom:{branchId,beatId}` and a new `value.id`. Keep `value.from` equal to the source branch's main-line origin; `value.beats` contains only the new continuation. Runtime copies the source branch through the named beat, remaps copied beat IDs and their referenced analysis, and keeps main-line analysis shared. Copied IDs use `<new-branch-id>-<old-id>`; collisions reject the entire batch. Existing valid reviews survive a pure reference rename only when the decision fingerprint is unchanged. Stale/unreviewed analysis stays pending, and evidence hashes remain bound to the original bytes.
+
+```json
+{"type":"branch.put","sceneId":"river-example","copyFrom":{"branchId":"check-back","beatId":"cb"},"value":{"id":"check-back-copy","from":"decision","label":{"en-US":"Review this line"},"beats":[]}}
+```
 
 Beat view:{reveal:["oop"]} exposes those seats until a later cue; view:{reveal:[]} clears explicit reveals (normal showdown remains revealed). Presentation changes only. For first-person narration use player observation at that moment, director observation for authoring.
 
@@ -120,3 +128,5 @@ For timed narration, confirm the schedule **after** measuring the actual languag
 Entry IDs are unique and cannot contain `::`. Repetition is allowed; compiled IDs gain an entry prefix. Every frame includes sceneId, entryId and branchId. Seek with frameId, or beatId plus entryId; ambiguous repeated beats are rejected. Use narration to explain time jumps and counterfactuals while the client stays clean. `output.set` choosing sceneId or branchId exits sequence playback unless that same command supplies sequence. `sequence:null` also returns to one scene. Aspect, language and profile changes preserve the programme. Invocation overrides `--scene` or `--branch` inspect/render one route; default validation/render/voice process the programme. `validate --all` still audits each scene/branch/language separately.
 
 Optional beat.speaker labels a stable role for authoring and provenance; it is not shown on the clean table. Set its actual independent reference using scoped voice.set. Project direction is a frozen creative brief; scene.direction overrides it. Select, customize and review it through [narrative modes](narrative-modes.md); it never changes legal actions or invents narration.
+
+Optional scene analysis, beat presentation, condition variants and course records use the same manifest and compiler. Read [teaching canvas](teaching-canvas.md) for their reference, review and cue-binding contracts.

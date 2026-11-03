@@ -25,6 +25,7 @@ export function receiptFor(project,requestId,signature){
 }
 async function removeUnusedBrokenAssets(directory,project){
   const used=new Set(Object.values(project.voice??{}).map(p=>p.referenceAssetId));
+  if(project.sound?.bed)used.add(project.sound.bed.assetId);
   for(const scene of project.lesson.scenes)for(const beat of [...scene.beats,...(scene.branches??[]).flatMap(b=>b.beats)]){for(const audio of Object.values(beat.audio??{}))used.add(audio.assetId);for(const settings of Object.values(beat.delivery??{}))used.add(settings.referenceAssetId);}
   for(const [id,asset]of Object.entries(project.assets))if(!used.has(id)){
     try{if(hash(await readFile(resolve(directory,asset.path)))===asset.sha256)continue;}

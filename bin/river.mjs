@@ -4,8 +4,8 @@ import {createInterface} from 'node:readline';
 import {doctor} from '../src/doctor.mjs';
 import {errorJSON,check,fail} from '../src/errors.mjs';
 
-const specs={doctor:['json'],init:['scene','project','locale','aspect','profile'],migrate:['lesson','project','locale','aspect','profile','scene','branch'],inspect:['project','view','beat'],validate:['project','locale','aspect','profile','scene','branch','all','render'],session:['project'],render:['project','locale','aspect','profile','scene','branch','out','timeout'],serve:['project','port'],help:[]};
-const booleans=['json','all','render'];
+const specs={doctor:['json'],init:['scene','project','locale','aspect','profile'],migrate:['lesson','project','locale','aspect','profile','scene','branch'],inspect:['project','view','beat'],validate:['project','locale','aspect','profile','scene','branch','all','render'],session:['project'],render:['project','locale','aspect','profile','scene','branch','out','timeout','rehearsal'],produce:['project','out','rehearsal','only'],serve:['project','port'],help:[]};
+const booleans=['json','all','render','rehearsal'];
 const report=x=>console.log(JSON.stringify(x));
 try{
   const [command='help',...args]=process.argv.slice(2),allowed=specs[command];check(allowed,'COMMAND','Unknown command.','command',{allowed:Object.keys(specs)});
@@ -25,7 +25,10 @@ try{
     required('lesson','project');const store=await migrateLegacy(opts.lesson,opts.project,output());report({ok:true,project:store.directory});
   }else if(command==='render'){
     required('project');const {renderVideo}=await import('../src/media/render.mjs');const controller=new AbortController();const abort=()=>controller.abort();process.once('SIGINT',abort);process.once('SIGTERM',abort);
-    try{report({ok:true,...await renderVideo(opts.project,{output:output(),out:opts.out,timeoutSeconds:opts.timeout?Number(opts.timeout):undefined,signal:controller.signal,onProgress:p=>process.stderr.write(JSON.stringify(p)+'\n')})});}finally{process.removeListener('SIGINT',abort);process.removeListener('SIGTERM',abort);}
+    try{report({ok:true,...await renderVideo(opts.project,{output:output(),out:opts.out,rehearsal:!!opts.rehearsal,timeoutSeconds:opts.timeout?Number(opts.timeout):undefined,signal:controller.signal,onProgress:p=>process.stderr.write(JSON.stringify(p)+'\n')})});}finally{process.removeListener('SIGINT',abort);process.removeListener('SIGTERM',abort);}
+  }else if(command==='produce'){
+    required('project','out');const {produce}=await import('../src/media/produce.mjs'),controller=new AbortController(),abort=()=>controller.abort();process.once('SIGINT',abort);process.once('SIGTERM',abort);
+    try{report({ok:true,...await produce(opts.project,{out:opts.out,rehearsal:!!opts.rehearsal,only:opts.only?.split(','),signal:controller.signal,onProgress:p=>process.stderr.write(JSON.stringify(p)+'\n')})});}finally{process.removeListener('SIGINT',abort);process.removeListener('SIGTERM',abort);}
   }else if(command==='validate'){
     const {ProjectStore}=await import('../src/project/store.mjs'),{validateProject}=await import('../src/compiler.mjs'),{localePacks}=await import('../src/locales.mjs');
     required('project');const store=new ProjectStore(opts.project),result=await validateProject(await store.read(),await localePacks(),{directory:store.directory,output:output(),media:!!opts.render,all:!!opts.all});report(result);if(!result.ready)process.exitCode=1;

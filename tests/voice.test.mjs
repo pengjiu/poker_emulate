@@ -72,6 +72,14 @@ test('Voice cancel reports completion once the manifest has been committed',asyn
   assert.equal((await d.voice({action:'cancel'})).cancelled,false);assert.equal((await store.read()).revision,1);resume();await pending;assert.equal(d.speech.job.status,'complete');
 });
 
+test('An unexpectedly terminated voice worker retains its exit signal without changing the project',async t=>{
+  await controlledEngine(t);process.env.RIVER_TEST_VOICE_MODE='signal';const store=await stored(t,{locale:'zh-CN'}),d=await Director.open(store.directory),before=await store.read();
+  await assert.rejects(d.voice({action:'generate',requestId:'unexpected-signal',expectedRevision:before.revision}),e=>e.code==='VOICE_FAILED'&&e.detail?.process?.signal==='SIGKILL'&&e.detail.process.exitCode===null);
+  assert.deepEqual(await store.read(),before);
+  const files=await readdir(join(store.directory,'evidence/voice')),file=files.find(f=>f.startsWith('failed-')&&f.endsWith('.json'));assert.ok(file);
+  const diagnostic=JSON.parse(await readFile(join(store.directory,'evidence/voice',file),'utf8'));assert.equal(diagnostic.error.process.signal,'SIGKILL');
+});
+
 test('A completed voice receipt remains replayable during an unrelated active generation',async t=>{
   await controlledEngine(t);const store=await stored(t,{locale:'en-US'}),d=await Director.open(store.directory),params={action:'generate',requestId:'completed-A',expectedRevision:0};
   const original=await d.voice(params);process.env.RIVER_TEST_VOICE_DELAY='400';const pending=d.voice({action:'generate',requestId:'active-B',expectedRevision:1,force:true});await waitFor(()=>d.speech.job?.phase==='synthesizing');

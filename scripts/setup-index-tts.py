@@ -20,6 +20,16 @@ REPOS = {
     'nvidia/bigvgan_v2_22khz_80band_256x': '633ff708ed5b74903e86ff1298cf4a98e921c513',
 }
 
+def warm_normalizer(home, python):
+    # The official normalizer builds FST caches on first use. Do that before
+    # loading the speech weights: compiling both together exceeds an 8 GiB CPU
+    # host even though steady-state synthesis fits. Upstream code is unchanged.
+    print(json.dumps({'phase': 'normalizer-cache'}), flush=True)
+    subprocess.run([str(python), '-c',
+                    'from indextts.utils.front import TextNormalizer; '
+                    'normalizer = TextNormalizer(enable_glossary=True); normalizer.load()'],
+                   cwd=home, check=True, timeout=300)
+
 def install_models(home, source):
     from huggingface_hub import HfApi, hf_hub_download
     mapping = {'facebook/w2v-bert-2.0': 'AI-ModelScope/w2v-bert-2.0', 'funasr/campplus': 'iic/speech_campplus_sv_zh-cn_16k-common'}
@@ -101,9 +111,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--home', default=os.environ.get('RIVER_INDEXTTS_HOME', str(ROOT / '.river/index-tts')))
     parser.add_argument('--models-only', action='store_true', help=argparse.SUPPRESS)
+    parser.add_argument('--warmup-only', action='store_true', help='Prepare official text-normalizer caches in an already installed environment.')
     parser.add_argument('--source', choices=['auto', 'huggingface', 'modelscope'], default='auto')
     args = parser.parse_args()
     home = Path(args.home).resolve()
+    python = home / '.venv' / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
+    if args.warmup_only:
+        warm_normalizer(home, python)
+        return
     if args.models_only:
         install_models(home, args.source)
         return
@@ -128,7 +143,7 @@ def main():
     if pinned['commit'] != COMMIT:
         raise RuntimeError('Installed engine revision differs; use a new --home for this version.')
     subprocess.run(['uv', 'sync', '--project', str(home), '--no-dev', '--locked'], check=True)
-    python = home / '.venv' / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
+    warm_normalizer(home, python)
     subprocess.run([str(python), str(Path(__file__).resolve()), '--home', str(home), '--source', args.source, '--models-only'], check=True)
 
 if __name__ == '__main__':
