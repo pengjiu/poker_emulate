@@ -91,7 +91,7 @@ Beat view:{reveal:["oop"]} exposes those seats until a later cue; view:{reveal:[
 {"type":"audio.attach","sceneId":"river-example","beatId":"decision","value":{"locale":"en-US","source":{"path":"/absolute/voice.wav"}}}
 ```
 
-scene.put has `{type:"scene.put",value:<whole scene>}`. It replaces/creates a scene, validating dependent actions and branches in one batch. Include all interdependent changes. Scene IDs are unique project-wide; branch IDs unique within scene.
+scene.put has `{type:"scene.put",value:<whole scene>}`. It replaces/creates a scene, validating dependent actions and branches in one batch. Include all interdependent changes. Scene IDs are unique project-wide; branch IDs unique within scene. For later narration, voice or presentation edits, prefer their targeted commands. When replacing a whole scene, start from its current public export and retain unchanged runtime-owned fields; rebuilding from the initial scene input can discard generated audio and reviewed timing.
 
 Audio source accepts exactly one local path or data URL (`{data:"data:audio/wav;base64,..."}`). WAV/MP3/M4A/AAC/OGG/FLAC/AIFF, max256MiB local, browser request max32MiB. Runtime probes duration, copies content-addressed file and creates `{assetId,locale,textHash}`. Never manually populate audio references or temporary absolute paths in the manifest.
 

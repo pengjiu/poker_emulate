@@ -64,7 +64,7 @@ test('custom small blinds survive play, rendering and an implicit next session l
   const start=createHand({seats:[{id:'hero',stack:100},{id:'other',stack:100}],button:'hero',bigBlind:3,smallBlind:1});
   assert.equal(start.smallBlind,1);assert.equal(displayState(observe(loadState(start))).smallBlind,1);
   const scene={id:'first',title:words('1/3 game'),start,beats:[{id:'start',label:words('Start')},{id:'fold',label:words('Fold'),actions:[{seat:'hero',type:'fold'}]}]},p=newProject({scenes:[scene]});
-  const plan=compileProject(p,packs);assert.match(renderFrame(plan,0),/1\.00 \/ 3\.00/);assert.doesNotMatch(renderFrame(plan,0),/1\.50 \/ 3\.00/);
+  const plan=compileProject(p,packs);assert.match(renderFrame(plan,0),/1 \/ 3/);assert.doesNotMatch(renderFrame(plan,0),/1\.5 \/ 3/);
   const next=continueSession(p,{sourceSceneId:'first',id:'next',title:words('Next')});
   assert.equal(next.scene.start.smallBlind,1);assert.equal(next.scene.continuity.level.smallBlind,1);
   assert.equal(next.scene.start.seats.find(s=>s.id===next.scene.start.blindSeats.smallBlindSeat).streetBet,1);

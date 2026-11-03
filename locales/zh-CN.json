@@ -149,7 +149,7 @@
     "voiceEmotionVector": "八维情绪",
     "voicePreparing": "准备中",
     "voiceSaving": "正在保存音频",
-    "voiceOnlyBeat": "仅本段的语速与表达",
+    "voiceOnlyBeat": "仅本段的声音与表达",
     "directionTitle": "讲解模式",
     "directionNone": "自由创作",
     "directionPattern": "选择模式",
@@ -211,7 +211,15 @@
     "teachingAuthorProvided": "作者提供",
     "teachingReplayPause": "回看决定",
     "teachingReplayContext": "回看的局面不改动主线牌局",
-    "teachingAdvisories": "编辑建议"
+    "teachingAdvisories": "编辑建议",
+    "voicePreset": "参考声线",
+    "voiceKeepReference": "保留当前参考",
+    "voicePresetUnavailable": "参考未安装",
+    "voicePresetHelp": "可试听官方原始参考；保存或生成时应用所选声线，生成后试听实际旁白。",
+    "voiceExportChoice": "导出旁白声线",
+    "voiceKeepNarration": "保留当前旁白",
+    "voiceExportHelp": "选择声线后，先用 IndexTTS 重新生成旁白，再导出；独立片段的参考覆盖会保留。新的语音需重新核对字幕与动作时点。",
+    "voiceExportGenerating": "正在生成导出旁白"
   },
   "errors": {
     "default": "请检查场景设置、所选语言和牌局动作。",
@@ -274,6 +282,9 @@
     "EVIDENCE_MISSING": "无法读取引用的依据文件，请恢复文件后再确认。",
     "EVIDENCE_UNBOUND": "请确认分析以绑定当前依据文件。",
     "EVIDENCE_CHANGED": "依据文件已变化，请复核结论并重新确认分析。",
-    "COURSE_ORDER_REVIEW": "节目顺序与课程约定不同，请复核先修内容、重复讲解和答案揭晓顺序。"
+    "COURSE_ORDER_REVIEW": "节目顺序与课程约定不同，请复核先修内容、重复讲解和答案揭晓顺序。",
+    "VOICE_PRESET_UNKNOWN": "找不到这个官方参考声线，请重新选择。",
+    "VOICE_PRESET_MISSING": "请先安装官方参考样本；可仅补装声线，无需重新下载模型。",
+    "VOICE_PRESET_CHANGED": "参考音频与固定版本不符，请重新安装官方参考样本。"
   }
 }

@@ -14,8 +14,10 @@
 .output-frame{position:relative;width:100%;height:100%;container-type:inline-size;background:#0d131a;overflow:hidden}
 .game-surface{position:absolute;inset:0;transform:scale(.86);transform-origin:50% 0}
 .game-surface .client{width:100%;height:100%}
-.caption-lane{position:absolute;bottom:2%;height:11%;left:6%;right:6%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:max(14px,1.45cqw);line-height:1.5;overflow:hidden;color:#e7edf4}
-.output-frame.portrait .caption-lane{font-size:max(14px,3.2cqw)}
+.caption-lane{position:absolute;bottom:2.5%;height:12%;left:10%;right:10%;display:flex;align-items:center;justify-content:center;text-align:center;font-family:"PingFang SC","Hiragino Sans","Noto Sans CJK SC","Microsoft YaHei",sans-serif;font-size:2.25cqw;font-weight:500;line-height:1.4;letter-spacing:.015em;color:#f7f8fa}
+.caption-text{max-inline-size:26em;text-wrap:balance;line-break:strict;word-break:normal;overflow-wrap:anywhere;paint-order:stroke fill;-webkit-text-stroke:.065em #081016e8;text-shadow:0 .055em .14em #000c}
+.output-frame.portrait .caption-lane{bottom:3%;height:11%;left:6%;right:6%;font-size:4.3cqw;line-height:1.4}
+.output-frame.portrait .caption-text{max-inline-size:20em}
 .output-frame.portrait .seat-action{font-size:max(14px,2.4cqw)}
 .client.portrait .seat-action{font-size:max(12px,2.4cqw)}
 .client.portrait .seat.hero .seat-action{font-size:max(12px,2.3cqw)}
@@ -37,7 +39,6 @@
 .client.portrait .pots-list span{padding:.25cqw .8cqw}
 .client.portrait .seat-action,.client.portrait .seat.hero .seat-action{font-size:3.9cqw}
 .client.portrait .seat.hero .seat-action{top:calc(100% + .5cqw);left:50%;transform:translateX(-50%)}
-.output-frame.portrait .caption-lane{font-size:3.8cqw}
 .client.portrait .pots-list.many{width:46cqw;margin-left:auto;margin-right:auto;font-size:3.9cqw}
 .client.portrait .pots-list.many span{white-space:nowrap}
 

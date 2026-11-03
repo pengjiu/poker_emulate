@@ -149,7 +149,7 @@
     "voiceEmotionVector": "8種類の感情",
     "voicePreparing": "準備中",
     "voiceSaving": "音声を保存中",
-    "voiceOnlyBeat": "この場面だけの話し方",
+    "voiceOnlyBeat": "この場面だけの声と話し方",
     "directionTitle": "解説モード",
     "directionNone": "自由制作",
     "directionPattern": "モードを選択",
@@ -211,7 +211,15 @@
     "teachingAuthorProvided": "作者提供",
     "teachingReplayPause": "判断を振り返る",
     "teachingReplayContext": "振り返りはメインのハンドを変更しません",
-    "teachingAdvisories": "編集上の確認"
+    "teachingAdvisories": "編集上の確認",
+    "voicePreset": "参照ボイス",
+    "voiceKeepReference": "現在の参照を保持",
+    "voicePresetUnavailable": "参照未導入",
+    "voicePresetHelp": "公式の参照音声を試聴できます。保存または生成で選択した声を適用し、生成後にナレーションを確認します。",
+    "voiceExportChoice": "書き出し用ナレーション",
+    "voiceKeepNarration": "現在のナレーションを保持",
+    "voiceExportHelp": "選択した声でIndexTTSの音声を再生成してから書き出します。場面ごとの話者設定は保持します。新しい音声で字幕と動作時刻を再確認してください。",
+    "voiceExportGenerating": "書き出し用音声を生成中"
   },
   "errors": {
     "default": "局面、選択した言語、アクションを確認してください。",
@@ -274,6 +282,9 @@
     "EVIDENCE_MISSING": "根拠ファイルを読み取れません。復元後に確認してください。",
     "EVIDENCE_UNBOUND": "分析を確認して現在の根拠ファイルを紐付けてください。",
     "EVIDENCE_CHANGED": "根拠ファイルが変更されました。結論を再確認してください。",
-    "COURSE_ORDER_REVIEW": "再生順がコースの構成と異なります。前提知識、重複、答えの提示順を再確認してください。"
+    "COURSE_ORDER_REVIEW": "再生順がコースの構成と異なります。前提知識、重複、答えの提示順を再確認してください。",
+    "VOICE_PRESET_UNKNOWN": "公式参照ボイスが見つかりません。一覧から選んでください。",
+    "VOICE_PRESET_MISSING": "公式参照サンプルを導入してください。モデルを再取得せず参照だけを追加できます。",
+    "VOICE_PRESET_CHANGED": "参照音声が固定版と一致しません。公式サンプルを再導入してください。"
   }
 }

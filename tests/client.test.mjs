@@ -5,12 +5,39 @@ import {pathToFileURL} from 'node:url';
 import {chromium} from 'playwright';
 import {build} from '../scripts/build.mjs';
 import {compileProject} from '../src/compiler.mjs';
-import {betPreset} from '../src/client/render.mjs';
+import {betPreset,subtitleCues} from '../src/client/render.mjs';
 import {fixture,packs,words} from './helpers.mjs';
 
 test('Raise presets size the raise after accounting for the call',()=>{
   const state={pot:20,seats:[{streetBet:0},{streetBet:5}],legalActions:[{type:'call',amount:5},{type:'raise',minTo:10,maxTo:50}]};
   assert.equal(betPreset(state,.5),17.5);assert.equal(betPreset(state,1),30);assert.equal(betPreset(state,'all'),50);assert.equal(betPreset(state,2),50);assert.equal(betPreset(state,'invalid'),null);assert.equal(betPreset({...state,legalActions:[]},.5),null);
+});
+
+test('Localized captions fit two comfortable lines in both full-resolution deliveries',async t=>{
+  await build();const browser=await chromium.launch({headless:true});t.after(()=>browser.close());const page=await browser.newPage();
+  await page.goto(pathToFileURL(resolve('dist/client.html')).href);await page.waitForFunction(()=>window.__riverReady);
+  const passages={
+    'zh-CN':'先看这枪的价格，再看我们能赢哪些牌。跟完底池是18.1BB，门槛大约24.86%。位置不变，换个下注尺度，决定就可能不同。',
+    'en-US':'First look at the price, then at the hands we can beat. Calling makes the pot 18.1BB and requires about 24.86% equity. A different bet size can change our decision.',
+    'ja-JP':'まずコールの価格を見て、勝てるハンドを考えます。コール後のポットは18.1BB、必要な勝率は約24.86%です。ベットサイズが変われば、判断も変わります。'
+  };
+  for(const aspect of ['landscape','portrait'])for(const [locale,text]of [...Object.entries(passages),['en-US','W'.repeat(72)],['en-US','GAMMA '.repeat(20)]]){
+    await page.setViewportSize(aspect==='portrait'?{width:1080,height:1920}:{width:1920,height:1080});
+    const plan=compileProject(fixture({sceneId:'button-vs-blind',locale,aspect,captions:true,profile:'final'}),packs),frame=structuredClone(plan.frames[0]);
+    Object.assign(frame,{start:0,duration:20,startFrame:0,endFrame:600,narration:text,narrationStart:0,narrationDuration:20,audio:{duration:20},captionCues:null});plan.frames=[frame];plan.totalFrames=600;
+    await page.evaluate(p=>window.riverFrame.load(p),plan);await page.evaluate(()=>document.fonts.ready);
+    for(const cue of subtitleCues(plan)){
+      await page.evaluate(i=>window.riverFrame.render(i),Math.floor((cue.start+cue.end)/2*plan.fps));
+      const geometry=await page.locator('.caption-text').evaluate(el=>{
+        const r=el.getBoundingClientRect(),lane=el.parentElement.getBoundingClientRect(),style=getComputedStyle(el);
+        const overlaps=[...document.querySelectorAll('.game-surface .card,.game-surface .action-buttons')].some(other=>{const b=other.getBoundingClientRect();return r.left<b.right&&r.right>b.left&&r.top<b.bottom&&r.bottom>b.top;});
+        return {font:parseFloat(style.fontSize),height:r.height,line:parseFloat(style.lineHeight),fits:r.left>=lane.left-1&&r.right<=lane.right+1&&r.top>=lane.top-1&&r.bottom<=lane.bottom+1,overlaps};
+      });
+      assert.ok(geometry.font>=40,`${aspect}/${locale}: subtitles are too small`);
+      assert.ok(geometry.height<=2*geometry.line+2,`${aspect}/${locale}: more than two lines`);
+      assert.ok(geometry.fits,`${aspect}/${locale}: caption escapes its safe lane`);assert.equal(geometry.overlaps,false,`${aspect}/${locale}: caption covers cards or actions`);
+    }
+  }
 });
 
 test('Dealer marker stays inside the client for every button position at2–9 seats',async t=>{

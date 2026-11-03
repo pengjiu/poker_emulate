@@ -1,0 +1,36 @@
+{
+  "repository": "IndexTeam/IndexTTS-2-Demo",
+  "revision": "b01840e8e4fd9753743a6d0466cd73ae1d634a68",
+  "presets": [
+    {
+      "id": "official-01",
+      "name": {
+        "zh-CN": "官方参考 01",
+        "en-US": "Official reference 01",
+        "ja-JP": "公式参照 01"
+      },
+      "file": "examples/voice_01.wav",
+      "sha256": "e33e6ee0107a1dd58e1d66dd90c13df3d55a8683047cc3d7ea206dad84ed3fc8"
+    },
+    {
+      "id": "official-04",
+      "name": {
+        "zh-CN": "官方参考 04",
+        "en-US": "Official reference 04",
+        "ja-JP": "公式参照 04"
+      },
+      "file": "examples/voice_04.wav",
+      "sha256": "2a3d2536245f45fd5e1eef046dd768ae7b72a0dba3ec3f370f145862fe64b3b2"
+    },
+    {
+      "id": "official-06",
+      "name": {
+        "zh-CN": "官方参考 06",
+        "en-US": "Official reference 06",
+        "ja-JP": "公式参照 06"
+      },
+      "file": "examples/voice_06.wav",
+      "sha256": "2d85800fe261d106c3274fa792cbb952458c4b0b2e1b908340a8cd0d63c73a30"
+    }
+  ]
+}

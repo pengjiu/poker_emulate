@@ -37,7 +37,7 @@ export function betPreset(state,size){
 export function clientMarkup(plan,frame,time,options={}){
   const editing=!!options.editing,captions=options.captions??plan.captions,betDraft=options.betDraft??null;
   const t=key=>plan.dictionary.strings[key]??key;
-  const fmt=n=>new Intl.NumberFormat(plan.locale,Math.abs(n)>=10000?{notation:'compact',maximumFractionDigits:2}:{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+  const fmt=n=>new Intl.NumberFormat(plan.locale,Math.abs(n)>=10000?{notation:'compact',maximumFractionDigits:2}:{maximumFractionDigits:2}).format(n);
   const compact=n=>new Intl.NumberFormat(plan.locale,{notation:Math.abs(n)>=10000?'compact':'standard',maximumFractionDigits:2}).format(n);
   const visualStart=frame.stateStart??frame.start,visualEvent=frame.stateEvent??frame.event;
   const s=frame.state,portrait=plan.aspect==='portrait',heroIndex=s.seats.findIndex(p=>p.id===s.hero),focus=options.focus??[];
@@ -113,15 +113,29 @@ export function narrationAt(plan,index){
   const start=frame.narrationStart??frame.start,duration=frame.narrationDuration??frame.audio?.duration??frame.duration,elapsed=(index-Math.round(start*plan.fps))/plan.fps;
   return elapsed>=0&&elapsed<duration?{id:frame.narrationId??frame.id,text:frame.narration,start,duration,elapsed,audio:frame.audio,captionCues:frame.captionCues??null}:null;
 }
-const captionWeight=text=>[...text].reduce((n,c)=>n+(/[^\x00-\x7F]/u.test(c)?2:1),0);
+const captionWeight=text=>[...text].reduce((n,c)=>n+(/[^\x00-\x7F]|[MW@%]/u.test(c)?2:/[A-Z0-9mw]/u.test(c)?1.5:1),0);
+const captionWords=new Intl.Segmenter(undefined,{granularity:'word'});
+const wordPieces=text=>[...captionWords.segment(text)].map(part=>part.segment);
 export function captionSegments(text,portrait){
-  const limit=portrait?72:200,segments=[];let chunk='',weight=0;
+  const limit=portrait?60:72,segments=[];let chunk='',weight=0;
   // Keep sentences/clauses intact when they fit, then fall back to words/characters.
   const units=text.split(/(?<=[。！？!?])/u).flatMap(sentence=>captionWeight(sentence)<=limit?[sentence]:sentence.split(/(?<=[，,；;：:])/u).flatMap(clause=>captionWeight(clause)<=limit?[clause]:(clause.match(/\S+\s*|\s+/gu)??[])));
   for(const part of units){
-    const pieces=captionWeight(part)>limit?[...part]:[part];
-    for(const piece of pieces){const length=captionWeight(piece);if(weight+length>limit&&chunk.trim()){segments.push(chunk.trim());chunk='';weight=0;}chunk+=piece;weight+=length;}
-  }if(chunk.trim())segments.push(chunk.trim());return segments;
+    const pieces=captionWeight(part)>limit?wordPieces(part).flatMap(word=>captionWeight(word)>limit?[...word]:[word]):[part];
+    for(const piece of pieces){const length=captionWeight(piece),closing=/^[，。！？；：、,.!?;:%％)）\]】]/u.test(piece);if(weight+length>limit&&chunk.trim()&&!closing){segments.push(chunk);chunk='';weight=0;}chunk+=piece;weight+=length;}
+  }if(chunk.trim())segments.push(chunk);
+  // Balance a short final tail instead of flashing an isolated word or number.
+  if(segments.length>1&&captionWeight(segments.at(-1))<limit/4){
+    const combined=segments.slice(-2).join(''),tokens=wordPieces(combined),total=captionWeight(combined);let left='',best=null;
+    for(let i=0;i<tokens.length-1;i++){
+      left+=tokens[i];const right=tokens.slice(i+1).join(''),a=captionWeight(left),b=total-a;
+      if(!left.trim()||!right.trim()||/^[，。！？；：、,.!?;:%％)）\]】]/u.test(right.trim())||Math.max(a,b)>limit+2)continue;
+      const score=Math.abs(a-b)-(/[，。！？；,.!?;]$/u.test(left.trim())?limit/10:0);
+      if(!best||score<best.score)best={left:left.trim(),right:right.trim(),score};
+    }
+    if(best)segments.splice(-2,2,best.left,best.right);
+  }
+  return segments.map(segment=>segment.trim());
 }
 export function captionPages(text,portrait){
   const segments=captionSegments(text,portrait),weights=segments.map(captionWeight),total=weights.reduce((n,w)=>n+w,0);let offset=0;
@@ -214,7 +228,7 @@ export function renderFrame(plan,index,options={}){
   const cue=narrationAt(plan,i),elapsed=cue?.elapsed??0,explicit=cue?.captionCues?.find(c=>elapsed>=c.start&&elapsed<c.end);
   const passage=cue?.captionCues?(explicit?{text:explicit.text,elapsed:elapsed-explicit.start,duration:explicit.end-explicit.start}:null):cue?{text:cue.text,elapsed,duration:cue.duration}:null;
   const text=passage?captionPages(passage.text,plan.aspect==='portrait').find(p=>passage.elapsed/passage.duration<p.endFraction)?.text??'':'';
-  return mark(`<div class="output-frame captions-on ${plan.aspect}"><div class="game-surface">${markup}</div><div class="caption-lane">${esc(text)}</div></div>`);
+  return mark(`<div class="output-frame captions-on ${plan.aspect}"><div class="game-surface">${markup}</div><div class="caption-lane">${text?`<span class="caption-text">${esc(text)}</span>`:''}</div></div>`);
 }
 
 /** Deterministic layout from this frame's actual semantic objects, shared by preview/export. */

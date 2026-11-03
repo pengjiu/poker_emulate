@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import subprocess
 import tarfile
+import tempfile
 import time
 import urllib.request
 
@@ -19,6 +20,37 @@ REPOS = {
     'funasr/campplus': 'e4b6ede7ce16997aff4ae69fbca1f0175e2afede',
     'nvidia/bigvgan_v2_22khz_80band_256x': '633ff708ed5b74903e86ff1298cf4a98e921c513',
 }
+REFERENCES = json.loads((ROOT / 'src/media/voice-presets.json').read_text())
+
+def install_references(home):
+    """Install only the pinned official speaker prompts; never load the model."""
+    rows = []
+    for preset in REFERENCES['presets']:
+        path = home / preset['file']
+        url = (f'https://huggingface.co/spaces/{REFERENCES["repository"]}/resolve/'
+               f'{REFERENCES["revision"]}/{preset["file"]}')
+        verified = (path.is_file() and 0 < path.stat().st_size <= 16 * 1024 * 1024
+                    and hashlib.sha256(path.read_bytes()).hexdigest() == preset['sha256'])
+        if not verified:
+            with urllib.request.urlopen(url, timeout=60) as response:
+                data = response.read(16 * 1024 * 1024 + 1)
+            if len(data) > 16 * 1024 * 1024 or hashlib.sha256(data).hexdigest() != preset['sha256']:
+                raise RuntimeError('Reference differs from pinned official content: ' + preset['id'])
+            path.parent.mkdir(parents=True, exist_ok=True)
+            temporary = None
+            try:
+                with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as file:
+                    temporary = Path(file.name)
+                    file.write(data)
+                os.replace(temporary, path)
+            finally:
+                if temporary and temporary.exists():
+                    temporary.unlink()
+        row = {'id': preset['id'], 'source': url, 'revision': REFERENCES['revision'],
+               'file': preset['file'], 'sha256': preset['sha256']}
+        rows.append(row)
+        print(json.dumps({'reference': preset['id'], 'bytes': path.stat().st_size, 'verified': True}), flush=True)
+    return rows
 
 def warm_normalizer(home, python):
     # The official normalizer builds FST caches on first use. Do that before
@@ -96,26 +128,31 @@ def install_models(home, source):
                 'sha256': expected.lfs.sha256 if expected.lfs else None, 'gitBlob': expected.blob_id, 'source': used}
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
         files = list(pool.map(get, tasks))
-    sample = home / 'examples/voice_04.wav'
-    sample.parent.mkdir(parents=True, exist_ok=True)
-    url = 'https://huggingface.co/spaces/IndexTeam/IndexTTS-2-Demo/resolve/main/examples/voice_04.wav'
-    if not sample.exists():
-        with urllib.request.urlopen(url, timeout=60) as response:
-            sample.write_bytes(response.read())
+    references = install_references(home)
     record = {'engine': 'IndexTTS-2.5', 'upstreamCommit': COMMIT, 'modelRevisions': REPOS, 'files': files,
-              'reference': {'source': url, 'sha256': hashlib.sha256(sample.read_bytes()).hexdigest()}}
+              'references': references, 'reference': next(row for row in references if row['id'] == 'official-04')}
     (home / '.river-install.json').write_text(json.dumps(record, indent=2) + '\n')
     print(json.dumps({'status': 'installed', 'modelBytes': sum(r['bytes'] for r in files)}), flush=True)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--home', default=os.environ.get('RIVER_INDEXTTS_HOME', str(ROOT / '.river/index-tts')))
-    parser.add_argument('--models-only', action='store_true', help=argparse.SUPPRESS)
-    parser.add_argument('--warmup-only', action='store_true', help='Prepare official text-normalizer caches in an already installed environment.')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--models-only', action='store_true', help=argparse.SUPPRESS)
+    mode.add_argument('--warmup-only', action='store_true', help='Prepare official text-normalizer caches in an already installed environment.')
+    mode.add_argument('--references-only', action='store_true', help='Install or repair the three official voice references without downloading models or preparing Python.')
     parser.add_argument('--source', choices=['auto', 'huggingface', 'modelscope'], default='auto')
     args = parser.parse_args()
     home = Path(args.home).resolve()
     python = home / '.venv' / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
+    if args.references_only:
+        references = install_references(home)
+        record_path = home / '.river-install.json'
+        record = json.loads(record_path.read_text()) if record_path.exists() else {'engine': 'IndexTTS-2.5'}
+        record['references'] = references
+        record['reference'] = next(row for row in references if row['id'] == 'official-04')
+        record_path.write_text(json.dumps(record, indent=2) + '\n')
+        return
     if args.warmup_only:
         warm_normalizer(home, python)
         return

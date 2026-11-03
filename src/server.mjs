@@ -17,16 +17,17 @@ import {keys} from './project/schema.mjs';
 import {check,errorJSON,fail} from './errors.mjs';
 import {hash,id} from './util.mjs';
 import {patterns} from './direction/index.mjs';
+import {readVoicePreset,voicePresetDefinition} from './media/voice.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)),exec=promisify(execFile);
 const types={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css','.json':'application/json','.mp4':'video/mp4','.wav':'audio/wav','.mp3':'audio/mpeg','.m4a':'audio/mp4','.png':'image/png','.srt':'text/plain','.gz':'application/gzip'};
-async function fileResponse(req,res,path,download){
-  const info=await stat(path);check(info.isFile(),'FILE','File not found.');let start=0,end=info.size-1,status=200;
+async function fileResponse(req,res,path,download,bytes){
+  const info=bytes?{size:bytes.length,isFile:()=>true}:await stat(path);check(info.isFile(),'FILE','File not found.');let start=0,end=info.size-1,status=200;
   if(req.headers.range){const match=/^bytes=(\d+)-(\d*)$/.exec(req.headers.range);if(!match){res.writeHead(416);res.end();return;}start=Number(match[1]);end=match[2]?Math.min(Number(match[2]),end):end;if(start>end){res.writeHead(416);res.end();return;}status=206;}
   const headers={'Content-Type':types[extname(path)]??'application/octet-stream','Content-Length':end-start+1,'Accept-Ranges':'bytes','Cache-Control':'no-store'};
   if(status===206)headers['Content-Range']=`bytes ${start}-${end}/${info.size}`;if(download)headers['Content-Disposition']=`attachment; filename="${download}"`;
-  res.writeHead(status,headers);if(req.method==='HEAD')res.end();else createReadStream(path,{start,end}).on('error',()=>res.destroy()).pipe(res);
+  res.writeHead(status,headers);if(req.method==='HEAD')res.end();else if(bytes)res.end(bytes.subarray(start,end+1));else createReadStream(path,{start,end}).on('error',()=>res.destroy()).pipe(res);
 }
-export async function serve(directory,{port=4174}={}){
+export async function serve(directory,{port=4174,render=renderVideo}={}){
   const d=await Director.open(directory),runtime=join(d.store.directory,'.runtime');await mkdir(runtime,{recursive:true});
   let release;try{release=await lockfile.lock(runtime,{stale:10000,update:2000,retries:0});}catch(e){fail('RUNTIME_BUSY','This project already has a running studio.','project',{},true);}
   const token=id(),runtimePath=join(d.store.directory,'.runtime.json');let url,job=null,jobPromise=null,jobAbort=null,previewPromise=null,previewAbort=null;
@@ -44,9 +45,24 @@ export async function serve(directory,{port=4174}={}){
           json(res,200,{ok:true,value:await previewPromise});return;
         }
         if(pathname==='/api/render'){
-          keys(body,['rehearsal'],'render');check(body.rehearsal===undefined||typeof body.rehearsal==='boolean','SCHEMA','rehearsal must be boolean.','render/rehearsal');check(!jobPromise,'RENDER_BUSY','A render is already running.');
-          jobAbort=new AbortController();job={status:'running',progress:null};
-          jobPromise=renderVideo(d.store.directory,{rehearsal:!!body.rehearsal,signal:jobAbort.signal,onProgress:p=>{job.progress=p;}}).then(result=>{job={status:'complete',result,videoUrl:`/artifacts/${result.fingerprint}/video.mp4`};},error=>{job={status:'failed',error:errorJSON(error)};}).finally(()=>{jobPromise=null;jobAbort=null;});json(res,202,{ok:true,value:job});return;
+          keys(body,['rehearsal','voicePresetId','expectedRevision'],'render');check(body.rehearsal===undefined||typeof body.rehearsal==='boolean','SCHEMA','rehearsal must be boolean.','render/rehearsal');check(!jobPromise,'RENDER_BUSY','A render is already running.');
+          const withVoice=body.voicePresetId!==undefined;
+          if(withVoice){voicePresetDefinition(body.voicePresetId);check(!d.speech.abort,'VOICE_BUSY','Voice generation is already running.');check(Number.isSafeInteger(body.expectedRevision),'REVISION_CONFLICT','Read the current revision before choosing an export voice.','render/expectedRevision');}
+          const abort=new AbortController();jobAbort=abort;job={status:'running',phase:withVoice?'voice':'render',progress:null};
+          const cancelVoice=()=>{if(job?.phase==='voice')d.voice({action:'cancel'}).catch(()=>{});};abort.signal.addEventListener('abort',cancelVoice);
+          jobPromise=(async()=>{
+            if(withVoice){
+              await readVoicePreset(body.voicePresetId);const project=await d.store.read();
+              check(body.expectedRevision===project.revision,'REVISION_CONFLICT','Read the current revision before choosing an export voice.','render/expectedRevision',{revision:project.revision});
+              const configured=await d.apply({requestId:id(),expectedRevision:project.revision,commands:[{type:'voice.set',value:{locale:project.output.locale,presetId:body.voicePresetId}}]});
+              check(!abort.signal.aborted,'VOICE_CANCELLED','Export voice generation cancelled.');
+              const generated=await d.voice({action:'generate',requestId:id(),expectedRevision:configured.revision,locale:project.output.locale,force:true});
+              check(!abort.signal.aborted,'VOICE_CANCELLED','Export voice generation cancelled.');
+              check((await d.store.read()).revision===generated.revision,'REVISION_CONFLICT','The project changed during export voice generation.','render');
+              check(!abort.signal.aborted,'VOICE_CANCELLED','Export voice generation cancelled.');job.phase='render';
+            }
+            return render(d.store.directory,{rehearsal:!!body.rehearsal,signal:abort.signal,onProgress:p=>{job.progress=p;}});
+          })().then(result=>{job={status:'complete',result,videoUrl:`/artifacts/${result.fingerprint}/video.mp4`};},error=>{job={status:'failed',error:errorJSON(error)};}).finally(()=>{abort.signal.removeEventListener('abort',cancelVoice);jobPromise=null;jobAbort=null;});json(res,202,{ok:true,value:job});return;
         }
         if(pathname==='/api/produce'){
           keys(body,['rehearsal','only'],'produce');check(!jobPromise,'RENDER_BUSY','A production job is already running.');check(body.rehearsal===undefined||typeof body.rehearsal==='boolean','SCHEMA','rehearsal must be boolean.','produce/rehearsal');jobAbort=new AbortController();job={status:'running',progress:null};
@@ -68,6 +84,7 @@ export async function serve(directory,{port=4174}={}){
         json(res,200,{project,observation,plan,patterns:patterns(),locales:Object.keys(d.packs),dictionaries:d.packs,dictionary:d.packs[project.output.locale],job,voice:await d.voice({action:'status'})});return;
       }
       if(pathname==='/api/plan'){json(res,200,{plan:await d.export({kind:'plan'}),observation:await d.observe()});return;}
+      if(pathname.startsWith('/api/voice-reference/')){const {path,bytes}=await readVoicePreset(pathname.slice('/api/voice-reference/'.length));await fileResponse(req,res,path,undefined,bytes);return;}
       if(pathname==='/practice'){const p=await d.store.read();await verifyPractice(p,d.store.directory);res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(practiceHTML(p,p.output.locale));return;}
       if(pathname==='/'){
         const html=await readFile(root+'src/studio/index.html','utf8');res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(html.replace('__SESSION_TOKEN__',JSON.stringify(token)));return;

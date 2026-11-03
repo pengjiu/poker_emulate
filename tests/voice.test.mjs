@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile,writeFile,mkdir,chmod,readdir,rm} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,chmod,readdir,rm,copyFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {chromium} from 'playwright';
 import {stored,temp} from './helpers.mjs';
@@ -9,14 +9,18 @@ import {voiceProfile} from '../src/project/schema.mjs';
 import {compileProject} from '../src/compiler.mjs';
 import {hash} from '../src/util.mjs';
 import {serve} from '../src/server.mjs';
-import {spawn} from 'node:child_process';
+import {spawn,execFile} from 'node:child_process';
 import {once} from 'node:events';
 import {connectDirector} from '../src/connect.mjs';
+import {voiceEngineStatus,readVoicePreset} from '../src/media/voice.mjs';
+import {promisify} from 'node:util';
+import presetCatalog from '../src/media/voice-presets.json' with {type:'json'};
 
-async function controlledEngine(t){
+async function controlledEngine(t,{presets=false}={}){
   const home=join(await temp(t),'engine'),checkpoint=join(home,'checkpoints');
   for(const name of ['config.yaml','gpt.pth','codec.pth','s2mel.pth','hf_cache/w2v-bert-2.0/model.safetensors','hf_cache/w2v-bert-2.0/config.json','hf_cache/w2v-bert-2.0/preprocessor_config.json','hf_cache/campplus_cn_common.bin','hf_cache/bigvgan/config.json','hf_cache/bigvgan/bigvgan_generator.pt']){const p=join(checkpoint,name);await mkdir(join(p,'..'),{recursive:true});await writeFile(p,'fixture');}
   await mkdir(join(home,'examples'));await writeFile(join(home,'examples/voice_04.wav'),await readFile(resolve('examples/legacy/assets/audio/zh-CN.wav')));await writeFile(join(home,'.river-install.json'),'{}');
+  if(presets)for(const preset of presetCatalog.presets)await copyFile(resolve('tests/fixtures/index-tts-references',preset.file.split('/').pop()),join(home,preset.file));
   const executable=resolve('tests/fixtures/voice-engine.mjs');await chmod(executable,0o755);
   const keys=['RIVER_INDEXTTS_HOME','RIVER_INDEXTTS_PYTHON','RIVER_TEST_VOICE_COUNTER','RIVER_TEST_VOICE_DELAY','RIVER_TEST_VOICE_MODE'],before=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
   t.after(()=>{for(const key of keys)if(before[key]===undefined)delete process.env[key];else process.env[key]=before[key];});
@@ -156,4 +160,126 @@ test('Explicit null selects main-line speech even when the current scene display
   await d.apply({requestId:'main-speech',expectedRevision:0,commands:[{type:'narration.set',sceneId,beatId:'bet',text:'这是主线下注的解释。'},{type:'output.set',value:{branchId:'check-line'}}]});
   await d.voice({action:'generate',requestId:'explicit-main',expectedRevision:1,sceneId,branchId:null,beatIds:['bet']});
   const p=await store.read();assert.ok(p.lesson.scenes[0].beats.find(b=>b.id==='bet').audio['zh-CN']);assert.equal(p.output.branchId,'check-line');
+});
+
+test('Official reference presets report availability and require three distinct pinned samples',async t=>{
+  const engine=await controlledEngine(t),uninstalled=await voiceEngineStatus();
+  assert.deepEqual(uninstalled.presets.map(p=>p.id),['official-01','official-04','official-06']);
+  assert.equal(new Set(uninstalled.presets.map(p=>p.sha256)).size,3);assert.ok(uninstalled.presets.every(p=>/^[a-f0-9]{64}$/.test(p.sha256)&&!p.available));
+  for(const preset of presetCatalog.presets){
+    const bytes=await readFile(resolve('tests/fixtures/index-tts-references',preset.file.split('/').pop()));assert.equal(hash(bytes),preset.sha256);
+    await copyFile(resolve('tests/fixtures/index-tts-references',preset.file.split('/').pop()),join(engine.home,preset.file));
+  }
+  const installed=await voiceEngineStatus();assert.ok(installed.available);assert.ok(installed.presets.every(p=>p.available&&p.previewUrl==='/api/voice-reference/'+p.id));
+  assert.ok(installed.presets.every(p=>p.source.revision==='b01840e8e4fd9753743a6d0466cd73ae1d634a68'));
+  await assert.rejects(readVoicePreset('../checkpoints/config.yaml'),e=>e.code==='VOICE_PRESET_UNKNOWN');
+  await writeFile(join(engine.home,'examples/voice_01.wav'),'wrong source');await assert.rejects(readVoicePreset('official-01'),e=>e.code==='VOICE_PRESET_CHANGED');
+  await rm(join(engine.home,'examples/voice_06.wav'));await assert.rejects(readVoicePreset('official-06'),e=>e.code==='VOICE_PRESET_MISSING');
+  const partial=await voiceEngineStatus();assert.equal(partial.available,true);assert.deepEqual(partial.presets.filter(p=>p.available).map(p=>p.id),['official-04']);
+});
+
+test('Public preset edits import portable references, replay exactly and invalidate generated bindings',async t=>{
+  const engine=await controlledEngine(t,{presets:true}),store=await stored(t,{locale:'zh-CN'}),d=await Director.open(store.directory);
+  const edit={requestId:'preset-01',expectedRevision:0,commands:[{type:'voice.set',value:{locale:'zh-CN',presetId:'official-01',speed:1.1}}]},receipt=await d.apply(edit),first=await store.read();
+  const reference=presetCatalog.presets[0].sha256;assert.equal(first.voice['zh-CN'].referenceAssetId,reference);assert.equal(first.voice['zh-CN'].speed,1.1);assert.equal(first.voice['zh-CN'].presetId,undefined);
+  assert.equal(hash(await readFile(join(store.directory,first.assets[reference].path))),reference);
+  await rm(join(engine.home,'examples/voice_01.wav'));assert.deepEqual(await d.apply(edit),receipt);
+  await assert.rejects(d.apply({...edit,requestId:'missing-preset',expectedRevision:1}),e=>e.code==='VOICE_PRESET_MISSING');assert.deepEqual(await store.read(),first);
+  await d.voice({action:'generate',requestId:'speak-01',expectedRevision:1});
+  let current=await store.read(),beat=current.lesson.scenes[0].beats.find(b=>b.id==='decision'),text=beat.narration['zh-CN'],duration=current.assets[beat.audio['zh-CN'].assetId].duration,oldAudio=beat.audio['zh-CN'].assetId;
+  await d.apply({requestId:'bind-01',expectedRevision:current.revision,commands:[{type:'timing.set',beatId:'decision',value:{locale:'zh-CN',timing:{actions:[],narration:0}}},{type:'captions.set',beatId:'decision',value:{locale:'zh-CN',cues:[{start:0,end:duration,text}]}},{type:'presentation.set',beatId:'decision',value:{surface:'table',focus:['hero']}},{type:'presentation.cues',beatId:'decision',value:{locale:'zh-CN',cues:[{at:0,focus:['hero']}]}}]});
+  current=await store.read();assert.equal(compileProject(current,d.packs).issues.length,0);
+  await d.apply({requestId:'preset-04',expectedRevision:current.revision,commands:[{type:'voice.set',value:{locale:'zh-CN',presetId:'official-04'}}]});
+  assert.ok(compileProject(await store.read(),d.packs).issues.some(i=>i.code==='AUDIO_STALE'));
+  await d.voice({action:'generate',requestId:'speak-04',expectedRevision:(await store.read()).revision});current=await store.read();beat=current.lesson.scenes[0].beats.find(b=>b.id==='decision');
+  assert.notEqual(beat.audio['zh-CN'].assetId,oldAudio);
+  const issues=compileProject(current,d.packs).issues.map(i=>i.code);for(const code of ['TIMING_STALE','CAPTION_STALE','PRESENTATION_STALE'])assert.ok(issues.includes(code),code);assert.ok(!issues.includes('AUDIO_STALE'));
+  const calls=(await readFile(engine.counter,'utf8')).trim().split('\n').map(JSON.parse);assert.deepEqual(calls.map(c=>c.clips[0].referenceHash),[reference,presetCatalog.presets[1].sha256]);
+  for(const value of [{presetId:'unknown'},{presetId:null},{presetId:'official-04',reference:null},{presetId:'official-04',reference:{path:resolve('examples/legacy/assets/audio/en-US.wav')}}]){
+    const before=await store.read();await assert.rejects(d.apply({requestId:crypto.randomUUID(),expectedRevision:before.revision,commands:[{type:'voice.set',value:{locale:'zh-CN',...value}}]}),e=>['VOICE_PRESET_UNKNOWN','VOICE_SETTINGS'].includes(e.code));assert.deepEqual(await store.read(),before);
+  }
+  const destination=join(await temp(t),'portable');await d.export({destination});await rm(engine.home,{recursive:true,force:true});const reopened=await Director.open(destination);assert.equal((await reopened.store.read()).voice['zh-CN'].referenceAssetId,presetCatalog.presets[1].sha256);
+});
+
+test('Reference-only installation verifies pinned samples without model, Python or normalizer setup',async t=>{
+  const directory=await temp(t),execute=promisify(execFile),script=`
+import importlib.util, io, json, sys
+from pathlib import Path
+sys.dont_write_bytecode=True
+spec=importlib.util.spec_from_file_location('river_setup', 'scripts/setup-index-tts.py')
+setup=importlib.util.module_from_spec(spec); spec.loader.exec_module(setup)
+home=Path(sys.argv[1]); fixtures=Path('tests/fixtures/index-tts-references')
+home.mkdir(); record=home/'.river-install.json'; record.write_text(json.dumps({'files':[{'file':'keep-model'}],'upstreamCommit':'keep-commit'}))
+requests=[]
+def fetch(url, timeout):
+    assert setup.REFERENCES['revision'] in url
+    requests.append(url)
+    return io.BytesIO((fixtures/url.split('/')[-1]).read_bytes())
+def forbidden(*args, **kwargs): raise AssertionError('Reference-only installation must not load or download models')
+setup.urllib.request.urlopen=fetch; setup.install_models=forbidden; setup.warm_normalizer=forbidden; setup.subprocess.run=forbidden
+sys.argv=['setup-index-tts.py','--home',str(home),'--references-only']; setup.main(); setup.main()
+result=json.loads(record.read_text()); assert len(requests)==3; assert result['files']==[{'file':'keep-model'}]; assert result['upstreamCommit']=='keep-commit'
+assert len(set(row['sha256'] for row in result['references']))==3
+missing=home/'examples/voice_01.wav'; missing.unlink()
+setup.urllib.request.urlopen=lambda *args, **kwargs:io.BytesIO(b'not the pinned sample')
+try: setup.main()
+except RuntimeError: pass
+else: raise AssertionError('A mismatched reference must be rejected')
+assert not missing.exists(); assert json.loads(record.read_text())==result
+print(json.dumps({'downloads':len(requests),'references':len(result['references'])}))
+`;
+  const {stdout}=await execute('python3',['-c',script,join(directory,'engine')]);assert.deepEqual(JSON.parse(stdout.trim().split('\n').at(-1)),{downloads:3,references:3});
+});
+
+async function studioAPI(server,store){
+  const {token}=JSON.parse(await readFile(join(store.directory,'.runtime.json'),'utf8'));
+  return async(path,body)=>{const response=await fetch(server.url+path,{method:'POST',headers:{'Content-Type':'application/json','x-river-token':token},body:JSON.stringify(body)});return {status:response.status,...await response.json()};};
+}
+async function completedStudioJob(server){
+  for(let i=0;i<120;i++){const snapshot=await(await fetch(server.url+'/api/snapshot')).json();if(snapshot.job&&snapshot.job.status!=='running')return snapshot;await new Promise(r=>setTimeout(r,30));}
+  throw Error('Studio export did not finish');
+}
+
+test('Studio export serializes native voice generation, preserves beat speakers and stops on cancel or failure',async t=>{
+  const engine=await controlledEngine(t,{presets:true}),store=await stored(t,{locale:'zh-CN'}),renders=[],server=await serve(store.directory,{port:0,render:async directory=>{assert.equal(server.director.speech.job.status,'complete');renders.push(await store.read());return {fingerprint:'c'.repeat(64),directory};}});t.after(()=>server.close());const post=await studioAPI(server,store),d=server.director;
+  await d.apply({requestId:'independent-speaker',expectedRevision:0,commands:[{type:'narration.set',beatId:'bet',text:'这段使用默认声线。'},{type:'voice.set',beatId:'decision',value:{locale:'zh-CN',presetId:'official-06'}}]});
+  const initial=await store.read(),local=initial.lesson.scenes[0].beats.find(b=>b.id==='decision').delivery['zh-CN'].referenceAssetId;
+  process.env.RIVER_TEST_VOICE_DELAY='400';const results=await Promise.all([post('/api/render',{voicePresetId:'official-04',expectedRevision:initial.revision}),post('/api/render',{voicePresetId:'official-04',expectedRevision:initial.revision})]);assert.deepEqual(results.map(r=>r.status).sort(),[202,409]);
+  let snapshot=await completedStudioJob(server);assert.equal(snapshot.job.status,'complete');assert.equal(renders.length,1);assert.equal(renders[0].voice['zh-CN'].referenceAssetId,presetCatalog.presets[1].sha256);assert.equal(renders[0].lesson.scenes[0].beats.find(b=>b.id==='decision').delivery['zh-CN'].referenceAssetId,local);
+  let calls=(await readFile(engine.counter,'utf8')).trim().split('\n').map(JSON.parse);assert.deepEqual(new Set(calls[0].clips.map(c=>c.referenceHash)),new Set([local,presetCatalog.presets[1].sha256]));
+  const revision=(await store.read()).revision;assert.equal((await post('/api/render',{})).status,202);snapshot=await completedStudioJob(server);assert.equal(snapshot.job.status,'complete');assert.equal(renders.length,2);assert.equal((await store.read()).revision,revision);assert.equal((await readFile(engine.counter,'utf8')).trim().split('\n').length,1);
+  for(const cancel of ['voice','export']){
+    const before=await store.read(),audio=before.lesson.scenes[0].beats.map(b=>b.audio);assert.equal((await post('/api/render',{voicePresetId:'official-01',expectedRevision:before.revision})).status,202);
+    await waitFor(()=>d.speech.job?.status==='running'&&d.speech.job?.phase==='synthesizing');
+    if(cancel==='voice')assert.equal((await d.voice({action:'cancel'})).cancelled,true);else await post('/api/cancel',{});
+    snapshot=await completedStudioJob(server);assert.equal(snapshot.job.error.code,'VOICE_CANCELLED');assert.equal(renders.length,2);assert.deepEqual((await store.read()).lesson.scenes[0].beats.map(b=>b.audio),audio);
+  }
+  process.env.RIVER_TEST_VOICE_MODE='fail';assert.equal((await post('/api/render',{voicePresetId:'official-04',expectedRevision:(await store.read()).revision})).status,202);snapshot=await completedStudioJob(server);assert.equal(snapshot.job.error.code,'VOICE_FAILED');assert.equal(renders.length,2);delete process.env.RIVER_TEST_VOICE_MODE;
+  const before=await store.read();assert.equal((await post('/api/render',{voicePresetId:'not-listed',expectedRevision:before.revision})).error.code,'VOICE_PRESET_UNKNOWN');assert.deepEqual(await store.read(),before);
+  assert.equal((await post('/api/render',{voicePresetId:'official-04',expectedRevision:0})).status,202);snapshot=await completedStudioJob(server);assert.equal(snapshot.job.error.code,'REVISION_CONFLICT');assert.equal(renders.length,2);assert.deepEqual(await store.read(),before);
+});
+
+test('Reference preview serves only intact whitelisted samples with native audio range requests',async t=>{
+  const engine=await controlledEngine(t,{presets:true}),store=await stored(t),server=await serve(store.directory,{port:0});t.after(()=>server.close());
+  for(const preset of presetCatalog.presets){const response=await fetch(server.url+'/api/voice-reference/'+preset.id);assert.equal(response.status,200);assert.equal(response.headers.get('Content-Type'),'audio/wav');assert.equal(hash(Buffer.from(await response.arrayBuffer())),preset.sha256);}
+  const range=await fetch(server.url+'/api/voice-reference/official-01',{headers:{Range:'bytes=0-31'}});assert.equal(range.status,206);assert.equal((await range.arrayBuffer()).byteLength,32);
+  const head=await fetch(server.url+'/api/voice-reference/official-01',{method:'HEAD'});assert.equal(head.status,200);assert.equal(Number(head.headers.get('Content-Length')),(await readFile(resolve('tests/fixtures/index-tts-references/voice_01.wav'))).length);
+  const unknown=await fetch(server.url+'/api/voice-reference/config.yaml');assert.equal(unknown.status,400);assert.equal((await unknown.json()).error.code,'VOICE_PRESET_UNKNOWN');
+  const traversal=await fetch(server.url+'/api/voice-reference/..%2F..%2Fcheckpoints%2Fconfig.yaml');assert.equal(traversal.status,400);assert.equal((await traversal.json()).error.code,'VOICE_PRESET_UNKNOWN');
+  await writeFile(join(engine.home,'examples/voice_01.wav'),'tampered');const changed=await fetch(server.url+'/api/voice-reference/official-01');assert.equal(changed.status,400);assert.equal((await changed.json()).error.code,'VOICE_PRESET_CHANGED');
+});
+
+test('Browser preset choices reach the native worker and export selection regenerates before rendering',async t=>{
+  const engine=await controlledEngine(t,{presets:true}),store=await stored(t,{locale:'zh-CN'}),renders=[],server=await serve(store.directory,{port:0,render:async directory=>{renders.push(await store.read());return {fingerprint:'d'.repeat(64),directory};}}),browser=await chromium.launch({headless:true});t.after(async()=>{await browser.close();await server.close();});
+  await server.director.apply({requestId:'default-narration',expectedRevision:0,commands:[{type:'narration.set',beatId:'bet',text:'这一段继承默认参考声线。'}]});process.env.RIVER_TEST_VOICE_DELAY='800';
+  const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];page.on('pageerror',error=>errors.push(error.message));await page.goto(server.url);await page.waitForSelector('#voice-status');await page.locator('[data-frame="decision"]').click();await page.waitForSelector('[data-frame="decision"].active');
+  await page.locator('.voice-settings').locator('summary').first().click();await page.selectOption('#voice-preset','official-01');assert.equal(await page.locator('#voice-reference-preview audio').getAttribute('src'),'/api/voice-reference/official-01');
+  await page.locator('[data-ui="voice-generate"]').click();await page.waitForSelector('[data-ui="voice-cancel"]');await page.waitForFunction(()=>document.querySelector('#voice-status').textContent.includes('完成'));assert.equal((await store.read()).voice['zh-CN'].referenceAssetId,presetCatalog.presets[0].sha256);
+  await page.locator('.voice-settings').locator('summary').first().click();await page.locator('#voice-local').check();await page.selectOption('#voice-preset','official-01');const localRevision=(await store.read()).revision;await page.locator('[data-ui="voice-save"]').click();await page.waitForFunction(revision=>document.querySelector('.stage-top')?.textContent.includes('r'+(revision+1)),localRevision);assert.equal((await store.read()).lesson.scenes[0].beats.find(b=>b.id==='decision').delivery['zh-CN'].referenceAssetId,presetCatalog.presets[0].sha256);
+  await page.locator('.voice-settings').locator('summary').first().click();await page.selectOption('#voice-preset','official-06');await page.locator('[data-ui="voice-generate"]').click();await page.waitForSelector('[data-ui="voice-cancel"]');await page.waitForFunction(()=>document.querySelector('#voice-status').textContent.includes('完成'));
+  await page.selectOption('#export-voice','official-04');assert.equal(await page.locator('[data-ui="render"]').isEnabled(),true);await page.locator('[data-ui="render"]').click();await page.waitForSelector('[data-ui="voice-cancel"]');assert.equal(await page.locator('[data-ui="render"]').isDisabled(),true);await page.waitForFunction(()=>document.querySelector('#job-status a')?.textContent.includes('完成'));
+  assert.equal(renders.length,1);assert.equal(renders[0].voice['zh-CN'].referenceAssetId,presetCatalog.presets[1].sha256);assert.equal(renders[0].lesson.scenes[0].beats.find(b=>b.id==='decision').delivery['zh-CN'].referenceAssetId,presetCatalog.presets[2].sha256);
+  let calls=(await readFile(engine.counter,'utf8')).trim().split('\n').map(JSON.parse);assert.equal(calls.length,3);assert.equal(calls[0].clips[0].referenceHash,presetCatalog.presets[0].sha256);assert.equal(calls[1].clips[0].referenceHash,presetCatalog.presets[2].sha256);assert.deepEqual(new Set(calls[2].clips.map(c=>c.referenceHash)),new Set([presetCatalog.presets[1].sha256,presetCatalog.presets[2].sha256]));
+  await page.selectOption('#export-voice','');await page.locator('[data-ui="render"]').click();await page.waitForFunction(()=>document.querySelector('#job-status a')?.textContent.includes('完成'));assert.equal(renders.length,2);assert.equal((await readFile(engine.counter,'utf8')).trim().split('\n').length,3);
+  process.env.RIVER_TEST_VOICE_DELAY='3000';await page.selectOption('#export-voice','official-01');await page.locator('[data-ui="render"]').click();await waitFor(()=>server.director.speech.job?.status==='running'&&server.director.speech.job?.phase==='synthesizing');await page.waitForSelector('[data-ui="voice-cancel"]');await page.locator('[data-ui="voice-cancel"]').click();const cancelled=await completedStudioJob(server);assert.equal(cancelled.job.error.code,'VOICE_CANCELLED');assert.equal(renders.length,2);assert.deepEqual(errors,[]);
 });

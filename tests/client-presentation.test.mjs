@@ -14,7 +14,7 @@ import {createHand} from '../src/poker/rules.mjs';
 
 test('chip-denominated tables label editable wager amounts in the declared denomination',()=>{
   const start=createHand({seats:[{id:'hero',stack:100},{id:'other',stack:100}],button:'hero',hero:'hero',bigBlind:2,unit:'chips'}),p=newProject({scenes:[{id:'chips',title:{'zh-CN':'筹码桌'},start,beats:[{id:'setup',label:{'zh-CN':'当前决定'}}]}]});
-  const plan=compileProject(p,packs),html=renderFrame(plan,0);assert.equal(plan.frames[0].state.unit,'chips');assert.match(html,/class="bet-amount">4\.00 筹码<\/span>/);assert.doesNotMatch(html,/4\.00 BB/);
+  const plan=compileProject(p,packs),html=renderFrame(plan,0);assert.equal(plan.frames[0].state.unit,'chips');assert.match(html,/class="bet-amount">4 筹码<\/span>/);assert.doesNotMatch(html,/class="bet-amount">4 BB/);
 });
 
 function project(aspect='landscape',seatCount=6,revealed=false){

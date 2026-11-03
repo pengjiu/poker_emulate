@@ -1,10 +1,10 @@
 # Integrated IndexTTS voice
 
-The default engine is official IndexTTS2.5, pinned by source/model revisions. It runs as one isolated Python worker per batch; there is no separate TTS server or queue. It supports installed Chinese, English and Japanese outputs. A generated voice is synthetic even when its delivery sounds natural.
+The default engine is official IndexTTS2.5, pinned by source/model revisions. It runs as one isolated Python worker per batch; there is no separate TTS server or queue. It supports installed Chinese, English and Japanese outputs. A generated voice is synthetic even when its delivery sounds natural; that production fact belongs in delivery metadata rather than repeated spoken framing.
 
 ## Setup and status
 
-Run `python3 scripts/setup-index-tts.py` from the repository root. It requires uv, installs the official locked Python environment under `.river/index-tts`, and downloads about7.1GB of necessary weights plus a default official Mandarin reference. The installer chooses a download service using a small network probe; `--source huggingface|modelscope` selects one explicitly. File hashes are checked against the pinned upstream revisions regardless of transport. Models are not bundled in source archives. On Apple Silicon the official MPS path uses full precision; CUDA/CPU follow upstream device selection. Check a short generation on the actual host before promising production readiness.
+Run `python3 scripts/setup-index-tts.py` from the repository root. It requires uv, installs the official locked Python environment under `.river/index-tts`, and downloads about7.1GB of necessary weights plus three pinned official speaker references. The installer chooses a download service using a small network probe; `--source huggingface|modelscope` selects one explicitly. File hashes are checked against the pinned upstream revisions regardless of transport. Models are not bundled in source archives. On Apple Silicon the official MPS path uses full precision; CUDA/CPU follow upstream device selection. Check a short generation on the actual host before promising production readiness.
 
 `RIVER_INDEXTTS_HOME` selects another installed engine directory; `RIVER_INDEXTTS_PYTHON` optionally selects its Python executable. Machine paths stay outside project manifests. Voice references are copied into project assets, so exported courses retain their speaker reference and generated audio.
 
@@ -18,6 +18,8 @@ On macOS the bridge defaults to PyTorch's Metal matmul kernel and the device's r
 
 `available` checks installed engine files. A successful real generation is separate evidence. The status also exposes current progress or the last result. A clean install can still import external audio while the model is absent.
 
+Status lists three distinct official references (`official-01`, `official-04`, `official-06`) with localized names, availability, hashes and audition URLs. Repair/download only these small references with `python3 scripts/setup-index-tts.py --references-only`; this does not install weights or reload/warm the engine. A missing optional preset does not disable an otherwise ready engine.
+
 ## Configure and generate
 
 Set per-language defaults through an ordinary apply batch. A reference accepts the same `{path}` or `{data}` source as audio.attach; omit it for the current reference, or set `reference:null` to restore the official default on the next generation.
@@ -28,6 +30,12 @@ Set per-language defaults through an ordinary apply batch. A reference accepts t
 ```
 
 Speed is0.5–2 times normal; greater is faster. Emotion strength is0–1. The eight emotion values are `[happy, angry, sad, afraid, disgusted, melancholy, surprised, calm]`, each0–1. The UI offers a few starting points; authors may choose any supported vector. No Qwen emotion-text model is required. Choose a consistent speaker and moderate emotion for a coherent course; more intensity is not automatically more natural.
+
+Select a built-in speaker with `{"type":"voice.set","value":{"locale":"zh-CN","presetId":"official-04","speed":0.95,"emotionStrength":0.4}}`. `presetId` and `reference` are mutually exclusive; both global and beat scopes are supported. Runtime imports the verified reference into the project's ordinary assets, preserving one canonical voice profile rather than a second preset configuration. Keep explicit per-beat speakers for dialogue. Pilot several voices in one batch when comparing them, and choose before full-route generation.
+
+These controls call the official model API: reference audio selects timbre, `speed` maps to native `duration_factor=1/speed`, and emotion/strength map to `emo_vector`/`emo_alpha`. There is no independent native pitch-in-Hz control exposed here. Do not invent pitch processing, time-stretch finished speech, or promise that parameter settings alone prove humanlike delivery. Audition the actual target-language passage and record the listening scope.
+
+The studio voice panel offers these references and native delivery controls. The export toolbar can keep current audio or choose a reference; choosing one serially configures it, regenerates the selected route through the existing voice controller, then renders. Explicit beat references remain authoritative. Cancel stops that existing job; failure preserves prior audio. New takes can invalidate precise captions, action timing or presentation cues, which must be reviewed and rebound before final export; the export action does not approve them automatically. For a timed production, select the voice before that review and export with current audio afterward.
 
 Pronunciations apply to speech in one literal replacement pass, longest terms first; captions keep their original text. They may also contain official IndexTTS phonetic notation when necessary. Use actual delivery to choose a reading rather than enforcing one spelling for every audience. Check replacements inside the complete sentence: adjacent words can merge into another number. When that happens, name the quantities in separate natural clauses instead of changing only an isolated digit.
 

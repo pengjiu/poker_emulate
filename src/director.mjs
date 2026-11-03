@@ -5,7 +5,7 @@ import {importAudio} from './media/audio.mjs';
 import {localePacks} from './locales.mjs';
 import {clone,hash} from './util.mjs';
 import {check,errorJSON} from './errors.mjs';
-import {VoiceController} from './media/voice.mjs';
+import {VoiceController,readVoicePreset} from './media/voice.mjs';
 import {selectDirection,patterns,effectiveDirection} from './direction/index.mjs';
 import {analysisSchema,confirmAnalysis,importSolverAnalysis,solverRequest} from './analysis/index.mjs';
 import {bindEvidence} from './analysis/evidence.mjs';
@@ -102,14 +102,16 @@ export class Director {
           const value=selectDirection(c.value);if(value===null)delete target.direction;else target.direction=value;continue;
         }
         if(c.type==='voice.set'){
-          keys(c.value,['locale','reference','emotion','emotionStrength','speed','pronunciations'],path+'/value');const {locale=project.output.locale,reference,...settings}=c.value;
+          keys(c.value,['locale','reference','presetId','emotion','emotionStrength','speed','pronunciations'],path+'/value');const {locale=project.output.locale,reference,presetId,...settings}=c.value;
+          check(!Object.hasOwn(c.value,'presetId')||!Object.hasOwn(c.value,'reference'),'VOICE_SETTINGS','Choose either presetId or reference, not both.',path+'/value');
           check(this.packs[locale],'LOCALE','Install a locale dictionary first.',path+'/value/locale');
           check(c.sceneId===undefined||c.beatId!==undefined,'VOICE_SETTINGS','sceneId requires beatId for a local voice override.',path);
           const scene=c.beatId?project.lesson.scenes.find(s=>s.id===(c.sceneId??project.output.sceneId)):null;
           const beat=c.beatId?[...(scene?.beats??[]),...(scene?.branches??[]).flatMap(b=>b.beats)].find(b=>b.id===c.beatId):null;
           check(!c.beatId||beat,'BEAT_UNKNOWN','Unknown beat for local voice.',path+'/beatId');
           const profile={...(beat?beat.delivery?.[locale]??{}:voiceProfile(project,locale)),...settings};voiceSchema(profile,path+'/value');
-          if(reference===null)delete profile.referenceAssetId;
+          if(Object.hasOwn(c.value,'presetId')){const {bytes}=await readVoicePreset(presetId),imported=await importAudio(this.store.directory,{data:'data:audio/wav;base64,'+bytes.toString('base64')});project.assets[imported.assetId]=imported.asset;profile.referenceAssetId=imported.assetId;}
+          else if(reference===null)delete profile.referenceAssetId;
           else if(reference!==undefined){const imported=await importAudio(this.store.directory,reference);project.assets[imported.assetId]=imported.asset;profile.referenceAssetId=imported.assetId;}
           if(beat){beat.delivery??={};beat.delivery[locale]=profile;}else{project.voice??={};project.voice[locale]=profile;}continue;
         }

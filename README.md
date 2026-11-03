@@ -51,7 +51,7 @@ node bin/river.mjs render --project projects/my-hand --profile final --out artif
 - [分析资料、画布、提示点与条件变式](.agents/skills/poker-director/references/teaching-canvas.md)
 - [范围、画板、连续实战、练习和批量制作](.agents/skills/poker-director/references/full-production.md)
 
-启用默认语音需要 uv。运行 `python3 scripts/setup-index-tts.py`，安装脚本会隔离官方 Python 环境，下载并校验约 7.1GB 必要模型文件；不修改系统 Python。随后在导演台点击“生成本段”或“补全本路线”。可以更换参考音色，设置本语言默认表达，也可勾选“仅本段”调整关键段落的语速和情绪。首次生成先试听一个自然段。`.river/` 是本机模型目录，不随课程或源码包分发；其他机器可先使用外部音频制作，再安装模型。
+启用默认语音需要 uv。运行 `python3 scripts/setup-index-tts.py`，安装脚本会隔离官方 Python 环境，下载并校验约 7.1GB 必要模型文件；不修改系统 Python。随后在导演台点击“生成本段”或“补全本路线”。可试听、选择三种官方参考声线，或导入自己的参考；通过 IndexTTS 原生参数设置语速和情绪，也可勾选“仅本段”调整关键段落。已有模型只需 `python3 scripts/setup-index-tts.py --references-only` 补装声线，无需重装模型。导出时可保留当前旁白或选择声线重新生成；有精确字幕、动作或提示点的作品，应先换声、复核绑定，再导出。首次生成先试听一个包含实际牌名与金额的自然段。`.river/` 是本机模型目录，不随课程或源码包分发；其他机器可先使用外部音频制作，再安装模型。
 
 音频通过 `audio.attach` 接收本地文件或浏览器 data URL，自动探测时长并复制到项目。项目目录包含 project.json、assets/、evidence/，可以完整复制迁移。旧 v1 JSON 用 `migrate --lesson <file> --project <new-directory>` 单向迁移，不覆盖原件。
 

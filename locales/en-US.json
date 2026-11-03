@@ -149,7 +149,7 @@
     "voiceEmotionVector": "Eight emotions",
     "voicePreparing": "Preparing",
     "voiceSaving": "Saving audio",
-    "voiceOnlyBeat": "Delivery for this beat only",
+    "voiceOnlyBeat": "Voice and delivery for this beat only",
     "directionTitle": "Narrative mode",
     "directionNone": "Freeform",
     "directionPattern": "Choose a mode",
@@ -211,7 +211,15 @@
     "teachingAuthorProvided": "Author provided",
     "teachingReplayPause": "Decision replay",
     "teachingReplayContext": "Replay does not change the main hand",
-    "teachingAdvisories": "Editorial review"
+    "teachingAdvisories": "Editorial review",
+    "voicePreset": "Reference voice",
+    "voiceKeepReference": "Keep current reference",
+    "voicePresetUnavailable": "Reference not installed",
+    "voicePresetHelp": "Preview the official source reference. Save or generate to apply the selected voice, then preview the actual narration.",
+    "voiceExportChoice": "Export narration voice",
+    "voiceKeepNarration": "Keep current narration",
+    "voiceExportHelp": "A selected voice regenerates narration with IndexTTS before rendering. Beat speaker overrides are kept. Review caption and action timing after new speech.",
+    "voiceExportGenerating": "Generating export narration"
   },
   "errors": {
     "default": "Check the situation, selected language and poker actions.",
@@ -274,6 +282,9 @@
     "EVIDENCE_MISSING": "The evidence file cannot be read. Restore it before confirming.",
     "EVIDENCE_UNBOUND": "Confirm the analysis to bind its current evidence file.",
     "EVIDENCE_CHANGED": "The evidence file changed. Review conclusions and confirm again.",
-    "COURSE_ORDER_REVIEW": "The programme differs from the course order. Review prerequisites, repetition and answer disclosure."
+    "COURSE_ORDER_REVIEW": "The programme differs from the course order. Review prerequisites, repetition and answer disclosure.",
+    "VOICE_PRESET_UNKNOWN": "Unknown official reference voice. Choose a listed voice.",
+    "VOICE_PRESET_MISSING": "Install the official reference samples. References can be installed without downloading the models again.",
+    "VOICE_PRESET_CHANGED": "The reference differs from the pinned official sample. Reinstall the reference samples."
   }
 }

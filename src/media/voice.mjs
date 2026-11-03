@@ -11,17 +11,38 @@ import {probeAudio,verifyAudio,importAudio} from './audio.mjs';
 import {hash} from '../util.mjs';
 import {receiptFor} from '../project/store.mjs';
 import {check,errorJSON,fail,RiverError} from '../errors.mjs';
+import presetCatalog from './voice-presets.json' with {type:'json'};
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const languages={'zh-CN':'ZH','en-US':'EN','ja-JP':'JA'};
 const required=['config.yaml','gpt.pth','codec.pth','s2mel.pth','hf_cache/w2v-bert-2.0/model.safetensors','hf_cache/w2v-bert-2.0/config.json','hf_cache/w2v-bert-2.0/preprocessor_config.json','hf_cache/campplus_cn_common.bin','hf_cache/bigvgan/config.json','hf_cache/bigvgan/bigvgan_generator.pt'];
 function enginePaths(){const home=resolve(process.env.RIVER_INDEXTTS_HOME??join(root,'.river/index-tts'));return {home,python:process.env.RIVER_INDEXTTS_PYTHON??join(home,'.venv',process.platform==='win32'?'Scripts/python.exe':'bin/python'),reference:join(home,'examples/voice_04.wav')};}
+export function voicePresetDefinition(presetId){
+  const preset=presetCatalog.presets.find(p=>p.id===presetId);
+  check(typeof presetId==='string'&&preset,'VOICE_PRESET_UNKNOWN','Choose an installed official reference ID.','voice/presetId');
+  return preset;
+}
+export async function readVoicePreset(presetId){
+  const preset=voicePresetDefinition(presetId);
+  const path=join(enginePaths().home,preset.file);let bytes;
+  try{const info=await stat(path);check(info.isFile()&&info.size>0&&info.size<=16*1024*1024,'VOICE_PRESET_CHANGED','Official reference has invalid content.','voice/presetId');bytes=await readFile(path);}
+  catch(error){if(error instanceof RiverError)throw error;fail('VOICE_PRESET_MISSING','Install the official reference samples first.','voice/presetId',{presetId,setup:'python3 scripts/setup-index-tts.py --references-only'});}
+  check(hash(bytes)===preset.sha256,'VOICE_PRESET_CHANGED','Official reference differs from the pinned sample.','voice/presetId',{presetId,setup:'python3 scripts/setup-index-tts.py --references-only'});
+  return {preset,path,bytes};
+}
+async function voicePresetsStatus(){
+  return Promise.all(presetCatalog.presets.map(async preset=>{
+    const value={id:preset.id,name:preset.name,sha256:preset.sha256,source:{repository:presetCatalog.repository,revision:presetCatalog.revision,file:preset.file}};
+    try{await readVoicePreset(preset.id);return {...value,available:true,previewUrl:'/api/voice-reference/'+preset.id};}
+    catch(error){return {...value,available:false,issue:error.code};}
+  }));
+}
 export async function voiceEngineStatus(){
   const paths=enginePaths(),missing=[];
   for(const file of [paths.python,join(paths.home,'.river-install.json'),paths.reference,...required.map(p=>join(paths.home,'checkpoints',p))]){
     try{check((await stat(file)).size>0,'VOICE_NOT_READY','Empty engine file.');}catch{missing.push(file);}
   }
-  return {engine:'IndexTTS-2.5',available:missing.length===0,locales:Object.keys(languages),missing,defaults:voiceDefaults,setup:'python3 scripts/setup-index-tts.py'};
+  return {engine:'IndexTTS-2.5',available:missing.length===0,locales:Object.keys(languages),missing,defaults:voiceDefaults,presets:await voicePresetsStatus(),setup:'python3 scripts/setup-index-tts.py',setupReferences:'python3 scripts/setup-index-tts.py --references-only'};
 }
 function pronounce(text,map){const names=Object.keys(map).sort((a,b)=>b.length-a.length);if(!names.length)return text;const pattern=names.map(s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');return text.replace(new RegExp(pattern,'gu'),match=>map[match]);}
 async function runEngine(request,signal,onProgress){

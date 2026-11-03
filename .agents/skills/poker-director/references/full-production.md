@@ -2,6 +2,7 @@
 
 ## Contents
 
+- [Plan the visual explanation](#plan-the-visual-explanation)
 - [Choose the needed capability](#choose-the-needed-capability)
 - [Draw, focus and compare](#draw-focus-and-compare)
 - [Study ranges and external strategy](#study-ranges-and-external-strategy)
@@ -9,6 +10,14 @@
 - [Keep courses and practice coherent](#keep-courses-and-practice-coherent)
 - [Mix and audition sound](#mix-and-audition-sound)
 - [Produce and revise deliveries](#produce-and-revise-deliveries)
+
+## Plan the visual explanation
+
+Narrative mode chooses perspective and reasoning structure; it does not imply a table-only video. In the production brief, identify the key ideas, what viewers will see at those moments, and when the live decision resumes. Choose visuals for comprehension rather than demonstrating every available feature.
+
+Board changes, blockers and action sizes can use discreet table focus, circles or arrows. Prices and denominators can use a calculation card; candidate hands can use groups or a matrix; changes in size, range or action can use a matched comparison. Read the relevant contracts below before composing these. Keep hypothetical ranges visibly distinct from observed information.
+
+For quantitative or comparative teaching, support reasoning that is hard to follow through speech and subtitles alone. A table-only passage remains appropriate when the table makes the point clear; record that choice when it covers the whole lesson. First-person immersion and visual explanation can coexist through short overlays or analysis cuts returning to the pending decision. There is no fixed tool count or mandatory layout.
 
 ## Choose the needed capability
 
@@ -70,6 +79,8 @@ Use `scene.create` inside an existing project to derive blinds, antes and action
 
 Add a cash `rake:{rate,cap,noFlopNoDrop,minPot?}` model or tournament `ante` / `bigBlindAnte` as needed. Ante and BBA are alternatives. Preserve fixed chip denomination across blind levels; `unit:"chips"` displays tournament chips, while `unit:"BB"` requires a unit big blind. The engine records dead money, short blind obligations and rake separately.
 
+For an ordinary live-client scene, choose plausible per-seat starting stacks, names and seating, then reason from the actual effective stack. Equal stacks remain useful for matched studies; they are not a requirement for a six-handed table. `scene.create` accepts stacks before posting blinds; a raw `scene.put` start holds remaining stacks and existing contributions separately. Never add decorative balance jitter or patch rendered amounts. Card visibility, folded seats, blind/button positions, action sizes, movement and payouts must follow the same engine state. Keep the active-seat indicator stable during thought; no invented countdown restarts with each narration segment.
+
 To continue real play, finish the source hand, then use `session.next`:
 
 ```json
@@ -113,5 +124,13 @@ If the user explicitly postpones voice generation, `--rehearsal` produces a labe
 Use `scripts/build-full-course.mjs --help` for an executable example of three progressive episodes, range studies, comparison, continuous hands, tournament/rake boundaries and practice. The example is reusable input, not a restriction on creative structure.
 
 After rendering, run `node scripts/verify-media.mjs RENDER_DIRECTORY PROJECT_DIRECTORY` against the returned fingerprint directory and its actual source project. It decodes the MP4, compares action/key frames, and checks complete source narration plus interior windows; a failure exits nonzero and a pass writes `decoded-validation.json`. This verifies encoding fidelity, not whether the TTS actually spoke every source clause. Review the actual speech content separately as described in the voice reference.
+
+A produced bundle has named files described by `delivery.json`, not a presumed render subdirectory. The original render directories remain under the `produce --out BASE` directory at `BASE/.render-cache/<outputs[i].fingerprint>`; this is a hidden directory, so default file listings may skip it. Verify the bundle's listed hashes, match each named MP4 to that render's `video.mp4`, and run `verify-media` there against the bundle's frozen `project/`. Check actual existence before considering a missing render; do not rerender merely because a search skipped hidden caches. Complete this check before cleaning local render caches, since the portable bundle carries receipts but not those original reference keyframe images.
+
+Before synthesis, review script, visible reasoning, card knowledge, amounts and action order together. Freeze that content and the implementation, pilot one difficult passage, then generate the remaining missing/stale clips in a batch. Retain unchanged audio and use targeted edits rather than rebuilding an old draft. Review the final real media in one bounded pass; repair concrete omissions, wrong facts or unreadable layout rather than cycling over harmless ASR homophones. Recheck only affected dependencies after a repair.
+
+Record task-local start/end timestamps around authoring, synthesis, rendering and verification, including cache hits and repair causes. Read actual worker/render durations from their receipts. Saved-file times bound elapsed intervals; they do not identify continuous work or separate computation from review/waiting. Report that distinction when auditing production speed.
+
+Burned captions and SRT use the same short semantic pages. Check the actual target-language output in each requested aspect: readable size, at most two lines, no leading punctuation or broken numerical terms, no clipped cards/actions, and no isolated tail flashing by. Use `captions.set` when exact speech-aligned cue timing matters; automatic text-weight pagination estimates reading time and is not forced alignment.
 
 Completion requires: selected output dependencies valid; actual encoded landscape/portrait frames readable; arrows/cameras attached correctly; route and session facts consistent; questions answered before feedback; complete delivery reopens; independent skill-only creation works. Keep engineering results, content/sound review and real learner outcomes distinct.
