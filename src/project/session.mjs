@@ -2,6 +2,7 @@ import {check,errorJSON} from '../errors.mjs';
 import {clone,hash} from '../util.mjs';
 import {chips,loadState,transition,observe,displayState,createHand} from '../poker/rules.mjs';
 import {route} from './routes.mjs';
+import {decisionFingerprint} from '../analysis/index.mjs';
 
 function keys(value,allowed,path) {
   check(value&&typeof value==='object'&&!Array.isArray(value),'SESSION','Expected an object.',path);
@@ -58,7 +59,7 @@ function nextSetup(project,value) {
   const source=project.lesson.scenes.find(s=>s.id===value.sourceSceneId);check(source,'SCENE_UNKNOWN','The previous hand does not exist.','session/sourceSceneId');
   const branchId=value.sourceBranchId??null,{state,sourceHash}=sourceResult(source,branchId);
   check(state.settled,'SESSION_UNSETTLED','Settle the previous hand before carrying its stacks forward.','session/sourceSceneId');
-  const level=clone(value.level??source.continuity?.level??{bigBlind:source.start.bigBlind??1,...(source.start.rake?{rake:source.start.rake}:{}),...(source.start.unit?{unit:source.start.unit}:{})});
+  const level=clone(value.level??source.continuity?.level??{bigBlind:source.start.bigBlind??1,...(source.start.smallBlind!==undefined?{smallBlind:source.start.smallBlind}:{}),...(source.start.rake?{rake:source.start.rake}:{}),...(source.start.unit?{unit:source.start.unit}:{})});
   if(level.bigBlind!==1&&level.unit===undefined)level.unit='chips';levelSchema(level,'session/level');
   const buttonRule=level.buttonRule??(level.unit==='chips'?'dead':'moving');
   const adjustments=clone(value.adjustments??[]);adjustmentsSchema(adjustments,'session/adjustments');
@@ -93,15 +94,15 @@ function observationSource(project,note,session=project.lesson.session) {
   const playedBranch=hand.branchId??null,playedRoute=route(scene,playedBranch),addressedRoute=route(scene,note.branchId===undefined?playedBranch:note.branchId);
   const played=playedRoute.find(b=>b.id===note.beatId)?.actions?.[note.actionIndex],addressed=addressedRoute.find(b=>b.id===note.beatId)?.actions?.[note.actionIndex];
   check(played&&addressed&&hash(played)===hash(addressed),'SESSION_OBSERVATION_ROUTE','An observation must reference an action on the session’s recorded route; a shared prefix is allowed.','session/observations/'+note.id);
-  let state=loadState(scene.start);const history=[];
+  let state=loadState(scene.start);
   for(const beat of playedRoute){
     if(beat.view)state.revealed=[...new Set([...state.revealed,...beat.view.reveal])];
     for(const [i,action]of (beat.actions??[]).entries()){
-      state=transition(state,action);history.push(clone(action));
+      state=transition(state,action);
       if(beat.id===note.beatId&&i===note.actionIndex){
         check(action.seat===note.seatId||action.type==='showdown'&&state.revealed.includes(note.seatId),'SESSION_OBSERVATION','A player observation must reference that player’s public action or an actually revealed showdown.','session/observations/'+note.id);
-        const visible=observe(state),publicSeats=visible.seats.map(({id,stack,contributed,streetBet,folded,hole})=>({id,stack,contributed,streetBet,folded,hole}));
-        const sourceHash=hash({sceneId:scene.id,branchId:playedBranch,history,board:visible.board,seats:publicSeats,kind:note.kind,text:note.text});
+        const visible=observe(state);
+        const sourceHash=hash({sceneId:scene.id,branchId:playedBranch,decisionHash:decisionFingerprint(scene,{beatId:note.beatId,actionIndex:note.actionIndex}),kind:note.kind,text:note.text});
         return {sourceHash,branchId:playedBranch,action:clone(action),street:visible.street,board:clone(visible.board),unit:state.displayUnit??'BB',publicState:displayState(visible)};
       }
     }
@@ -109,9 +110,10 @@ function observationSource(project,note,session=project.lesson.session) {
   check(false,'SESSION_OBSERVATION','An observation must reference an existing completed player action.','session/observations/'+note.id);
 }
 /** Explicit author review binds a note to what was actually visible. */
-export function reviewSession(project,value) {
+export function reviewSession(project,value,reviewIds) {
   sessionSchema(value);const copy=clone(value);
-  copy.observations=(copy.observations??[]).map(note=>{const source=observationSource(project,note,copy);return {...note,branchId:source.branchId,sourceHash:source.sourceHash};});
+  if(reviewIds!==undefined)check(Array.isArray(reviewIds)&&new Set(reviewIds).size===reviewIds.length&&reviewIds.every(id=>copy.observations?.some(n=>n.id===id)),'SESSION_OBSERVATION','Review IDs must name distinct submitted observations.','session.set/reviewIds');
+  copy.observations=(copy.observations??[]).map(note=>{if(reviewIds!==undefined&&!reviewIds.includes(note.id))return note;const source=observationSource(project,note,copy);return {...note,branchId:source.branchId,sourceHash:source.sourceHash};});
   return copy;
 }
 export function resolveSessionObservations(project) {
@@ -153,4 +155,11 @@ export function sessionIssues(project) {
     catch(error){const e=errorJSON(error);issue(e.code,e.message,e.path,{sceneId:note.sceneId,beatId:note.beatId});}
   }
   return issues;
+}
+
+/** A selected later hand depends on every earlier hand in its recorded session. */
+export function sessionIssuesForScenes(project,sceneIds) {
+  const relevant=new Set(sceneIds),order=project.lesson.session?.hands.map(hand=>hand.sceneId)??[];
+  for(const sceneId of sceneIds){const index=order.indexOf(sceneId);if(index>=0)for(const prior of order.slice(0,index+1))relevant.add(prior);}
+  return sessionIssues(project).filter(issue=>!issue.target?.sceneId||relevant.has(issue.target.sceneId));
 }

@@ -29,6 +29,7 @@ export async function buildFullCourse(directory){
   await apply([{type:'analysis.importSolver',sceneId:model.id,analysisId:'strategy-import',source:{data:payload}}]);
   const current=await director.export();
   await apply(current.lesson.scenes.flatMap(scene=>[...(scene.analysis??[]).map(item=>({type:'analysis.confirm',sceneId:scene.id,analysisId:item.id})),...(scene.variant?[{type:'scene.review',sceneId:scene.id}]:[])]));
+  await apply([{type:'practice.set',value:(await director.export()).lesson.practice}]);
   const practiceFiles={};
   for(const locale of ['zh-CN','en-US','ja-JP']){const file=locale==='zh-CN'?'practice.html':`practice-${locale}.html`;await director.export({kind:'practice',locale,destination:join(directory,'evidence',file)});practiceFiles[locale]=`evidence/${file}`;}
   const final=await director.export(),packs=await localePacks(),deliveries=[];

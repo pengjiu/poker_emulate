@@ -7,7 +7,7 @@ import {pathToFileURL} from 'node:url';
 import {chromium} from 'playwright';
 import {continueSession,sessionIssues,reviewSession,resolveSessionObservations} from '../src/project/session.mjs';
 import {createVariant,variantIssues} from '../src/project/variants.mjs';
-import {answerPractice,practiceSummary,practiceIssues,practiceHTML} from '../src/project/practice.mjs';
+import {answerPractice,practiceSummary,practiceIssues,practiceHTML,reviewPractice} from '../src/project/practice.mjs';
 import {loadState,bankroll,createHand} from '../src/poker/rules.mjs';
 import {newProject,createProject} from '../src/project/store.mjs';
 import {Director} from '../src/director.mjs';
@@ -98,13 +98,14 @@ test('Single-variable changes replay board, holdings, stacks and actions and rej
   const variant=createVariant(turn,{id:'good',title:words('Different river'),change:{kind:'board',beatId:'river',actionIndex:0,cardIndex:0,card:'Tc'}});assert.equal(variant.beats[1].actions[0].cards[0],'Tc');
 });
 test('Practice records a real choice against its decision and answer version without claiming mastery',()=>{
-  const p=withPractice();assert.deepEqual(practiceIssues(p),[]);const record=answerPractice(p,{questionId:'q1',choiceIds:['call'],learnerId:'viewer',answeredAt:'2026-11-02T12:00:00Z'});p.lesson.practice.attempts.push(record);
+  const p=withPractice();p.lesson.practice=reviewPractice(p,p.lesson.practice);assert.deepEqual(practiceIssues(p),[]);const record=answerPractice(p,{questionId:'q1',choiceIds:['call'],learnerId:'viewer',answeredAt:'2026-11-02T12:00:00Z'});p.lesson.practice.attempts.push(record);
   assert.equal(record.correct,true);assert.equal(practiceSummary(p).current,1);assert.equal(practiceSummary(p).correct,1);
   p.lesson.practice.questions[0].correctChoiceIds=['fold'];assert.equal(practiceSummary(p).stale,1);assert.equal(practiceSummary(p).current,0);
   assert.throws(()=>answerPractice(p,{questionId:'q1',choiceIds:['raise']}),e=>e.code==='PRACTICE_CHOICE');
 });
 test('Portable practice hides feedback until answering, survives reopen and renders authored text safely',async t=>{
   const p=withPractice();p.lesson.practice.questions[0].prompt=words('</script><img src=x onerror="window.injected=true"> Which action?');
+  p.lesson.practice=reviewPractice(p,p.lesson.practice);
   const dir=await mkdtemp(join(tmpdir(),'river-practice-'));t.after(()=>rm(dir,{recursive:true,force:true}));const path=join(dir,'practice.html');await writeFile(path,practiceHTML(p,'zh-CN'));
   const browser=await chromium.launch({headless:true});t.after(()=>browser.close());const page=await browser.newPage({viewport:{width:390,height:844}});await page.goto(pathToFileURL(path).href);
   assert.equal(await page.locator('#feedback').isVisible(),false);assert.equal(await page.locator('#explanation').textContent(),'');assert.equal(await page.locator('img').count(),0);assert.equal(await page.evaluate(()=>window.injected),undefined);

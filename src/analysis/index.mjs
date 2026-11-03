@@ -122,7 +122,7 @@ export function decisionFingerprint(scene, node) {
     hole: id === hero || state.revealed.includes(id) ? hole : null
   }));
   const extra = {};
-  for (const name of ['rake', 'rakeTaken', 'deadPot', 'antePaid', 'forcedBet', 'displayUnit']) if (visible[name] !== undefined) extra[name] = clone(visible[name]);
+  for (const name of ['smallBlind', 'rake', 'rakeTaken', 'deadPot', 'antePaid', 'forcedBet', 'displayUnit']) if (visible[name] !== undefined) extra[name] = clone(visible[name]);
   return hash({street, board, button, actor, hero, bigBlind, lastFullRaise, actedAt, roundClosed, settled, seats, history, ...extra});
 }
 

@@ -88,7 +88,7 @@ export function sceneSchema(scene,path='scene'){
   if(scene.variant!==undefined)variantSchema(scene.variant,path+'/variant');
   if(scene.continuity!==undefined)continuitySchema(scene.continuity,path+'/continuity');
   if(scene.direction!==undefined)directionSchema(scene.direction,path+'/direction');
-  keys(scene.start,['street','board','button','hero','actor','bigBlind','lastFullRaise','actedAt','seats','roundClosed','rake','unit','deadPot','antePaid','forcedBet','blindSeats'],path+'/start');
+  keys(scene.start,['street','board','button','hero','actor','bigBlind','smallBlind','lastFullRaise','actedAt','seats','roundClosed','rake','unit','deadPot','antePaid','forcedBet','blindSeats'],path+'/start');
   const start=scene.start;
   list(start.seats,path+'/start/seats');for(const [i,seat]of start.seats.entries()){
     keys(seat,['id','name','stack','contributed','streetBet','folded','hole','avatar'],path+'/start/seats/'+i);
@@ -99,7 +99,7 @@ export function sceneSchema(scene,path='scene'){
     if(seat.avatar!==undefined)string(seat.avatar,path+'/start/seats/'+i+'/avatar');
   }
   if(start.board!==undefined)list(start.board,path+'/start/board');
-  for(const key of ['bigBlind','lastFullRaise'])if(start[key]!==undefined)finite(start[key],path+'/start/'+key);
+  for(const key of ['bigBlind','smallBlind','lastFullRaise'])if(start[key]!==undefined)finite(start[key],path+'/start/'+key);
   if(start.roundClosed!==undefined)check(typeof start.roundClosed==='boolean','SCHEMA','roundClosed must be boolean.',path+'/start/roundClosed');
   if(start.actedAt!==undefined){object(start.actedAt,path+'/start/actedAt');for(const [k,v]of Object.entries(start.actedAt))finite(v,path+'/start/actedAt/'+k);}
   try{loadState(start);}catch(error){error.path=path+'/start';throw error;}

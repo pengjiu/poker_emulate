@@ -106,3 +106,5 @@ Table stacks are read from the node; `otherStacks` only adds explicitly identifi
 - [PokerStars ICM introduction](https://www.pokerstars.com/poker/learn/lesson/icm-and-its-impact-on-tournaments/) identifies stacks and the payout structure as model inputs.
 
 The mathematical tests validate the implemented assumptions; external strategy truth and real learner outcomes require their own evidence.
+
+Scene-derived SPR, equity, outs and call EV require the hero still to be live. A folded hero cannot claim a share of the remaining pot. Explicit alternative-hand studies may use a separate hypothetical node or the independent `equityAgainstRange` calculation.

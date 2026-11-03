@@ -45,8 +45,8 @@ export async function produce(directory,{out,rehearsal=false,only,signal,onProgr
     await store.copyTo(join(stage,'project'));
     const practices=[];
     if(project.lesson.practice){
-      const {practiceHTML}=await import('../project/practice.mjs');
-      for(const locale of [...new Set(outputs.map(output=>output.locale))]){const file=`practice-${locale}.html`;await writeFile(join(stage,file),practiceHTML(project,locale));practices.push({locale,file});}
+      const {practiceHTML,verifyPractice}=await import('../project/practice.mjs');
+      for(const locale of [...new Set(outputs.map(output=>output.locale))]){await verifyPractice(project,frozen,{locale});const file=`practice-${locale}.html`;await writeFile(join(stage,file),practiceHTML(project,locale));practices.push({locale,file});}
       const preferred=practices.find(item=>item.locale===project.output.locale)??practices[0];await copyFile(join(stage,preferred.file),join(stage,'practice.html'));
     }
     const cards=outputs.map(o=>`<article><h2>${esc(o.title)}</h2><p>${esc(o.locale)} · ${esc(o.aspect)} · ${o.duration.toFixed(1)}s${o.status==='VISUAL_PASS'?' · 配音待制作 / Voice pending':''}</p><video controls preload="metadata" src="${o.video}"></video><p><a href="${o.video}">MP4</a> · <a href="${o.id}-transcript.json">Transcript</a> · <a href="${o.id}-chapters.json">Chapters</a></p></article>`).join('');

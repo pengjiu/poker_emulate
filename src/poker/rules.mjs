@@ -64,6 +64,10 @@ export function loadState(input) {
     seats:input.seats.map(p => ({id:p.id,name:p.name ?? p.id,stack:chips(p.stack),contributed:chips(p.contributed ?? 0),streetBet:chips(p.streetBet ?? 0),folded:!!p.folded,hole:[...(p.hole ?? [])],action:p.action ?? null})),
     roundClosed:!!input.roundClosed, settled:false, revealed:[], payouts:[], refunds:[], potAtAward:0, lastEvent:null
   };
+  if (input.smallBlind !== undefined) {
+    s.smallBlind = chips(input.smallBlind);
+    requireThat(s.smallBlind > 0 && s.smallBlind <= s.bigBlind, 'BLIND', 'The small blind must be positive and at most the big blind.');
+  }
   if (input.unit !== undefined) {
     requireThat(['BB','chips'].includes(input.unit), 'CHIP_UNIT', 'Use BB or chips as the display denomination.');
     requireThat(input.unit !== 'BB' || s.bigBlind === 100, 'CHIP_UNIT', 'BB display requires a big blind of one; use chips for changing tournament levels.');
@@ -259,7 +263,7 @@ export function observe(s, {view='player',seat=s.hero}={}) {
  * Legal actions and lastEvent already use author amounts and must remain unchanged. */
 export function displayState(state) {
   const s=clone(state);
-  for(const key of ['bigBlind','lastFullRaise','bankroll','pot','potAtAward','rakeTaken','deadPot','forcedBet'])if(s[key]!==undefined)s[key]/=100;
+  for(const key of ['bigBlind','smallBlind','lastFullRaise','bankroll','pot','potAtAward','rakeTaken','deadPot','forcedBet'])if(s[key]!==undefined)s[key]/=100;
   if(s.antePaid)s.antePaid=Object.fromEntries(Object.entries(s.antePaid).map(([id,amount])=>[id,amount/100]));
   if(s.rake)for(const key of ['cap','minPot'])s.rake[key]/=100;
   for(const paid of s.rakePaid??[])paid.amount/=100;
@@ -302,7 +306,7 @@ export function createHand(input) {
   const ordered=[...players.slice(bbIndex+1),...players.slice(0,bbIndex+1)];
   const actor=ordered.find(p=>p.stack>0)?.id??null;
   const roles={smallBlindSeat:sbIndex>=0?players[sbIndex].id:null,bigBlindSeat:players[bbIndex].id};
-  const start={street:'preflop',board:[],button,hero,bigBlind,lastFullRaise:bigBlind,unit,blindSeats:roles,seats:players.map(p=>({id:p.id,...(p.name!==undefined?{name:p.name}:{}),...(p.avatar!==undefined?{avatar:p.avatar}:{}),stack:p.stack/100,contributed:p.contributed/100,streetBet:p.streetBet/100,...(p.folded?{folded:true}:{}),hole:p.folded?[]:clone(p.hole??[])})),actor,roundClosed:!actor,...(dead?{deadPot:dead/100,antePaid:Object.fromEntries(Object.entries(antes).map(([id,value])=>[id,value/100]))}:{}),...(nominal?{forcedBet:bigBlind}:{}),...(rake?{rake:clone(rake)}:{})};
+  const start={street:'preflop',board:[],button,hero,bigBlind,...(sb*2!==bb?{smallBlind}:{}),lastFullRaise:bigBlind,unit,blindSeats:roles,seats:players.map(p=>({id:p.id,...(p.name!==undefined?{name:p.name}:{}),...(p.avatar!==undefined?{avatar:p.avatar}:{}),stack:p.stack/100,contributed:p.contributed/100,streetBet:p.streetBet/100,...(p.folded?{folded:true}:{}),hole:p.folded?[]:clone(p.hole??[])})),actor,roundClosed:!actor,...(dead?{deadPot:dead/100,antePaid:Object.fromEntries(Object.entries(antes).map(([id,value])=>[id,value/100]))}:{}),...(nominal?{forcedBet:bigBlind}:{}),...(rake?{rake:clone(rake)}:{})};
   const state=loadState(start);nextActor(state,players[bbIndex].id);integrity(state);
   start.actor=state.actor;start.roundClosed=state.roundClosed;
   for(const p of start.seats){const actual=player(state,p.id);p.stack=actual.stack/100;p.contributed=actual.contributed/100;p.streetBet=actual.streetBet/100;}

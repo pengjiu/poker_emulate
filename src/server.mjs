@@ -12,7 +12,7 @@ import {compileProject,validateProject} from './compiler.mjs';
 import {renderVideo} from './media/render.mjs';
 import {renderMixedAudio} from './media/mix.mjs';
 import {produce} from './media/produce.mjs';
-import {practiceHTML} from './project/practice.mjs';
+import {practiceHTML,verifyPractice} from './project/practice.mjs';
 import {keys} from './project/schema.mjs';
 import {check,errorJSON,fail} from './errors.mjs';
 import {hash,id} from './util.mjs';
@@ -68,7 +68,7 @@ export async function serve(directory,{port=4174}={}){
         json(res,200,{project,observation,plan,patterns:patterns(),locales:Object.keys(d.packs),dictionaries:d.packs,dictionary:d.packs[project.output.locale],job,voice:await d.voice({action:'status'})});return;
       }
       if(pathname==='/api/plan'){json(res,200,{plan:await d.export({kind:'plan'}),observation:await d.observe()});return;}
-      if(pathname==='/practice'){const p=await d.store.read();res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(practiceHTML(p,p.output.locale));return;}
+      if(pathname==='/practice'){const p=await d.store.read();await verifyPractice(p,d.store.directory);res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(practiceHTML(p,p.output.locale));return;}
       if(pathname==='/'){
         const html=await readFile(root+'src/studio/index.html','utf8');res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(html.replace('__SESSION_TOKEN__',JSON.stringify(token)));return;
       }

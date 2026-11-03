@@ -96,6 +96,10 @@ export function compileMetrics(state, item) {
   const result = [], fail = (kind, unit, reason) => ({kind, unit, value: null, applicable: false, reason});
   let equity;
   for (const kind of item.metrics ?? []) {
+    if (hero.folded) {
+      const unit = kind === 'spr' ? 'ratio' : kind === 'outs' ? 'cards' : kind === 'callEV' ? state.displayUnit ?? 'BB' : 'probability';
+      result.push(fail(kind, unit, 'The hero has folded and cannot contest this pot. Use a separately declared hypothetical node to study an alternative.')); continue;
+    }
     if (kind === 'spr') {
       const pot = visible.pot / 100, opponents = live.filter(seat => seat.id !== state.hero);
       result.push(pot > 0 && opponents.length ? {kind, unit: 'ratio', value: Math.min(hero.stack, Math.max(...opponents.map(seat => seat.stack))) / 100 / pot, applicable: true, pot, effectiveStack: Math.min(hero.stack, Math.max(...opponents.map(seat => seat.stack))) / 100, byOpponent: opponents.map(seat => ({seat: seat.id, effectiveStack: Math.min(hero.stack, seat.stack) / 100, value: Math.min(hero.stack, seat.stack) / 100 / pot})), definition: 'Remaining effective stack divided by the current gross pot; multiway headline uses the deepest live opponent.'} : fail(kind, 'ratio', 'SPR needs a positive unawarded pot and at least one opponent.')); continue;

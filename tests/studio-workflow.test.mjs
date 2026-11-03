@@ -7,6 +7,8 @@ import {createProject,newProject} from '../src/project/store.mjs';
 import {serve} from '../src/server.mjs';
 import {compileProject} from '../src/compiler.mjs';
 import {Director} from '../src/director.mjs';
+import {practiceIssues} from '../src/project/practice.mjs';
+import {resolveSessionObservations} from '../src/project/session.mjs';
 
 function lesson(){return {scenes:[{id:'finished',title:words('Completed hand'),start:{street:'river',board:['2c','5d','8h','9s','Jc'],button:'hero',hero:'hero',actor:'other',seats:[{id:'hero',name:'North',stack:95,contributed:5,hole:['Ah','Ad']},{id:'other',name:'Harbor',stack:95,contributed:5,hole:['Kh','Kd']}]},beats:[{id:'checks',label:words('Check through'),actions:[{type:'check',seat:'other'},{type:'check',seat:'hero'}]},{id:'award',label:words('Award'),actions:[{type:'showdown'}]}]}]};}
 test('director session and practice forms create a legal continuation and an answerable independent exercise',async t=>{
@@ -33,4 +35,19 @@ test('language-specific rehearsal estimates do not replace an attached voice dur
   const p=newProject(lesson()),beat=p.lesson.scenes[0].beats[0];beat.narration=words('A reading-time example.');beat.hold=.2;beat.rehearsalDuration={'zh-CN':4,'en-US':8,'ja-JP':6};
   const durations=Object.keys(beat.rehearsalDuration).map(locale=>compileProject(p,packs,{output:{locale}}).frames.find(f=>f.narration).narrationDuration);assert.deepEqual(durations,[4,8,6]);
   const {hash}=await import('../src/util.mjs'),assetId='a'.repeat(64);p.assets[assetId]={path:'assets/'+assetId+'.wav',sha256:assetId,bytes:200,duration:2,mime:'audio/wav'};beat.audio={'zh-CN':{assetId,locale:'zh-CN',textHash:hash(beat.narration['zh-CN'])}};assert.equal(compileProject(p,packs).frames.find(f=>f.audio).narrationDuration,2);
+});
+
+test('editing one practice item and adding one observation leave other stale content unconfirmed',async t=>{
+  const dir=await temp(t),store=await createProject(join(dir,'project'),newProject(lesson())),d=await Director.open(store.directory);
+  const question={id:'one',sceneId:'finished',node:{beatId:'checks'},prompt:words('First question'),choices:[{id:'hero',text:words('North')},{id:'other',text:words('Harbor')}],correctChoiceIds:['hero'],explanation:words('Original explanation')};
+  const practice={id:'practice',title:words('Practice'),questions:[question,{...structuredClone(question),id:'two',prompt:words('Second question')}]};
+  await d.apply({requestId:'prepare',expectedRevision:0,commands:[{type:'practice.set',value:practice},{type:'session.set',value:{id:'session',title:words('Session'),hands:[{sceneId:'finished'}],observations:[{id:'old',sceneId:'finished',beatId:'checks',actionIndex:0,seatId:'other',kind:'observed',text:words('Original blind interpretation')} ]}}]});
+  const s=(await store.read()).lesson.scenes[0];s.start.bigBlind=3;s.start.smallBlind=1;s.start.unit='chips';
+  await d.apply({requestId:'changed-level',expectedRevision:1,commands:[{type:'scene.put',value:s}]});
+  let server,browser;t.after(async()=>{await browser?.close();await server?.close();});server=await serve(store.directory,{port:0});browser=await chromium.launch();const page=await browser.newPage();await page.goto(server.url);
+  await page.locator('[data-ui="workflow-practice"]').evaluate(b=>b.closest('details').open=true);await page.click('[data-ui="workflow-practice"]');await page.selectOption('[data-work="question"]','one');await page.fill('[data-work="explanation"]','Reviewed only the first question.');await page.click('.modal-overlay [data-save]');await page.waitForSelector('.modal-overlay',{state:'detached'});
+  assert.ok(practiceIssues(await store.read()).some(i=>i.code==='PRACTICE_STALE'&&i.path==='practice/two'));
+  await page.locator('[data-ui="workflow-observation"]').evaluate(b=>b.closest('details').open=true);await page.click('[data-ui="workflow-observation"]');await page.fill('[data-work="note"]','A new observation under the new level.');await page.click('.modal-overlay [data-save]');await page.waitForSelector('.modal-overlay',{state:'detached'});
+  const notes=resolveSessionObservations(await store.read());assert.equal(notes[0].current,false);assert.equal(notes[1].current,true);
+  await page.locator('[data-ui="workflow-session"]').evaluate(b=>b.closest('details').open=true);await page.click('[data-ui="workflow-session"]');assert.equal(await page.inputValue('[data-work="smallBlind"]'),'1');assert.equal(await page.inputValue('[data-work="bigBlind"]'),'3');
 });

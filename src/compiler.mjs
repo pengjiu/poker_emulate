@@ -10,7 +10,7 @@ import {compilePresentations} from './presentation.mjs';
 import {variantReviewHash,variantIssues} from './project/variants.mjs';
 import {route} from './project/routes.mjs';
 import {compileSound} from './media/sound.mjs';
-import {sessionIssues,resolveSessionObservations} from './project/session.mjs';
+import {sessionIssuesForScenes,resolveSessionObservations} from './project/session.mjs';
 import {practiceIssues} from './project/practice.mjs';
 import {courseAdvisories} from './project/course.mjs';
 export {route} from './project/routes.mjs';
@@ -98,10 +98,9 @@ export function compileProject(project,packs,{output={},view='player'}={}){
   const course=project.lesson.course;
   if(course&&selected.sequence&&JSON.stringify(selected.sequence.map(e=>e.sceneId))!==JSON.stringify(course.episodes.flatMap(e=>e.sceneIds??[e.sceneId])))plan.advisories=[{code:'COURSE_ORDER_REVIEW',path:'lesson/course/episodes',message:'Programme order differs from the course brief. Review prerequisites, repetition and answer disclosure; update the course brief if this order is intentional.'}];
   const advisory=courseAdvisories(project,entries);if(advisory.length)plan.advisories=[...(plan.advisories??[]),...advisory];
-  const selectedScenes=new Set(entries.map(e=>e.scene.id)),sessionScenes=new Set(selectedScenes),sessionOrder=project.lesson.session?.hands.map(hand=>hand.sceneId)??[];
-  for(const sceneId of selectedScenes){const index=sessionOrder.indexOf(sceneId);if(index>=0)for(const prior of sessionOrder.slice(0,index+1))sessionScenes.add(prior);}
-  for(const issue of [...variantIssues(project),...practiceIssues(project)])if(!issue.target?.sceneId||selectedScenes.has(issue.target.sceneId))issues.push(issue);
-  for(const issue of sessionIssues(project))if(!issue.target?.sceneId||sessionScenes.has(issue.target.sceneId))issues.push(issue);
+  const selectedScenes=new Set(entries.map(e=>e.scene.id));
+  for(const issue of [...variantIssues(project),...practiceIssues(project,selected.locale)])if(!issue.target?.sceneId||selectedScenes.has(issue.target.sceneId))issues.push(issue);
+  issues.push(...sessionIssuesForScenes(project,selectedScenes));
   if(project.lesson.session){
     let notes=[];try{notes=resolveSessionObservations(project);}catch{}
     const order=project.lesson.session.hands.map(h=>h.sceneId);

@@ -14,7 +14,7 @@ const keys = (value, allowed, path) => { check(object(value), 'SOLVER_SCHEMA', '
 
 export function solverDecision(state) {
   const visible = displayState(observe(state));
-  return {street: visible.street, board: clone(visible.board), button: visible.button, hero: visible.hero, actor: visible.actor, unit: visible.unit, bigBlind: visible.bigBlind, pot: visible.pot, deadPot: visible.deadPot ?? 0, seats: visible.seats.map(player => ({id: player.id, stack: player.stack, contributed: player.contributed, streetBet: player.streetBet, folded: player.folded, hole: player.id===visible.hero||visible.revealed.includes(player.id)?clone(player.hole):[null,null]}))};
+  return {street: visible.street, board: clone(visible.board), button: visible.button, hero: visible.hero, actor: visible.actor, unit: visible.unit, bigBlind: visible.bigBlind, ...(visible.smallBlind!==undefined?{smallBlind:visible.smallBlind}:{}), pot: visible.pot, deadPot: visible.deadPot ?? 0, seats: visible.seats.map(player => ({id: player.id, stack: player.stack, contributed: player.contributed, streetBet: player.streetBet, folded: player.folded, hole: player.id===visible.hero||visible.revealed.includes(player.id)?clone(player.hole):[null,null]}))};
 }
 
 export function solverSchema(solver, path = 'solver') {

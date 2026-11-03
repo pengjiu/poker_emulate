@@ -1,7 +1,10 @@
 import {check,errorJSON} from '../errors.mjs';
 import {clone,hash,id} from '../util.mjs';
 import {observe,displayState} from '../poker/rules.mjs';
-import {resolveDecision,decisionFingerprint} from '../analysis/index.mjs';
+import {resolveDecision,decisionFingerprint,compileAnalysis} from '../analysis/index.mjs';
+import {verifyEvidence} from '../analysis/evidence.mjs';
+import {sessionIssuesForScenes} from './session.mjs';
+import {variantIssues} from './variants.mjs';
 
 function keys(value,allowed,path) {
   check(value&&typeof value==='object'&&!Array.isArray(value),'PRACTICE','Expected an object.',path);
@@ -17,7 +20,8 @@ export function practiceSchema(value,path='lesson/practice') {
   check(Array.isArray(value.questions)&&value.questions.length>0,'PRACTICE','Provide at least one question.',path+'/questions');
   const seen=new Set();
   for(const [i,q]of value.questions.entries()){
-    const p=path+'/questions/'+i;keys(q,['id','sceneId','node','analysisId','prompt','choices','correctChoiceIds','explanation','objective'],p);
+    const p=path+'/questions/'+i;keys(q,['id','sceneId','node','analysisId','prompt','choices','correctChoiceIds','explanation','objective','review'],p);
+    if(q.review!==undefined){keys(q.review,['questionHash'],p+'/review');check(/^[a-f0-9]{64}$/.test(q.review.questionHash),'PRACTICE_REVIEW','Question confirmation is produced by practice.set.',p+'/review');}
     for(const key of ['id','sceneId'])text(q[key],p+'/'+key);check(!seen.has(q.id),'PRACTICE','Question IDs must be unique.',p+'/id');seen.add(q.id);
     keys(q.node,['beatId','actionIndex'],p+'/node');text(q.node.beatId,p+'/node/beatId');
     if(q.node.actionIndex!==undefined)check(Number.isSafeInteger(q.node.actionIndex)&&q.node.actionIndex>=0,'PRACTICE','Use a completed zero-based action.',p+'/node/actionIndex');
@@ -38,27 +42,59 @@ function questionContext(project,question) {
   check(!question.analysisId||material,'ANALYSIS_UNKNOWN','Practice references missing analysis.','practice/'+question.id+'/analysisId');
   if(material)check(decisionFingerprint(scene,material.node)===decisionHash,'PRACTICE_NODE','The practice and its analysis must address the same public decision.','practice/'+question.id+'/analysisId');
   const {review,...analysis}=material??{};
-  return {state:displayState(observe(state)),questionHash:hash({question,decisionHash,analysis:material?analysis:null})};
+  const {review:ignored,...content}=question;
+  return {state:displayState(observe(state)),questionHash:hash({question:content,decisionHash,analysis:material?analysis:null}),scene,material};
 }
 export function questionVersion(project,question) { return questionContext(project,question).questionHash; }
+
+// Saving the reviewed question binds both its answer and the facts it teaches.
+// Later fact changes must never silently promote an old answer to a new version.
+export function reviewPractice(project,value,reviewIds) {
+  practiceSchema(value);const practice=clone(value);
+  if(reviewIds!==undefined)check(Array.isArray(reviewIds)&&new Set(reviewIds).size===reviewIds.length&&reviewIds.every(id=>practice.questions.some(q=>q.id===id)),'PRACTICE_REVIEW','Review IDs must name distinct submitted questions.','practice.set/reviewIds');
+  for(const question of practice.questions)if(reviewIds===undefined||reviewIds.includes(question.id))question.review={questionHash:questionVersion(project,question)};
+  return practice;
+}
+function readyQuestion(project,question,locale=project.output.locale) {
+  const context=questionContext(project,question),path='practice/'+question.id;
+  check(question.review,'PRACTICE_UNREVIEWED','Review the question, answer and explanation, then save through practice.set.',path);
+  check(question.review.questionHash===context.questionHash,'PRACTICE_STALE','Question conditions or content changed; review the answer and explanation through practice.set.',path);
+  const sources=new Set([question.sceneId]);
+  for(const sceneId of sources){const source=project.lesson.scenes.find(s=>s.id===sceneId)?.variant?.sourceSceneId;if(source)sources.add(source);}
+  const dependency=[...sessionIssuesForScenes(project,sources),...variantIssues(project).filter(issue=>sources.has(issue.target?.sceneId))][0];
+  if(dependency)check(false,dependency.code,dependency.message,dependency.path);
+  const analysis=context.material?compileAnalysis(context.scene,context.material,locale):null;
+  if(analysis?.issues.length){const issue=analysis.issues[0];check(false,issue.code,issue.message,issue.path);}
+  return {...context,analysis};
+}
+
+export async function verifyPractice(project,directory,{locale=project.output.locale,questionId}={}) {
+  const practice=project.lesson.practice;if(!practice)return;
+  practiceSchema(practice);
+  for(const question of practice.questions.filter(q=>questionId===undefined||q.id===questionId)){
+    const {analysis}=readyQuestion(project,question,locale);
+    if(analysis?.evidence?.source)await verifyEvidence(directory,analysis.evidence);
+  }
+}
 export function answerPractice(project,value) {
   keys(value,['questionId','choiceIds','learnerId','answeredAt'],'practice.answer');text(value.questionId,'practice.answer/questionId');uniqueStrings(value.choiceIds,'practice.answer/choiceIds');
   const practice=project.lesson.practice;check(practice,'PRACTICE','No practice set is attached.','lesson/practice');practiceSchema(practice);
   const question=practice.questions.find(q=>q.id===value.questionId);check(question,'PRACTICE_QUESTION','Unknown question.','practice.answer/questionId');
   check(value.choiceIds.every(id=>question.choices.some(c=>c.id===id)),'PRACTICE_CHOICE','The answer contains an unknown choice.','practice.answer/choiceIds');
+  readyQuestion(project,question);
   const learnerId=value.learnerId??'local',answeredAt=value.answeredAt??new Date().toISOString();text(learnerId,'practice.answer/learnerId');check(Number.isFinite(Date.parse(answeredAt)),'PRACTICE','Use an ISO date for the answer time.','practice.answer/answeredAt');
   const choiceIds=[...value.choiceIds].sort(),expected=[...question.correctChoiceIds].sort();
   return {id:id(),questionId:question.id,questionHash:questionVersion(project,question),choiceIds,correct:hash(choiceIds)===hash(expected),learnerId,answeredAt};
 }
 export function practiceSummary(project) {
   const practice=project.lesson.practice;if(!practice)return {questions:0,attempts:0,current:0,correct:0,stale:0,results:[]};practiceSchema(practice);
-  const versions=new Map(practice.questions.map(q=>[q.id,questionVersion(project,q)])),results=(practice.attempts??[]).map(a=>({...clone(a),current:versions.get(a.questionId)===a.questionHash}));
+  const versions=new Map(practice.questions.map(q=>{try{return [q.id,readyQuestion(project,q).questionHash];}catch{return [q.id,null];}})),results=(practice.attempts??[]).map(a=>({...clone(a),current:versions.get(a.questionId)===a.questionHash}));
   const current=results.filter(a=>a.current);
   return {questions:practice.questions.length,attempts:results.length,current:current.length,correct:current.filter(a=>a.correct).length,stale:results.length-current.length,results};
 }
-export function practiceIssues(project) {
+export function practiceIssues(project,locale=project.output.locale) {
   const practice=project.lesson.practice,issues=[];if(!practice)return issues;practiceSchema(practice);
-  for(const question of practice.questions){try{questionContext(project,question);}catch(error){const e=errorJSON(error);issues.push({...e,target:{sceneId:question.sceneId,beatId:question.node.beatId}});}}
+  for(const question of practice.questions){try{readyQuestion(project,question,locale);}catch(error){const e=errorJSON(error);issues.push({...e,target:{sceneId:question.sceneId,beatId:question.node.beatId}});}}
   // Old answers are historical records, not a reason to block a new video.
   return issues;
 }
@@ -71,7 +107,7 @@ export function practiceHTML(project,locale=project.output.locale) {
   const zh=locale.startsWith('zh'),ja=locale.startsWith('ja'),labels=zh?{title:'练习',submit:'提交答案',next:'下一题',again:'重新作答',correct:'回答正确',incorrect:'请再核对条件',select:'请至少选择一项',progress:'题目',saved:'作答记录保存在本机。更改题目后旧记录仍保留，但不计入新版结果。',export:'导出作答记录',multi:'可以选择一项或多项。',history:'本机作答记录',empty:'尚无记录',score:'正确',current:'当前版本',stale:'旧版本',chips:'筹码',pot:'底池',hero:'英雄手牌'}:ja?{title:'練習',submit:'回答する',next:'次の問題',again:'もう一度',correct:'正解',incorrect:'前提を確認してください',select:'選択肢を選んでください',progress:'問題',saved:'回答はこの端末に保存されます。改訂前の回答は新しい結果に含まれません。',export:'回答を出力',multi:'一つ以上選択できます。',history:'回答履歴',empty:'回答はありません',score:'正解',current:'現在の版',stale:'以前の版',chips:'チップ',pot:'ポット',hero:'ヒーローの手札'}:{title:'Practice',submit:'Submit answer',next:'Next question',again:'Try again',correct:'Correct',incorrect:'Review the conditions',select:'Select at least one choice',progress:'Question',saved:'Answers stay on this device. Earlier versions remain in history and do not count toward a revised question.',export:'Export answers',multi:'Select one or more choices.',history:'Answer history',empty:'No answers yet',score:'Correct',current:'Current version',stale:'Earlier version',chips:'chips',pot:'Pot',hero:'Hero cards'};
   labels.actor=zh?'当前行动者':ja?'現在の手番':'Acting player';labels.call=zh?'跟注额':ja?'コール額':'Call amount';
   const streets=zh?{preflop:'翻前',flop:'翻牌',turn:'转牌',river:'河牌'}:ja?{preflop:'プリフロップ',flop:'フロップ',turn:'ターン',river:'リバー'}:{preflop:'Preflop',flop:'Flop',turn:'Turn',river:'River'};
-  const questions=practice.questions.map(q=>{const {state,questionHash}=questionContext(project,q);return {id:q.id,version:questionHash,prompt:localized(q.prompt,locale,'practice/'+q.id+'/prompt'),objective:q.objective?localized(q.objective,locale,'practice/'+q.id+'/objective'):null,choices:q.choices.map(c=>({id:c.id,text:localized(c.text,locale,'practice/'+q.id+'/choices/'+c.id)})),correctChoiceIds:q.correctChoiceIds,explanation:localized(q.explanation,locale,'practice/'+q.id+'/explanation'),context:{street:streets[state.street],board:state.board,hero:state.seats.find(s=>s.id===state.hero)?.hole??[],pot:state.pot,toCall:state.legalActions.find(a=>a.type==='call')?.amount??0,actor:state.seats.find(s=>s.id===state.actor)?.name??'—',unit:state.unit==='chips'?labels.chips:state.unit,seats:state.seats.map(s=>({id:s.id,name:s.name,stack:s.stack,folded:s.folded}))}};});
+  const questions=practice.questions.map(q=>{const {state,questionHash}=readyQuestion(project,q,locale);return {id:q.id,version:questionHash,prompt:localized(q.prompt,locale,'practice/'+q.id+'/prompt'),objective:q.objective?localized(q.objective,locale,'practice/'+q.id+'/objective'):null,choices:q.choices.map(c=>({id:c.id,text:localized(c.text,locale,'practice/'+q.id+'/choices/'+c.id)})),correctChoiceIds:q.correctChoiceIds,explanation:localized(q.explanation,locale,'practice/'+q.id+'/explanation'),context:{street:streets[state.street],board:state.board,hero:state.seats.find(s=>s.id===state.hero)?.hole??[],pot:state.pot,toCall:state.legalActions.find(a=>a.type==='call')?.amount??0,actor:state.seats.find(s=>s.id===state.actor)?.name??'—',unit:state.unit==='chips'?labels.chips:state.unit,seats:state.seats.map(s=>({id:s.id,name:s.name,stack:s.stack,folded:s.folded}))}};});
   const title=localized(practice.title,locale,'practice/title'),payload={id:practice.id,title,locale,labels,questions};
   return `<!doctype html><html lang="${escapeHTML(locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(title)}</title><style>
 *{box-sizing:border-box}body{margin:0;background:#0d1720;color:#e9f2f7;font:17px/1.6 system-ui,sans-serif;overflow-wrap:anywhere}main{max-width:900px;margin:36px auto;padding:0 22px}h1{font-size:30px;margin-bottom:10px}.muted{color:#9fb4c5}section{background:#162632;border:1px solid #304654;border-radius:18px;padding:24px;margin:22px 0}.context{display:flex;flex-wrap:wrap;gap:12px 28px;color:#b8dacf}.cards{font-size:24px;letter-spacing:4px}.choices{display:grid;gap:12px}label{display:flex;gap:12px;padding:14px;background:#1c3443;border:1px solid #3b5362;border-radius:10px;cursor:pointer}input{width:20px;height:20px;margin-top:5px;flex-shrink:0}button{padding:11px 20px;background:#8bd9b6;color:#112b25;border:0;border-radius:9px;font:inherit;cursor:pointer;margin:8px 12px 8px 0}button:disabled{opacity:.5;cursor:default}#feedback{border-left:4px solid #8bd9b6;padding:12px 18px;background:#213a38;margin-top:20px}#feedback[hidden]{display:none}ul{padding-left:22px}.history-row{font-size:14px;border-bottom:1px solid #304654;padding:8px 0}.bar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}#notice{color:#ffc87a}@media(max-width:500px){main{margin:20px auto;padding:0 14px}section{padding:18px}h1{font-size:25px}}
