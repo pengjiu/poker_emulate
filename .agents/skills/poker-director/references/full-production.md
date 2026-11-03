@@ -112,4 +112,6 @@ If the user explicitly postpones voice generation, `--rehearsal` produces a labe
 
 Use `scripts/build-full-course.mjs --help` for an executable example of three progressive episodes, range studies, comparison, continuous hands, tournament/rake boundaries and practice. The example is reusable input, not a restriction on creative structure.
 
+After rendering, run `node scripts/verify-media.mjs RENDER_DIRECTORY PROJECT_DIRECTORY` against the returned fingerprint directory and its actual source project. It decodes the MP4, compares action/key frames, and checks complete source narration plus interior windows; a failure exits nonzero and a pass writes `decoded-validation.json`. This verifies encoding fidelity, not whether the TTS actually spoke every source clause. Review the actual speech content separately as described in the voice reference.
+
 Completion requires: selected output dependencies valid; actual encoded landscape/portrait frames readable; arrows/cameras attached correctly; route and session facts consistent; questions answered before feedback; complete delivery reopens; independent skill-only creation works. Keep engineering results, content/sound review and real learner outcomes distinct.

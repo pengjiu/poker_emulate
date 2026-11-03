@@ -37,11 +37,11 @@ async function runEngine(request,signal,onProgress){
     child.stderr.on('data',append);
     signal.addEventListener('abort',kill,{once:true});if(signal.aborted)kill();timer=setTimeout(()=>{timedOut=true;kill();},request.timeoutSeconds*1000);
     let spawnError;child.on('error',error=>{spawnError=error;});
-    child.on('close',async code=>{
+    child.on('close',async(code,exitSignal)=>{
       clearTimeout(timer);clearTimeout(force);signal.removeEventListener('abort',kill);log.end();
       if(signal.aborted){reject(Object.assign(new Error('Voice generation cancelled.'),{code:'VOICE_CANCELLED'}));return;}
       if(timedOut){reject(Object.assign(new Error('Voice generation timed out.'),{code:'VOICE_TIMEOUT'}));return;}
-      if(spawnError||code!==0){let tail='';try{tail=(await readFile(logPath,'utf8')).slice(-6000);}catch{}reject(Object.assign(new Error('IndexTTS generation failed.'),{code:'VOICE_FAILED',cause:spawnError?.message,detail:tail}));return;}
+      if(spawnError||code!==0){let tail='';try{tail=(await readFile(logPath,'utf8')).slice(-6000);}catch{}reject(Object.assign(new Error(`IndexTTS worker exited unexpectedly (${exitSignal??'code '+code}).`),{code:'VOICE_FAILED',cause:spawnError?.message,detail:tail,process:{exitCode:code,signal:exitSignal}}));return;}
       try{accept(JSON.parse(await readFile(request.result,'utf8')));}catch(error){reject(error);}
     });
   });
@@ -112,7 +112,7 @@ export class VoiceController{
       check(!abort.signal.aborted,'VOICE_CANCELLED','Voice generation cancelled.');
       check(result.clips?.length===clips.length,'VOICE_FAILED','Engine did not return every requested clip.');
       for(const c of clips)await probeAudio(c.output);
-      const evidence={engine:result.engine,device:result.device,seconds:result.seconds,locale,sceneId,referenceHash:baseSpeaker.sha256,settings:profile,clips:clips.map(({sceneId,beatId,narration,spokenText,settings,referenceHash})=>({sceneId,beatId,narration,spokenText,settings,referenceHash})),source:'https://github.com/index-tts/index-tts',state:'generated; project receipt determines attachment',requestId:params.requestId};
+      const evidence={engine:result.engine,device:result.device,seconds:result.seconds,...(result.runtime?{runtime:result.runtime}:{}),locale,sceneId,referenceHash:baseSpeaker.sha256,settings:profile,clips:clips.map(({sceneId,beatId,narration,spokenText,settings,referenceHash})=>({sceneId,beatId,narration,spokenText,settings,referenceHash})),source:'https://github.com/index-tts/index-tts',state:'generated; project receipt determines attachment',requestId:params.requestId};
       const value=await d.commit(params,signature,async current=>{
         const imported=await importAudio(d.store.directory,{path:baseSpeaker.path});current.assets[imported.assetId]=imported.asset;
         const finalProfile={...profile,referenceAssetId:imported.assetId};current.voice??={};current.voice[locale]=finalProfile;
@@ -127,10 +127,10 @@ export class VoiceController{
       },{beforeCommit:()=>{check(!abort.signal.aborted,'VOICE_CANCELLED','Voice generation cancelled.');this.job={...this.job,status:'committing'};}});
       this.job={status:'complete',index:clips.length,total:clips.length,sceneId,locale,revision:value.revision,engine:result.engine,device:result.device,seconds:result.seconds};return value;
     }catch(cause){
-      const error=cause instanceof RiverError?cause:new RiverError(cause.code?.startsWith('VOICE_')?cause.code:'VOICE_FAILED',cause.message,'voice',{detail:cause.detail??cause.cause});
+      const error=cause instanceof RiverError?cause:new RiverError(cause.code?.startsWith('VOICE_')?cause.code:'VOICE_FAILED',cause.message,'voice',{detail:cause.detail??cause.cause,...(cause.process?{process:cause.process}:{})});
       this.job={...this.job,status:error.code==='VOICE_CANCELLED'?'cancelled':'failed',error:errorJSON(error)};
       // Preserve a bounded diagnostic outside the temporary worker directory.
-      try{const log=await readFile(join(directory,'engine.log'));const destination=join(d.store.directory,'evidence/voice');await mkdir(destination,{recursive:true});await writeFile(join(destination,'failed-'+signature+'.log'),log);}catch{}
+      try{const destination=join(d.store.directory,'evidence/voice');await mkdir(destination,{recursive:true});await writeFile(join(destination,'failed-'+signature+'.json'),JSON.stringify({requestId:params.requestId,sceneId,locale,error:errorJSON(error)},null,2)+'\n');const log=await readFile(join(directory,'engine.log'));await writeFile(join(destination,'failed-'+signature+'.log'),log);}catch{}
       throw error;
     }finally{if(directory)await rm(directory,{recursive:true,force:true});await release();}
   }

@@ -1,5 +1,7 @@
 # River Studio 执行状态
 
+2026-11-03：PR #1 的本地根因修复、完整课程重制及当前验收见 [完整课程复验与 5W 记录](reviews/2026-11-03/full-course-completion.md)。以下版本状态与 `release.json` 保留为原批次历史，不用于冒充本轮成片结果。
+
 2026-11-02：M1–M8 的 v1.0.0 基线保留。当前 v1.2.0 加入开放讲解模式、连续动作/语音、多手和分支顺序、独立声源及绑定音频的精确字幕；详见 [STYLE_MODES_REVIEW.md](STYLE_MODES_REVIEW.md)。v1.1.0 的官方 IndexTTS2.5 与134秒六人桌完整课程保留。最终验收以 [release.json](../release.json) 及其 qualification 为准。
 
 中文 GTO 真实任务首轮失败、一次反馈后交付，精修 skill 后又完成独立渲染前复测。目录和字幕通用修复见 [REAL_SCENARIO_REVIEW.md](REAL_SCENARIO_REVIEW.md)。

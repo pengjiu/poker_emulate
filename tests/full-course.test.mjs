@@ -29,6 +29,16 @@ test('The complete authoring builder prepares every delivery with only voice pen
   const rich=compileAnalysis(scene,scene.analysis.find(a=>a.id==='weighted'),'zh-CN'),lean=compileAnalysis(scene,scene.analysis.find(a=>a.id==='low-bluff'),'zh-CN');
   assert.ok(Math.abs(rich.metrics.find(m=>m.kind==='equity').value-1/3)<1e-12);assert.ok(rich.metrics.find(m=>m.kind==='callEV').value>0);assert.equal(rich.range.matrix.length,169);
   assert.equal(lean.metrics.find(m=>m.kind==='equity').value,.25);assert.ok(lean.metrics.find(m=>m.kind==='callEV').value<0);assert.equal(rich.calculation.threshold,6/21.1);
+  const variant=project.lesson.scenes.find(s=>s.id==='full-price-turn-ace');
+  const before=compileAnalysis(scene,scene.analysis.find(a=>a.id==='board-baseline'),'zh-CN'),after=compileAnalysis(variant,variant.analysis.find(a=>a.id==='changed'),'zh-CN');
+  assert.deepEqual(scene.analysis.find(a=>a.id==='board-baseline').range,variant.analysis.find(a=>a.id==='changed').range);
+  assert.equal(before.metrics.find(m=>m.kind==='equity').value,.25);assert.equal(after.metrics.find(m=>m.kind==='equity').value,.5);
+  assert.ok(Math.abs(before.metrics.find(m=>m.kind==='callEV').value+.725)<1e-12);assert.ok(Math.abs(after.metrics.find(m=>m.kind==='callEV').value-4.55)<1e-12);
+  const third=project.lesson.scenes.find(s=>s.id==='full-session-3'),riverThought=observe(resolveDecision(third,{beatId:'river-plan'}));
+  assert.deepEqual(riverThought.board,['9d','6c','2h','Kd','3c']);assert.equal(riverThought.actor,riverThought.hero);assert.equal(riverThought.legalActions.find(a=>a.type==='check')?.type,'check');
+  const short=project.lesson.scenes.find(s=>s.id==='full-short');assert.ok(short.beats.findIndex(b=>b.id==='price')<short.beats.findIndex(b=>b.id==='weighted'));
+  const transfer=compileAnalysis(scene,scene.analysis.find(a=>a.id==='transfer-weights'),'zh-CN');assert.equal(transfer.metrics.find(m=>m.kind==='equity').value,.2);assert.ok(Math.abs(transfer.metrics.find(m=>m.kind==='callEV').value+1.78)<1e-12);
+  assert.equal(answerPractice(project,{questionId:'weighted-transfer',choiceIds:['fold']}).correct,true);
   const model=project.lesson.scenes.find(s=>s.id==='full-equilibrium'),strategy=compileAnalysis(model,model.analysis.find(a=>a.id==='strategy-import'),'zh-CN');assert.equal(strategy.solver.model.accuracy.value,0);assert.equal(strategy.range.combos[0].actions.call,.5);
   assert.deepEqual(sessionIssues(project),[]);const notes=resolveSessionObservations(project);assert.equal(notes.length,1);assert.equal(notes[0].current,true);assert.deepEqual(notes[0].publicState.seats.find(s=>s.id==='bb').hole,['Ks','Jh']);
   for(const s of project.lesson.scenes.filter(s=>['full-price','full-session-2','full-session-3'].includes(s.id))){const state=resolveDecision(s,{beatId:s.beats.at(-1).id});assert.equal(bankroll(state),60000);assert.equal(state.settled,true);}

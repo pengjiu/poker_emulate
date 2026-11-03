@@ -99,7 +99,15 @@ export function frameAt(plan,index){return plan.frames.find(f=>index>=f.startFra
 export function narrationCues(plan){
   const cues=new Map();for(const f of plan.frames)if(f.narration){const id=f.narrationId??f.id;if(!cues.has(id))cues.set(id,{id,sceneId:f.sceneId,entryId:f.entryId,beatId:f.beatId,speaker:f.speaker??null,text:f.narration,start:f.narrationStart??f.start,duration:f.narrationDuration??f.audio?.duration??f.duration,audio:f.audio,captionCues:f.captionCues??null});}return [...cues.values()];
 }
-export function subtitleCues(plan){return narrationCues(plan).flatMap(cue=>cue.captionCues?cue.captionCues.map(c=>({text:c.text,start:cue.start+c.start,end:cue.start+c.end})):[{text:cue.text,start:cue.start,end:cue.start+cue.duration}]);}
+export function subtitleCues(plan){
+  return narrationCues(plan).flatMap(cue=>{
+    const passages=cue.captionCues??[{text:cue.text,start:0,end:cue.duration}];
+    return passages.flatMap(passage=>captionPages(passage.text,plan.aspect==='portrait').map(page=>({
+      text:page.text,start:cue.start+passage.start+page.startFraction*(passage.end-passage.start),
+      end:cue.start+passage.start+page.endFraction*(passage.end-passage.start)
+    })));
+  });
+}
 export function narrationAt(plan,index){
   const frame=frameAt(plan,index);if(!frame?.narration)return null;
   const start=frame.narrationStart??frame.start,duration=frame.narrationDuration??frame.audio?.duration??frame.duration,elapsed=(index-Math.round(start*plan.fps))/plan.fps;

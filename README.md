@@ -1,5 +1,7 @@
 # River Studio
 
+最新本地修复、完整课程交付与逐项 5W 记录见 [2026-11-03 完整课程复验](docs/reviews/2026-11-03/full-course-completion.md)。历史发布和验收记录保留，不能替代新批次证据。
+
 本地、Agent 优先的德州扑克内容制作工具。通过结构化场景控制牌、筹码、行动、旁白和路线，以真实客户端布局生成横版/竖版视频。默认集成官方 IndexTTS2.5 本地语音，同时支持导入外部 TTS 或其他本地模型的音频。
 
 **完整教学制作扩展**增加稳定研究画布、语义画板与镜头、加权范围矩阵、决策计算与策略附件、安全变式、连续实战、课程与练习、共用声音后期和章节复用。它仍使用 v2 项目和六方法；旧工程无需迁移。当前范围见[完整计划](docs/FULL_PLAN_DELIVERY.md)，实际验证与边界见[完整验收](docs/FULL_PLAN_ACCEPTANCE.md)；此前的[第一阶段实施计划](docs/TEACHING_IMPLEMENTATION_PLAN.md)和[教学验收](docs/TEACHING_ACCEPTANCE.md)保留为历史记录。

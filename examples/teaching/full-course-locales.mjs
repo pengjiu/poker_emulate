@@ -101,7 +101,7 @@ const translations = {
     "en-US": "A hand class is not one combination",
     "ja-JP": "ハンドの種類とコンボは別"
   },
-  "把 K J 展开。我们这次只列了三个具体花色组合，绝不把整个 K J 自动当成十二个组合。矩阵里的格子表示牌类，展开后才是实际参与计算的组合。若手里或牌面上出现同一张牌，对应组合必须删去。筛选只是帮助我们看清某一部分，不会把筛选后的数字偷偷改成完整范围。": {
+  "把非同花 K J，也就是 KJo 展开。它共有十二个可能组合，我们这次只给其中三个具体花色组合权重。矩阵里的格子表示牌类，展开后才是实际参与计算的组合。若手里或牌面上出现同一张牌，对应组合必须删去。筛选只是帮助我们看清某一部分，不会把筛选后的数字偷偷改成完整范围。": {
     "en-US": "Expand king-jack. We listed only three specific suit combinations; we do not silently turn that into all twelve offsuit combinations. A matrix cell is a hand class. Its expanded rows are the actual combinations in the calculation. If a card is in our hand or on the board, any conflicting combination must disappear. Filtering helps us inspect part of the range; it doesn't quietly redefine that subset as the whole range.",
     "ja-JP": "K Jを展開します。今回はスートまで指定した3コンボだけです。それを勝手にオフスート全12コンボへ増やしません。マトリクスの1マスはハンドの種類で、展開した各行が実際の計算対象です。手札やボードとカードが重複するコンボは除外されます。フィルターは一部を詳しく見るためのもので、その部分をレンジ全体として再定義するものではありません。"
   },
@@ -132,10 +132,6 @@ const translations = {
   "两条路线从同一个决定出发": {
     "en-US": "Two lines from the same decision",
     "ja-JP": "同じ判断地点から二つのライン"
-  },
-  "再把跟注和弃牌并排看。两条路线从完全相同的六个大盲下注开始，右侧只演示我们选完动作以后，筹码和底池怎样变化。这里没有提前摊牌，也没有把这一条演示的输赢写成期望收益。期望收益来自刚才明确的范围模型；动作对照负责说明代价。看完后，我们回到仍然轮到自己行动的牌桌。": {
-    "en-US": "Put call and fold side by side. Both begin against exactly the same six-big-blind bet. The panels show how stacks and the pot change after our action. There is no early showdown, and one displayed outcome is not being called EV. EV came from the stated range model; the line comparison explains commitments and costs. After the comparison, we return to the table where it is still our turn.",
-    "ja-JP": "コールとフォールドを並べます。どちらも同じ6BBのベットに直面した状態から始まり、選んだ後のスタックとポットの変化を示します。先にショーダウンしたり、一つの結果をEVと呼んだりはしません。EVは明示したレンジモデルから計算し、ラインの比較は投入と代価を説明します。比較が終わったら、まだ自分の番であるテーブルに戻ります。"
   },
   "跟注 · 支付 6 BB": {
     "en-US": "Call · Pay 6 BB",
@@ -331,7 +327,7 @@ const translations = {
   },
   "这套推导还要经过检查。对手的四种纯策略，是两类牌分别选过牌或All-in；我的纯策略是总跟或总弃。逐一计算这些偏离的收益，没有哪一个能超过当前混合策略，才支持这里的均衡结论。只要任何一方找到更有利的单独改变，这组频率就还不是均衡。这里双方最佳回应能够增加的收益都是零；有些偏离反而更差。": {
     "en-US": "The derivation still needs a check. The bettor has four pure strategies: check or move all-in with each of the two hand types. My pure strategies are always call and always fold. We calculate each unilateral deviation. Only if none improves on the mixed strategy does the equilibrium claim hold. If either player finds a profitable change, the proposed frequencies are not yet an equilibrium. Here, the best response improves neither player's value: the gain is zero. Some deviations do worse.",
-    "ja-JP": "この推導は、最後に検証が必要です。ベット側の純粋戦略は、二種類のハンドそれぞれでチェックかオールインを選ぶ四通り。私の純粋戦略は、必ずコールするか、必ず降りるかの二通りです。一方だけ戦略を変えた場合の期待値をすべて計算し、現在の混合戦略を上回らないことを確認します。どちらかに有利な変更があれば、まだ均衡ではありません。今回は双方とも最適応答による上積みはゼロで、変更によっては損になります。"
+    "ja-JP": "この導出は、最後に検証が必要です。ベット側の純粋戦略は、二種類のハンドそれぞれでチェックかオールインを選ぶ四通り。私の純粋戦略は、必ずコールするか、必ず降りるかの二通りです。一方だけ戦略を変えた場合の期待値をすべて計算し、現在の混合戦略を上回らないことを確認します。どちらかに有利な変更があれば、まだ均衡ではありません。今回は双方とも最適応答による上積みはゼロで、変更によっては損になります。"
   },
   "双方最佳回应：额外收益 = 0": {
     "en-US": "Best-response improvement for both players: zero",
@@ -349,26 +345,6 @@ const translations = {
     "en-US": "We return to the decision after the opponent moves all-in. The pot is twenty and I must call ten. Break-even equity is still one third, while the equilibrium strategy calls this bluff catcher half the time. The scene will demonstrate one call. We are not claiming that a random draw just selected it. The opponent's actual cards remain hidden and cannot guide the decision now.",
     "ja-JP": "相手がオールインした後の、まだ判断していない場面に戻ります。ポットは20、必要なコールは10です。損益分岐のエクイティは3分の1のままですが、均衡戦略ではこのブラフキャッチャーを半分コールします。画面では、そのうち一度のコールを示します。乱数で選んだと装うわけではありません。相手の実際の手札はまだ非公開で、この判断には使えません。"
   },
-  "把推导变成可检查的数据": {
-    "en-US": "Turn the derivation into inspectable data",
-    "ja-JP": "推導を検証できるデータにする"
-  },
-  "现在把刚才经过最佳回应检查的策略，按统一的数据格式附在这个决定上。画面中的一半跟注、一半弃牌，属于当前这张抓诈唬牌，在限定的跟或弃模型下的行动频率。它不是对手范围里空气的占比，也不是这张牌的权益。资料还记录牌面、筹码、允许动作和算法说明；换成另一个决定，旧数据不能继续冒充当前答案。": {
-    "en-US": "We now attach the strategy we checked with best responses to this exact decision, using a structured data format. Half call and half fold describes the action frequency of this bluff catcher in a model that allows only those two choices. It is neither the air share of the opponent's range nor the hand's equity. The attachment also records the board, stacks, allowed actions and method. Change the decision, and the old data cannot silently pass as its answer.",
-    "ja-JP": "最適応答で検証した戦略を、共通のデータ形式でこの判断地点に添付します。画面のコール半分、フォールド半分は、二つの行動だけを許したモデルで、このブラフキャッチャーをどう使うかという頻度です。相手レンジ内のエア比率でも、この手のエクイティでもありません。資料にはボード、スタック、許可された行動、計算法も記録します。判断地点が変われば、古いデータを新しい答えとして使うことはできません。"
-  },
-  "确认附件不等于证明任何策略": {
-    "en-US": "Validating an attachment is not proving a strategy",
-    "ja-JP": "添付の確認だけでは戦略の正しさは証明できない"
-  },
-  "系统能检查附件有没有被替换，输入是不是当前节点，策略的动作是否合法。它不能因为文件上写着“solver”就证明一个任意答案最优。这份示范另外保留了有限模型的独立最佳回应推导。实际接入其他求解器时，还要检查它的抽水、行动树、范围、精度和约束，不能只拿到一张漂亮矩阵就结束。": {
-    "en-US": "The system can check whether an attachment changed, whether its inputs match this node, and whether its actions are legal. A file called solver cannot, by itself, prove that an arbitrary strategy is optimal. This example also includes an independent best-response calculation for the bounded game. When importing another solver's output, check its rake, action tree, ranges, accuracy and restrictions. A convincing matrix is only one part of the evidence.",
-    "ja-JP": "システムは、添付が置き換わっていないか、入力が現在のノードに合っているか、アクションが合法かを確認できます。しかしファイルにsolverと書いてあるだけで、任意の戦略が最適だとは証明できません。この例には、有限モデルの独立した最適応答計算も残しています。別のソルバーを使うときは、レーキ、行動ツリー、レンジ、精度、制約も確認します。きれいなマトリクスだけで検証を終えてはいけません。"
-  },
-  "数据完整性和策略正确性分开检查": {
-    "en-US": "Check data integrity and strategic validity separately",
-    "ja-JP": "データの整合性と戦略の妥当性を別々に確認"
-  },
   "示范跟注": {
     "en-US": "Demonstrate a call",
     "ja-JP": "コールを実演する"
@@ -383,7 +359,7 @@ const translations = {
   },
   "这一次撞上价值牌，跟注输了。它不推翻前面的均衡推导，就像上一集赢了也不能证明所有跟注都正确。如果价值与空气的先验比例改变，或者允许新的下注尺寸，我们就需要重新求解。这一集记住的是怎样检查条件、分母和偏离收益，而不是背一个到处适用的二分之一。": {
     "en-US": "This time we ran into value and lost the call. That does not overturn the equilibrium derivation, just as winning last episode did not prove every call was correct. Change the prior proportions of value and air, or allow another bet size, and we must solve again. The useful lesson is how to check assumptions, denominators and gains from deviations, not to memorize one half as a universal answer.",
-    "ja-JP": "今回はバリューハンドに当たり、コールは負けました。それで均衡の推導が覆るわけではありません。前回勝ったからといって、すべてのコールが正しいとは言えないのと同じです。最初のバリューとエアの比率が変わったり、新しいサイズを許したりしたら、再び解く必要があります。覚えたいのは前提、分母、戦略変更の利益を確かめる方法です。どこでも使える答えとして2分の1を暗記することではありません。"
+    "ja-JP": "今回はバリューハンドに当たり、コールは負けました。それで均衡の導出が覆るわけではありません。前回勝ったからといって、すべてのコールが正しいとは言えないのと同じです。最初のバリューとエアの比率が変わったり、新しいサイズを許したりしたら、再び解く必要があります。覚えたいのは前提、分母、戦略変更の利益を確かめる方法です。どこでも使える答えとして2分の1を暗記することではありません。"
   },
   "受限河牌极化模型": {
     "en-US": "Bounded polar river model",
@@ -451,7 +427,7 @@ const translations = {
   },
   "来自本项目有限模型推导的格式适配，不是商业求解器输出。": {
     "en-US": "A format adaptation of this project's bounded-game derivation, not commercial solver output.",
-    "ja-JP": "本プロジェクトの有限モデルの推導を共通形式にした資料。商用ソルバーの出力ではない。"
+    "ja-JP": "本プロジェクトの有限モデルの導出を共通形式にした資料。商用ソルバーの出力ではない。"
   },
   "第 3 集 · 连续实战中的观察与更新": {
     "en-US": "Episode 3 · Observe and update across a session",
@@ -460,10 +436,6 @@ const translations = {
   "沿用真实前史进入下一手": {
     "en-US": "Carry real history into the next hand",
     "ja-JP": "実際の履歴を次のハンドへつなぐ"
-  },
-  "接着第一集继续打。筹码来自那一手的实际结算，按钮向前移动，Northstar 现在在小盲，我在关煞位拿梅花 K J。上一手我们确实见到他用 K J 诈唬，但只有一手样本。它能证明他做过这件事，不能证明他在任何牌面、任何尺寸下都会频繁诈唬。我们保留这条观察，也保留不确定性。": {
-    "en-US": "We continue from episode one. Stacks come from that hand's actual settlement, and the button moves on. Northstar is now in the small blind, while I hold king-jack of clubs in the cutoff. We did see him bluff with king-jack last hand, but that is one observation. It proves he has done it once; it does not establish frequent bluffing on every board and at every size. We keep the observation and the uncertainty together.",
-    "ja-JP": "第1回の続きから始めます。スタックは実際の精算結果を引き継ぎ、ボタンが移動しています。Northstarは今度はスモールブラインドで、私はカットオフのクラブKJです。前のハンドで彼がKJをブラフにしたのは確かですが、観察したのは一度だけ。一度した事実は確認できても、すべてのボードとサイズで頻繁にブラフするとは言えません。観察と不確実性の両方を残します。"
   },
   "已观察：一次河牌诈唬摊牌": {
     "en-US": "Observed: one river bluff shown down",
@@ -541,10 +513,6 @@ const translations = {
     "en-US": "Do not use hidden cards to justify a read",
     "ja-JP": "未知の手札で読みを正当化しない"
   },
-  "我们弃了，这一手没有摊牌。我不知道他究竟拿什么，也不能在复盘里偷偷翻出预先安排的底牌，证明自己读得准。当前能检查的是行动是否合法、价格是否算对、假设是否说清。这些都能成立，而结果依旧保持未知。下一手继续沿用真实筹码，不重置成一百个大盲。": {
-    "en-US": "We fold, and there is no showdown. I do not know his hand. Reviewing the scene does not give me permission to reveal prearranged cards and claim that my read was accurate. We can check the legal action, the price calculation and the stated assumptions. All three can be sound while the opponent's cards remain unknown. The next hand keeps the settled stacks instead of resetting everyone to a hundred big blinds.",
-    "ja-JP": "私たちは降り、このハンドにショーダウンはありません。相手の手札は分からないままです。復習だからといって、設定済みの手札をこっそり公開し、読みが当たった証拠にしてはいけません。確認できるのは、行動が合法か、価格が正しいか、前提が明示されているかです。それらが正しくても、相手の手札は不明のままで構いません。次も実際の精算後スタックを使い、全員を100ビッグブラインドに戻したりはしません。"
-  },
   "一个明确的低诈唬练习范围": {
     "en-US": "An explicit low-bluff practice range",
     "ja-JP": "ブラフが少ないと明示した練習レンジ"
@@ -565,10 +533,6 @@ const translations = {
     "en-US": "A different decision problem",
     "ja-JP": "別の判断課題へ"
   },
-  "按钮又移了一格。Northstar 在按钮位，我在劫煞位拿一对九。这里的问题已经不同：上一手是在河牌抓诈唬，这一手要从翻前建立计划。我们保留他曾经亮出一次诈唬的记录，却不把那条记录当成无限的进攻许可。对手的座位和双方后手也已经变化，画面会跟着真实结算更新。": {
-    "en-US": "The button moves again. Northstar is on the button and I hold pocket nines in the hijack. The task has changed: last hand was a river bluff catch; this time we need a plan from preflop. We retain the record of his one shown bluff without treating it as unlimited permission to attack. Positions and remaining stacks have also changed, and the scene follows the actual settlements.",
-    "ja-JP": "もう一度ボタンが移動しました。Northstarがボタンで、私はハイジャックの99です。課題も変わっています。前のハンドはリバーのブラフキャッチでしたが、今回はプリフロップから計画を立てます。一度ブラフを公開した記録は残しても、無制限に攻める許可にはしません。ポジションと残りスタックも変わり、画面は実際の精算結果を引き継いでいます。"
-  },
   "新任务：如何获得价值": {
     "en-US": "New task: get value",
     "ja-JP": "新しい課題：バリューを得る"
@@ -585,10 +549,6 @@ const translations = {
     "en-US": "Even a strong hand needs continuing targets",
     "ja-JP": "強い手でも、何が続けるかを考える"
   },
-  "翻牌暗三条，先别急着因为强就加注。我想保留他的高张和一部分弱成手，让这些牌还有机会在后续投入。跟注和加注各有代价；加注可以立刻向较强的继续范围收费，也可能把空气赶走。这里示范跟注，是一种路线，不宣称唯一答案。重要的是执行前说出自己希望哪些牌留下。": {
-    "en-US": "We flop a set, but strength alone is not a reason to raise immediately. I want to retain high cards and some weaker made hands so they can put in money later. Calling and raising each have costs. A raise can charge a stronger continuing range now, but may drive out air. We demonstrate a call as one line, without claiming it is the only answer. Before acting, name the hands you want to keep.",
-    "ja-JP": "フロップでセットです。ただ、強いからというだけですぐレイズする必要はありません。私は高い未完成のカードや一部の弱いメイドハンドを残し、後でチップを入れる機会を作りたいと考えています。コールとレイズにはそれぞれ代償があります。レイズなら強めの継続レンジから今すぐ取れる一方、エアを追い出すかもしれません。ここでは一つのラインとしてコールを示し、唯一の正解とは言いません。行動する前に、何を残したいかを言葉にします。"
-  },
   "跟注保留范围": {
     "en-US": "Call to retain the range",
     "ja-JP": "レンジを残すためにコール"
@@ -600,10 +560,6 @@ const translations = {
   "从保留范围走向价值下注": {
     "en-US": "From retaining hands to betting for value",
     "ja-JP": "ハンドを残す段階からバリューベットへ"
-  },
-  "K 出现后，部分高张变成能支付的成手。到了河牌，我们的目标从“保留他继续诈唬的机会”转成“让更差成手愿意跟注”。这不是前后矛盾，而是街道和信息发生了变化。先确定目标，再选择尺寸；不能把翻牌的慢打当成必须一路过牌的承诺。": {
-    "en-US": "The king turns some high cards into made hands that can pay. By the river, our aim changes from preserving opportunities to bluff to getting worse made hands to call. That is not a contradiction: the street and available information have changed. Choose the target first, then the size. Slow-playing the flop is not a promise to check every later street.",
-    "ja-JP": "Kによって、一部の高いカードが支払えるメイドハンドに変わります。リバーでは、ブラフを続ける機会を残すことから、弱いメイドハンドにコールしてもらうことへ目的が変わります。矛盾ではなく、ストリートと情報が変わった結果です。先に対象を決め、それからサイズを選びます。フロップのスロープレーは、最後までチェックすると約束することではありません。"
   },
   "河牌价值下注": {
     "en-US": "Bet the river for value",
@@ -628,10 +584,6 @@ const translations = {
   "干净与不干净的出路": {
     "en-US": "Clean and dirty outs",
     "ja-JP": "クリーンなアウツと不確かなアウツ"
-  },
-  "这里用 A K 红桃听花，面对一个明确列出的强牌范围。看起来能改善手牌的牌，并不一定都让我们赢：配对牌面可能让对手变成葫芦，某些高张也可能继续输给两对或三条。出路面板会逐张河牌检查给定范围下的权益，并把成牌改善与真正的获胜可能分开。它只按当前公共信息和指定范围计算，不读取安排好的下一张牌。": {
-    "en-US": "Here ace-king of hearts draws to a flush against an explicitly listed strong range. Not every card that improves our hand makes us win. A paired board can give the opponent a full house, and some high cards still lose to two pair or a set. The outs panel checks equity against the stated range for each possible river, separating a stronger hand from a winning one. It uses current public information and the specified range, never the prearranged next card.",
-    "ja-JP": "ここではハートのAKで、明示した強いレンジに対してフラッシュを狙います。手が改善するカードが、必ず勝つカードとは限りません。ボードがペアになれば相手がフルハウスになることがあり、高いカードを引いてもツーペアやセットに負ける場合があります。アウツのパネルは、可能なリバー一枚ずつについて指定レンジへのエクイティを確認し、手の改善と勝つ可能性を分けます。現在の公開情報と指定レンジだけを使い、あらかじめ用意した次のカードは読みません。"
   },
   "逐张河牌检查": {
     "en-US": "Check each possible river",
@@ -713,10 +665,6 @@ const translations = {
     "en-US": "Reconsider after a public card changes",
     "ja-JP": "公開カードが変わったら結論を見直す"
   },
-  "这次从转牌发生前改动一张公共牌，再由同一规则重放，底池和行动来自新路线。A 替换了 T，英雄的相对强度、某些价值组合和听牌路径都会改变。我们把旧的范围结论撤下，重新声明假设。变式的价值，是指出哪些条件支撑原判断，而不是只给相同讲稿换一张背景牌。": {
-    "en-US": "This time we change one public card before the turn is dealt, then replay the hand with the same rules. Pots and actions come from the new line. Replacing the ten with an ace changes our relative strength, some value combinations and possible draws. We remove the old range conclusion and state assumptions again. A useful variation identifies which conditions supported the original judgment; it does more than place a different background card behind the same script.",
-    "ja-JP": "今回はターンが配られる直前から公開カード一枚を変え、同じルールでリプレイします。ポットとアクションは新しい展開から得られます。TをAに替えると、こちらの相対的な強さ、バリューの候補、ドローの経路が変わります。古いレンジの結論を外し、改めて前提を示します。変化例の目的は、元の判断を支えていた条件を確かめること。同じ説明の背景カードだけを差し替えることではありません。"
-  },
   "从事件发生前重放的牌面变化": {
     "en-US": "A board change replayed from before the event",
     "ja-JP": "イベント前から再生したボード変更"
@@ -793,10 +741,6 @@ const translations = {
     "en-US": "In the previous hand, Northstar bet on this recorded line and showed KsJh at showdown. This is one observation.",
     "ja-JP": "前のハンドでNorthstarは記録されたラインでベットし、ショーダウンでKsJhを公開した。観察はこの一例。"
   },
-  "当前明确九个等权组合：六个价值、三个诈唬。在限定跟或弃下，哪项判断成立？": {
-    "en-US": "The stated range contains nine equally weighted combinations: six value hands and three bluffs. Considering only call or fold, which statement is valid?",
-    "ja-JP": "明示されたレンジは、バリュー六コンボとブラフ三コンボの等しい重みです。コールかフォールドだけを比較すると、正しい説明はどれですか。"
-  },
   "给定范围权益高于价格门槛，跟注增量 EV 为正": {
     "en-US": "Equity against the stated range exceeds the price threshold, so calling has positive incremental EV",
     "ja-JP": "指定レンジへのエクイティが価格の閾値を超え、コールの増分EVは正になる"
@@ -817,10 +761,6 @@ const translations = {
     "en-US": "Separate price, equity and frequency",
     "ja-JP": "価格、エクイティ、頻度を区別する"
   },
-  "条件改为六个价值、两个诈唬，等权，价格不变。哪项成立？": {
-    "en-US": "Keep the price unchanged, but use six value combinations and two bluffs, equally weighted. Which statement follows?",
-    "ja-JP": "価格は変えず、バリュー六コンボとブラフ二コンボを等しく扱います。正しい説明はどれですか。"
-  },
   "权益变为25%，在限定跟或弃下弃牌更好": {
     "en-US": "Equity falls to 25%; among call and fold, folding is better",
     "ja-JP": "エクイティは25%となり、コールかフォールドならフォールドがよい"
@@ -832,10 +772,6 @@ const translations = {
   "变的是范围，不是牌局价格。新范围权益低于价格门槛，因此必须重审原结论。": {
     "en-US": "The range changed, not the price. Equity against the new range is below the threshold, so the original conclusion must be reconsidered.",
     "ja-JP": "変わったのは価格ではなくレンジです。新しいレンジへのエクイティが閾値を下回るため、元の結論を見直す必要があります。"
-  },
-  "上一手确实见到 Northstar 诈唬。这能直接推出哪些结论？": {
-    "en-US": "We saw Northstar bluff last hand. Which conclusions are directly supported?",
-    "ja-JP": "前のハンドでNorthstarのブラフを実際に見ました。直接支持される結論はどれですか。"
   },
   "他在那一条已记录路线中至少诈唬过一次": {
     "en-US": "He bluffed at least once on that recorded line",
@@ -884,6 +820,110 @@ const translations = {
   "独立竖版短课": {
     "en-US": "Standalone vertical lesson",
     "ja-JP": "独立した縦型レッスン"
+  },
+  "接着第一集继续打。筹码来自那一手的实际结算，按钮向前移动，Northstar 现在在小盲，我在CO 位，也就是按钮右手一位拿梅花 K J。上一手我们确实见到他用 K J 诈唬，但只有一手样本。它能证明他做过这件事，不能证明他在任何牌面、任何尺寸下都会频繁诈唬。我们保留这条观察，也保留不确定性。": {
+    "en-US": "We continue from episode one. Stacks come from that hand's actual settlement, and the button moves on. Northstar is now in the small blind, while I hold king-jack of clubs in the cutoff. We did see him bluff with king-jack last hand, but that is one observation. It proves he has done it once; it does not establish frequent bluffing on every board and at every size. We keep the observation and the uncertainty together.",
+    "ja-JP": "第1回の続きから始めます。スタックは実際の精算結果を引き継ぎ、ボタンが移動しています。Northstarは今度はスモールブラインドで、私はカットオフのクラブKJです。前のハンドで彼がKJをブラフにしたのは確かですが、観察したのは一度だけ。一度した事実は確認できても、すべてのボードとサイズで頻繁にブラフするとは言えません。観察と不確実性の両方を残します。"
+  },
+  "按钮又移了一格。Northstar 在按钮位，我在HJ 位，也就是 CO 右手一位拿一对九。这里的问题已经不同：上一手是在河牌抓诈唬，这一手要从翻前建立计划。我们保留他曾经亮出一次诈唬的记录，却不把那条记录当成无限的进攻许可。对手的座位和双方后手也已经变化，画面会跟着真实结算更新。": {
+    "en-US": "The button moves again. Northstar is on the button and I hold pocket nines in the hijack. The task has changed: last hand was a river bluff catch; this time we need a plan from preflop. We retain the record of his one shown bluff without treating it as unlimited permission to attack. Positions and remaining stacks have also changed, and the scene follows the actual settlements.",
+    "ja-JP": "もう一度ボタンが移動しました。Northstarがボタンで、私はハイジャックの99です。課題も変わっています。前のハンドはリバーのブラフキャッチでしたが、今回はプリフロップから計画を立てます。一度ブラフを公開した記録は残しても、無制限に攻める許可にはしません。ポジションと残りスタックも変わり、画面は実際の精算結果を引き継いでいます。"
+  },
+  "九、六、二，彩虹面，我中了顶暗三条。他在十七点五的池里打五个，我准备先跟。加注可能赶走 A K、A Q；TT 到 AA 这些超对，两条路线都可能收得到钱。先跟，是拿这一街少收一点，换他后面继续下注的机会。转牌若来 A 或 K，高张可能成对；如果他突然打很大，我也会重新比较跟注与加注。慢打一街，不等于后面都慢打。": {
+    "en-US": "Nine, six, deuce, rainbow: top set. He bets five into seventeen point five. I plan to call. A raise may fold out ace-king or ace-queen; overpairs from tens through aces may pay either line. Calling takes less now to leave room for his later bets. An ace or king on the turn may pair his high cards. A sudden large bet would also make me reconsider calling versus raising. Slow-playing one street is not a promise to slow-play the next.",
+    "ja-JP": "9、6、2のレインボーでトップセットです。17.5のポットに5のベット。ここはコールするつもりです。レイズはAKやAQを降ろすかもしれませんが、TTからAAのオーバーペアなら、どちらのラインでも取れる可能性があります。今取る額を抑え、次のベットを残す考えです。ターンのAやKで高いカードがペアになるかもしれません。急に大きく打たれた場合も、コールとレイズを考え直します。一度スロープレーしても、次も同じとは限りません。"
+  },
+  "河牌梅花三。四五成顺了，不过它有没有进翻前的 3bet 范围，还得看对手。转牌 K 他过牌，A K、K Q 可能想控池，TT 到 QQ 也可能愿意抓一枪。现在池里二十七点五，我准备打十二，让这些更差的成手付钱。若被加注，再看他会不会拿更小的暗三条这样打，以及 K K、四五和诈唬各有多少。拿着强牌，也得知道这枪向谁收钱。": {
+    "en-US": "The river is the three of clubs. Five-four makes a straight, if it was in his preflop three-betting range. After checking back the king, ace-king or king-queen may be controlling the pot; tens through queens may bluff-catch once. I plan to bet twelve into twenty-seven point five for value from those worse hands. If raised, I will consider smaller sets, kings, five-four and bluffs. A strong hand still needs a target for its value bet.",
+    "ja-JP": "リバーはクラブの3。54はストレートですが、そもそも相手のプリフロップの3ベットレンジに入るかは別です。KのターンをチェックバックしたAKやKQはポットを抑えたいのかもしれません。TTからQQも一度ならブラフキャッチする可能性があります。ポット27.5に12を打ち、そうした弱いハンドから取るつもりです。レイズには、小さいセット、KK、54、ブラフを考え直します。強いハンドでも、何に払ってもらうかが大事です。"
+  },
+  "河牌发出": {
+    "en-US": "The river card",
+    "ja-JP": "リバーカード"
+  },
+  "这手没摊牌，我不知道他拿什么，只记下这条路线里的一次满池下注。弃牌有没有道理，要回头检查价格和范围，不能靠猜他的底牌给自己颁奖。带着结算后的筹码，继续下一手。": {
+    "en-US": "No showdown, so I do not know his hand. I record one pot-sized river bet in this line. To review the fold, I check the price and my range assumption, rather than award myself a win for guessing his cards. We carry the settled stacks into the next hand.",
+    "ja-JP": "ショーダウンがないので、相手の手札は分かりません。このラインでポットベットを一度した、という事実を残します。フォールドを振り返るなら、価格とレンジの仮定を確かめます。手札を想像して自分を正解扱いはしません。精算後のスタックで次のハンドへ進みます。"
+  },
+  "跟注，要再付六个大盲；弃牌，就不再投入。右边是同一个决定的两种结果，暂时都不翻对手的牌。跟完池子变大，不等于这次跟注就赚钱；赚不赚，要用刚才的范围算。对照看完，回到我面前这笔下注，动作还没点。": {
+    "en-US": "Calling costs another six big blinds; folding costs nothing more. These are two outcomes from the same decision, with the opponent still face down. A bigger pot after calling does not prove a profitable call. That calculation comes from the range we just stated. Now return to the bet in front of me: my action is still pending.",
+    "ja-JP": "コールなら、さらに6BBを払います。フォールドなら追加の支払いはありません。同じ判断からの二つの結果を、相手の手札は伏せたまま比べています。コール後にポットが大きくなっても、それだけで利益があるとは言えません。利益の計算には先ほどのレンジを使います。比較を終えたら、まだアクションしていない元の判断に戻ります。"
+  },
+  "看这张 Q Q：在刚才限定的河牌模型里，一半跟，一半弃。这是我拿着这手牌时怎么选动作，不是说对手有一半诈唬，也不是说我的胜率有一半。对手下注里的诈唬是三分之一，我的跟注频率却是一半。两个分母，千万别混。": {
+    "en-US": "Look at these pocket queens: in our bounded river game, call half and fold half. That is how I choose an action with this hand. It does not mean half his bets are bluffs or that I win half the time. His betting range is one-third bluffs; my calling frequency is one-half. Those percentages use different denominators.",
+    "ja-JP": "このQQは、今の限定されたリバーモデルでは半分コール、半分フォールドです。このハンドでどう行動するかの割合であって、相手の半分がブラフという意味でも、勝率が半分という意味でもありません。相手のベットレンジではブラフが3分の1、こちらのコール頻度は2分の1。分母が違うことを忘れないでください。"
+  },
+  "这套频率有用，是因为刚才检查过双方改打法还能不能多赚。它只回答这道题：固定满池 All-in、价值和空气各半、没有抽水。换成小注、加上加注空间，或者改变范围，都得重新算。记住推理怎么走，比背住一个百分之五十更值钱。": {
+    "en-US": "These frequencies matter because we checked whether either player could gain by changing strategy. They answer this specific game: one pot-sized all-in, an equal prior of value and air, and no rake. A smaller bet, a raise option or a different range requires a new solution. Remembering the reasoning is more useful than memorizing fifty percent.",
+    "ja-JP": "この頻度に意味があるのは、どちらかが戦略を変えてもっと得できないかを確かめたからです。対象はポットサイズのオールイン一種類、バリューとエアーが事前に半々、レーキなしの問題です。小さいベット、レイズの選択肢、違うレンジなら解き直す必要があります。50パーセントを暗記するより、考え方を覚えるほうが役に立ちます。"
+  },
+  "A K 红桃听花，看见红桃别急着全算成干净出路。对面先给 J J、七七和 J 九这三个等权组合。河牌红桃九，我虽然成花，暗三条却成了葫芦，J 九也成了葫芦；红桃二能赢 J 九，却仍输给暗三条补成的葫芦。成牌是一回事，成牌以后能赢谁，是另一回事。逐张看这个范围，才知道哪些补牌真能帮我。": {
+    "en-US": "Ace-king of hearts has a flush draw, but not every heart is a clean out. Give the opponent jacks, sevens and jack-nine as three equally weighted combos. The nine of hearts makes our flush, but the sets and jack-nine make full houses. The deuce of hearts beats jack-nine, yet still loses to the full houses made by the sets. Improving our hand and beating the range are different questions. Check each river against the stated range.",
+    "ja-JP": "ハートのAKでフラッシュドローですが、ハートを全部クリーンアウトに数えるのは早いです。相手をJJ、77、J9の三つの等重みコンボとします。リバーがハートの9なら、こちらはフラッシュでも、セットもJ9もフルハウスになります。ハートの2ならJ9には勝ちますが、セットが作るフルハウスには負けます。自分の手が強くなることと、相手のレンジに勝つことは別。指定したレンジに対して一枚ずつ確かめます。"
+  },
+  "这次两边都固定成同样十二个等权组合：六个暗三条，三个 K J，三个 Q T。原来转牌 T，Q T 是两对，我只赢三个 K J，权益百分之二十五。转牌换成 A，我的 A Q 成了更大的两对，也能赢 Q T，权益升到百分之五十。价格仍是百分之二十八点四，因此同一范围下，跟注从亏零点七二五，变成赚四点五五个大盲。这里单独检查一张牌的影响；实战中，对手的下注范围也可能跟着牌面调整。": {
+    "en-US": "Fix both cases to the same twelve equally weighted combos: six sets, three king-jack and three queen-ten. On the original ten turn, queen-ten has two pair. I beat only the three king-jacks: twenty-five percent equity. Change the turn to an ace and my ace-queen makes higher two pair, also beating queen-ten: fifty percent equity. The price stays at twenty-eight point four percent. Against that same range, call EV changes from minus 0.725 to plus 4.55 big blinds. This isolates the card change; in real play, the betting range can change with the board too.",
+    "ja-JP": "両方を同じ12の等重みコンボに固定します。セットが六つ、KJが三つ、QTが三つです。元のTターンではQTがツーペアで、勝てるのはKJの三つだけ。エクイティは25パーセントです。ターンをAに替えるとAQが上のツーペアになり、QTにも勝つので50パーセントに上がります。必要な価格は28.4パーセントのまま。同じレンジに対するコールEVがマイナス0.725からプラス4.55BBへ変わります。これは一枚の影響だけを比べたものです。実戦ではボードとともに相手のベットレンジも変わりえます。"
+  },
+  "原牌面：相同十二组合": {
+    "en-US": "Original board: the same twelve combos",
+    "ja-JP": "元のボード：同じ12コンボ"
+  },
+  "同样范围下的转牌变化": {
+    "en-US": "Change the turn against the same range",
+    "ja-JP": "同じレンジでターンを変更"
+  },
+  "两边固定十二个等权组合，只比较转牌变化。": {
+    "en-US": "The same twelve equally weighted combos on both sides; only the turn card changes.",
+    "ja-JP": "両方を同じ12の等重みコンボに固定し、ターンカードだけを変更。"
+  },
+  "相同牌类，不同权重": {
+    "en-US": "Same hand types, different weights",
+    "ja-JP": "同じハンド種類、違う重み"
+  },
+  "六个价值组合权重1，三个诈唬组合各权重0.5。": {
+    "en-US": "Six value combos weighted 1, three bluff combos weighted 0.5 each.",
+    "ja-JP": "バリュー六コンボは重み1、ブラフ三コンボはそれぞれ重み0.5。"
+  },
+  "新条件：六个价值组合各权重1，三个诈唬组合各权重0.5，价格不变。限定跟或弃，哪项正确？": {
+    "en-US": "New condition: six value combos each weighted 1, three bluff combos each weighted 0.5, with the same price. For call or fold, which is correct?",
+    "ja-JP": "新条件：バリュー六コンボは各重み1、ブラフ三コンボは各重み0.5。価格は同じです。コールかフォールドなら、正しいのは？"
+  },
+  "诈唬权重占20%，跟注EV为−1.78 BB，选择弃牌": {
+    "en-US": "Bluffs have 20% of the weight, call EV is −1.78 BB: fold",
+    "ja-JP": "ブラフの重みは20%、コールEVは−1.78BBなのでフォールド"
+  },
+  "仍有三个诈唬组合，所以权益仍是三分之一": {
+    "en-US": "There are still three bluff combos, so equity is still one third",
+    "ja-JP": "ブラフはまだ三コンボなので、エクイティは3分の1のまま"
+  },
+  "总权重为7.5，能赢的权重为1.5。权益20%，跟注EV为0.2×21.1−6=−1.78 BB。要看权重，不能只数牌类。": {
+    "en-US": "Total weight is 7.5, and winning weight is 1.5. Equity is 20%; call EV is 0.2×21.1−6=−1.78 BB. Use the weights, not just the number of hand types.",
+    "ja-JP": "総重み7.5のうち勝つ重みは1.5。エクイティ20%、コールEVは0.2×21.1−6=−1.78BBです。種類の数だけでなく重みを使います。"
+  },
+  "复习：当前明确九个等权组合：六个价值、三个诈唬。在限定跟或弃下，哪项判断成立？": {
+    "en-US": "Recall: The stated range contains nine equally weighted combinations: six value hands and three bluffs. Considering only call or fold, which statement is valid?",
+    "ja-JP": "復習：明示されたレンジは、バリュー六コンボとブラフ三コンボの等しい重みです。コールかフォールドだけを比較すると、正しい説明はどれですか。"
+  },
+  "复习：条件改为六个价值、两个诈唬，等权，价格不变。哪项成立？": {
+    "en-US": "Recall: Keep the price unchanged, but use six value combinations and two bluffs, equally weighted. Which statement follows?",
+    "ja-JP": "復習：価格は変えず、バリュー六コンボとブラフ二コンボを等しく扱います。正しい説明はどれですか。"
+  },
+  "复习：上一手确实见到 Northstar 诈唬。这能直接推出哪些结论？": {
+    "en-US": "Recall: We saw Northstar bluff last hand. Which conclusions are directly supported?",
+    "ja-JP": "復習：前のハンドでNorthstarのブラフを実際に見ました。直接支持される結論はどれですか。"
+  },
+  "一半跟注是什么意思": {
+    "en-US": "What does calling half mean?",
+    "ja-JP": "半分コールとは何か"
+  },
+  "哪些条件一变就要重算": {
+    "en-US": "Which changes require a new solution?",
+    "ja-JP": "どの条件が変われば解き直すか"
+  },
+  "固定尺寸与范围下的均衡": {
+    "en-US": "Equilibrium for a fixed size and range",
+    "ja-JP": "固定サイズとレンジでの均衡"
   }
 };
 
