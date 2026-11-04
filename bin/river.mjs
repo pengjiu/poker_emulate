@@ -4,7 +4,7 @@ import {createInterface} from 'node:readline';
 import {doctor} from '../src/doctor.mjs';
 import {errorJSON,check,fail} from '../src/errors.mjs';
 
-const specs={doctor:['json'],init:['scene','project','locale','aspect','profile'],migrate:['lesson','project','locale','aspect','profile','scene','branch'],inspect:['project','view','beat'],validate:['project','locale','aspect','profile','scene','branch','all','render'],session:['project'],render:['project','locale','aspect','profile','scene','branch','out','timeout','rehearsal'],produce:['project','out','rehearsal','only'],serve:['project','port'],help:[]};
+const specs={doctor:['json'],patterns:['id'],init:['scene','project','locale','aspect','profile'],migrate:['lesson','project','locale','aspect','profile','scene','branch'],inspect:['project','view','beat'],validate:['project','locale','aspect','profile','scene','branch','all','render'],session:['project'],render:['project','locale','aspect','profile','scene','branch','out','timeout','rehearsal'],produce:['project','out','rehearsal','only'],serve:['project','port'],help:[]};
 const booleans=['json','all','render','rehearsal'];
 const report=x=>console.log(JSON.stringify(x));
 try{
@@ -17,6 +17,7 @@ try{
   const output=()=>Object.fromEntries(Object.entries({locale:opts.locale,aspect:opts.aspect,profile:opts.profile,sceneId:opts.scene,branchId:opts.branch==='main'?null:opts.branch}).filter(([,v])=>v!==undefined));
   if(command==='help')report({commands:specs,sessionMethods:['load','observe','apply','seek','export','voice']});
   else if(command==='doctor'){const result=await doctor();report(result);if(!result.ok)process.exitCode=1;}
+  else if(command==='patterns'){const {patterns}=await import('../src/direction/index.mjs');report(patterns(opts.id));}
   else if(command==='init'){
     const {createProject,newProject}=await import('../src/project/store.mjs');
     required('scene','project');const scene=JSON.parse(await readFile(opts.scene,'utf8'));const selected=output();selected.sceneId=scene.id;const store=await createProject(opts.project,newProject({scenes:[scene]},selected));report({ok:true,project:store.directory});

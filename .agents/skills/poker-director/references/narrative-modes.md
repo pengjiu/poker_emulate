@@ -4,7 +4,14 @@ A mode is a repeatable creative brief: information perspective, narrative struct
 
 ## Discover, select, customize
 
-After init, use the existing session methods; no extra service is needed:
+Discover before creating a project; do not initialize an empty scene or create a throwaway hand just to read the catalog:
+
+```sh
+node bin/river.mjs patterns
+node bin/river.mjs patterns --id think-aloud
+```
+
+After init, the same catalog is available through the existing session methods; no extra service is needed:
 
 ```json
 {"method":"export","params":{"kind":"patterns"}}
@@ -34,7 +41,33 @@ For a combined mode, read both profiles, choose one dominant perspective/structu
 
 ## Review consistency and delivery
 
+### Editorial pass
+
+Before multiplying a format into several examples, complete one representative passage and inspect its exported storyboard. Name the selected brief's observable mechanism: what changes in the viewer's understanding, and which action, reveal, question, exchange or comparison causes it? Removing the mode title should leave that mechanism recognizable. If the mechanism is missing, revise the brief/structure before polishing isolated words or adding more hands. Custom and combined modes use the same test without adopting a fixed sequence or catchphrase.
+
+Read the whole script as spoken Chinese for the intended viewer. Begin with a concrete uncertainty or consequence, advance it through meaningful information, and leave a usable recognition condition or decision. A transition that repeats the previous paragraph adds no explanation. Support important claims with the current cards, continuing hands, price or actual comparison; a generic slogan and a correct calculator result cannot carry the lesson by themselves. Let opening, sentence length, humor, suspense and ending fit the chosen style rather than a universal hook formula.
+
+Check counterfactual cards and candidate combinations against the actual known-card set and the relevant range, even when the poker actions themselves validate. A hypothetical holding can collide with the board or change the made hand; a blocker may remove bluffs without removing value. Read numerical conclusions from the current compiled analysis before putting them into words. Zero EV can mean indifference, not a uniquely correct fold. For a claimed adjustment, first verify that its model can change the decision; changing only narration cannot create that boundary.
+
+Compare each completed-action phrase with the action's actual time in the storyboard, across the whole decision episode. After-action commentary cannot speak while that action is still pending. When explaining an earlier price after the pot has been awarded, use an explicit replay or retain a visible prior decision/price comparison; the current zero pot does not explain it. Match each visual reference to the sections visible at that instant: mentioning a combo view while `range` is hidden is an unfinished explanation. Camera movement alone does not expose a reasoning mechanism.
+
+Review quiz hints across previous chapters and the full question wording, not just its pause. In a two-choice question, “do the opposite of last time” can already give the answer. Dialogue roles use stable, audience-readable `beat.speaker` names; captions show these names. Put the role in that metadata, not a repeated `Name:` prefix inside narration, which would duplicate the label and make synthesis speak the name. Speaker names and dialogue structure can be reviewed without audio, but do not claim distinct voice performance until real references/takes exist.
+
+Check every public response for `ok:true` before depending on its result. A rejected apply keeps the old revision; correct it and inspect again. After the final edit, export the latest storyboard/plan and validate that exact revision. Record the observed IDs and results, not an intended next revision or an unverified card. Keep failed reviews and append separate run records; never overwrite the first round while timing a repair. Distinguish time spent reading/planning/reviewing from a subsecond command batch. Write authored JSON/logs explicitly as UTF-8 (for example Node fs UTF-8, or an explicit Python encoding); a host's default locale is not a content format.
+
+### Silent editorial pass
+
+When voice is explicitly deferred, set the requested language, `captions:true` and the intended aspect/profile, and give each narrated beat a realistic `rehearsalDuration` for reading. Keep thinking pauses as separate action-free time; a long hold over text is not an unanswered question.
+
+Use the ordinary `timing.set`, `captions.set` and `presentation.cues` commands to plan speech-relative action/caption/reveal times. With no audio reference for that language and a positive estimate, runtime records an explicit null draft binding; never fill it yourself. One continuous commentary passage may advance several real actions while its precise caption cues report them after they occur. Review the estimated clock and actual screenshots before rendering. Once a real take is attached, these bindings become stale and require explicit review against that take.
+
+Inspect the complete script and selected brief, then validate. Only expected `AUDIO_MISSING` issues may remain. Render/produce with `--rehearsal`, inspect the actual encoded output and caption timeline, and compare them with the promised style mechanism. The output is a silent editorial review, not proof of completed voice performance. Use [complete production](full-production.md#produce-and-revise-deliveries) for the exact cache and verification workflow.
+
 Use the selected profile's localized checks as review questions, with concrete beat/time evidence and remaining issues. A rendered file or a terminology regex cannot certify expert judgment, natural delivery or a compelling story.
+
+An independent reviewer must receive the original requested outcome and user expression constraints as well as the saved brief, selected profile, complete script and current storyboard. Ask it to read the target-language narration reference too. Passing only an author's summary can omit constraints such as no production framing, or turn a newly invented opponent assumption into an asserted observation. Keep those assumptions legible as natural conditions, and distinguish audience-facing words from project/evidence labels.
+
+Apply those expression constraints to visible analysis titles, conditions, group labels and annotations too, not only narration/SRT. Fetch the current public project/plan when the compact storyboard omits that copy. Keep necessary decision assumptions in natural conditional language; provenance and production disclaimers belong in evidence rather than a repeated on-screen footer.
 
 For a new/custom mode, inspect two contrasting hands or decision spots: a normal example and a boundary/counterexample. The same reasoning discipline, perspective and rhythm should survive the change in cards; wording and outcomes may differ. Each work must also satisfy the user's requested teaching outcome. Fix the reusable brief or capability when the same failure appears across examples; do not narrow hand choice just to make a template pass.
 
@@ -44,7 +77,7 @@ For a condition comparison, state both cases' assumptions and show what the chan
 
 Audit decision episodes across beats too: if the speaker still weighs folding/calling the current bet, its action remains pending until that thought ends. A later beat can plan the next street after committing, but an earlier alternative needs an explicit retrospective/counterfactual transition. Starting a thought before the action is insufficient when the remainder still describes that uncommitted choice. Check the actual state at each such passage, not only the beat that contains the button click.
 
-For the first delivery of a new/combined mode, or a programme with quizzes or knowledge/counterfactual shifts, obtain an independent **editorial preflight before full voice generation** when delegation is available. Give a fresh subagent the requested outcome, saved brief, complete sequence/script and compiled states; keep product access read-only and let it derive findings. Missing draft audio is expected at this stage. Include earlier chapters to expose cross-chapter disclosures; resolve wording, reasoning and information-flow findings before spending a full voice batch. After rendering, have that reviewer check the actual affected intervals as well: a correct plan does not prove correct speech/action timing. Retain failed reviews. This adds a review role, not another runtime or a fixed writing template. Without delegation, perform a separate full-programme review and label it self-review; do not claim independent verification.
+For the first delivery of a new/combined mode, or a programme with quizzes or knowledge/counterfactual shifts, obtain an independent **editorial preflight before a silent editorial delivery as well as before full voice generation** when delegation is available. Deferring voice does not defer this check. Give a fresh subagent the requested outcome, saved brief, complete sequence/script and exported storyboard; keep product access read-only and let it derive findings. Missing draft audio is expected at this stage. Include earlier chapters to expose cross-chapter disclosures; resolve wording, reasoning and information-flow findings before encoding a batch or spending a full voice batch. Have the author repair the concrete findings, then recheck affected passages without reopening unrelated accepted material. After rendering, have that reviewer check the actual affected intervals as well: a correct plan does not prove correct speech/action timing. Retain failed reviews. This adds a review role, not another runtime or a fixed writing template. Without delegation, perform a separate full-programme review and label it self-review; do not claim independent verification.
 
 Compare the brief's visual plan with the proposed presentation before voice generation and with actual encoded decision frames afterward. Check whether viewers can follow the important numbers, hand candidates and condition changes on screen. When they remain only in narration/subtitles, review the pedagogical reason for that choice; legality, decoding and waveform checks do not establish that the lesson explains visually.
 

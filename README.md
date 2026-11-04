@@ -44,6 +44,8 @@ node bin/river.mjs render --project projects/my-hand --profile final --out artif
 
 `session` 接受每行一个 JSON 请求，支持 load/observe/apply/seek/export/voice。所有成功编辑自动保存。格式与命令实例的唯一说明在项目 skill：
 
+选风格时无需先建工程：`node bin/river.mjs patterns` 查看目录，`patterns --id dialogue` 读取完整模式。工程内可用 `export` 的 `kind:"storyboard"` 获取同一编译计划的紧凑分镜，核对旁白时刻、公开状态、实际动作和可见分析。延期配音时也可先编排字幕与动作，并通过 `--rehearsal` 审查实际画面。
+
 - [poker-director skill](.agents/skills/poker-director/SKILL.md)
 - [项目、场景、音频及批次格式](.agents/skills/poker-director/references/lesson-format.md)
 - [六种制作流程](.agents/skills/poker-director/references/task-recipes.md)

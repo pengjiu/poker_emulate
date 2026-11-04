@@ -57,3 +57,10 @@ test('Balancing an English tail preserves spaces inside the redistributed pages'
   assert.ok(pages.some(p=>p.text.includes('price changed.')));assert.ok(pages.every(p=>!p.text.includes('pricechanged')));
   assert.equal(pages.map(p=>p.text).join('').replace(/\s/g,''),text.replace(/\s/g,''));
 });
+
+test('Caption speaker identity follows the current turn, escapes text and clears with narration',()=>{
+  const plan=compileProject(fixture({sceneId:'button-vs-blind',locale:'zh-CN',captions:true,profile:'final'}),packs),frame=structuredClone(plan.frames[0]);
+  Object.assign(frame,{start:0,duration:3,startFrame:0,endFrame:90,narration:'这次先看哪些更差的牌会跟。',narrationStart:0,narrationDuration:2,audio:null,speaker:'老周 <教练>'});plan.frames=[frame];plan.totalFrames=90;
+  assert.match(renderFrame(plan,10),/class="caption-speaker">老周 &lt;教练&gt;<\/span>/);assert.doesNotMatch(renderFrame(plan,75),/caption-speaker/);
+  frame.speaker='阿哲';assert.match(renderFrame(plan,10),/class="caption-speaker">阿哲<\/span>/);
+});

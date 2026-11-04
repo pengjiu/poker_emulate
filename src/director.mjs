@@ -7,6 +7,7 @@ import {clone,hash} from './util.mjs';
 import {check,errorJSON} from './errors.mjs';
 import {VoiceController,readVoicePreset} from './media/voice.mjs';
 import {selectDirection,patterns,effectiveDirection} from './direction/index.mjs';
+import {storyboard} from './direction/storyboard.mjs';
 import {analysisSchema,confirmAnalysis,importSolverAnalysis,solverRequest} from './analysis/index.mjs';
 import {bindEvidence} from './analysis/evidence.mjs';
 import {presentationSchema,presentationCueSchema} from './presentation.mjs';
@@ -160,7 +161,7 @@ export class Director {
           beat.timing??={};beat.timing.overrides??={};beat.timing.overrides[locale]=clone(c.value.timing);beat.timing.audioHashes??={};beat.timing.audioHashes[locale]=c.value.timing===null?null:beat.audio?.[locale]?.assetId??null;
         }else if(c.type==='captions.set'){
           keys(c.value,['locale','cues'],path+'/value');if(c.value.cues===null){if(beat.captionCues)delete beat.captionCues[locale];}
-          else{check(Array.isArray(c.value.cues)&&c.value.cues.length>0,'CAPTION_TIMING','Provide caption intervals, or null for automatic paging.',path+'/value/cues');check(beat.audio?.[locale],'AUDIO_MISSING','Generate or attach the speech before binding precise captions.',path+'/value');beat.captionCues??={};beat.captionCues[locale]={audioHash:beat.audio[locale].assetId,cues:clone(c.value.cues)};}
+          else{check(Array.isArray(c.value.cues)&&c.value.cues.length>0,'CAPTION_TIMING','Provide caption intervals, or null for automatic paging.',path+'/value/cues');check(beat.audio?.[locale]||Number.isFinite(beat.rehearsalDuration?.[locale])&&beat.rehearsalDuration[locale]>0,'AUDIO_MISSING','Attach speech or set a positive rehearsalDuration for this language before binding precise captions.',path+'/value');beat.captionCues??={};beat.captionCues[locale]={audioHash:beat.audio?.[locale]?.assetId??null,cues:clone(c.value.cues)};}
         }else{
           keys(c.value,['locale','source'],path+'/value');check(beat.narration?.[locale]?.trim(),'NARRATION','Set narration before attaching its audio.',path+'/beatId');
           const imported=await importAudio(this.store.directory,c.value.source);project.assets[imported.assetId]=imported.asset;
@@ -178,7 +179,8 @@ export class Director {
   async voice(params={}){return this.speech.dispatch(params);}
   async export(options={}){
     keys(options,['kind','destination','patternId','sceneId','analysisId','locale'],'export');const kind=options.kind??'project';
-    check(['project','plan','patterns','practice','practice-results','session','solver'].includes(kind),'EXPORT_KIND','Unknown export kind.','export/kind');
+    check(['project','plan','storyboard','patterns','practice','practice-results','session','solver'].includes(kind),'EXPORT_KIND','Unknown export kind.','export/kind');
+    if(kind==='storyboard')check(options.destination===undefined,'EXPORT_KIND','Storyboard is returned as structured data.','export/destination');
     if(kind==='patterns'){check(options.destination===undefined,'EXPORT_KIND','Patterns are returned as structured data.','export');return patterns(options.patternId);}
     check(options.patternId===undefined,'EXPORT_KIND','patternId applies to patterns only.','export/patternId');
     if(kind==='project'&&options.destination)return this.store.copyTo(options.destination);
@@ -187,7 +189,7 @@ export class Director {
     if(kind==='practice-results')return practiceSummary(project);
     if(kind==='session')return resolveSessionObservations(project);
     if(kind==='solver'){const scene=project.lesson.scenes.find(s=>s.id===(options.sceneId??project.output.sceneId)),item=scene?.analysis?.find(a=>a.id===options.analysisId);check(item,'ANALYSIS_UNKNOWN','Choose analysis to export a solver request.','analysisId');return solverRequest(scene,item.node);}
-    return kind==='project'?clone(project):compileProject(project,this.packs);
+    if(kind==='project')return clone(project);const plan=compileProject(project,this.packs);return kind==='storyboard'?storyboard(plan):plan;
   }
   async dispatch(request){
     keys(request,['method','params'],'request');const methods=['load','observe','apply','seek','export','voice'];check(methods.includes(request.method),'METHOD','Unknown method.','method',{allowed:methods});

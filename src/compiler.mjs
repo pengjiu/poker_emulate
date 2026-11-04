@@ -17,6 +17,10 @@ export {route} from './project/routes.mjs';
 export {displayState as stateInBB} from './poker/rules.mjs';
 
 export const profiles={draft:{short:720,fps:24},final:{short:1080,fps:30}};
+function timingBindingCurrent(beat,locale,audioHash){
+  const ref=beat.audio?.[locale],estimate=beat.rehearsalDuration?.[locale];
+  return ref?audioHash===ref.assetId:audioHash===null&&Number.isFinite(estimate)&&estimate>0;
+}
 export function selectedRoutes(project,output={}){
   const selected={...project.output,...output};
   if((Object.hasOwn(output,'sceneId')||Object.hasOwn(output,'branchId'))&&!Object.hasOwn(output,'sequence'))selected.sequence=null;
@@ -63,11 +67,12 @@ export function compileProject(project,packs,{output={},view='player'}={}){
         else audio={assetId:ref.assetId,locale:selected.locale,duration:asset.duration,path:asset.path};
       }
       const actions=beat.actions??[],actionHold=beat.actionHold??.7,hold=beat.hold??1.2,estimated=beat.rehearsalDuration?.[selected.locale]??hold,timing=timingProfile(beat,selected.locale);
-      if(timing&&narration&&(!ref||beat.timing.audioHashes?.[selected.locale]!==ref.assetId))issues.push({code:'TIMING_STALE',path:`beats/${beat.id}/timing/${selected.locale}`,message:'Review action/speech timing against the current audio through timing.set.',retryable:false,target});
+      if(timing&&narration&&!timingBindingCurrent(beat,selected.locale,beat.timing.audioHashes?.[selected.locale]))issues.push({code:'TIMING_STALE',path:`beats/${beat.id}/timing/${selected.locale}`,message:'Review action/speech timing against the current audio or explicit rehearsal estimate through timing.set.',retryable:false,target});
       const captionSettings=beat.captionCues?.[selected.locale],captions=captionSettings?.cues;
-      if(captionSettings&&(!captionSettings.audioHash||captionSettings.audioHash!==ref?.assetId||!captions.length))issues.push({code:'CAPTION_STALE',path:`beats/${beat.id}/captionCues/${selected.locale}`,message:'Confirm precise caption timing against the current audio through captions.set.',retryable:false,target});
-      if(audio&&captions?.at(-1)?.end>audio.duration+1e-6)issues.push({code:'CAPTION_TIMING',path:`beats/${beat.id}/captionCues/${selected.locale}`,message:'Caption cues exceed the measured speech duration.',retryable:false,target});
-      if(captions?.some(c=>{const near=Math.floor(c.start*fps),first=near/fps>=c.start?near:near+1;return first/fps>=Math.min(c.end,audio?.duration??Infinity);}))issues.push({code:'CAPTION_TIMING',path:`beats/${beat.id}/captionCues/${selected.locale}`,message:'Every caption cue must cover a visible frame at the selected frame rate.',retryable:false,target});
+      if(captionSettings&&(!timingBindingCurrent(beat,selected.locale,captionSettings.audioHash)||!captions.length))issues.push({code:'CAPTION_STALE',path:`beats/${beat.id}/captionCues/${selected.locale}`,message:'Confirm precise caption timing against the current audio or explicit rehearsal estimate through captions.set.',retryable:false,target});
+      const captionDuration=audio?.duration??(!ref?beat.rehearsalDuration?.[selected.locale]:undefined);
+      if(captionDuration!==undefined&&captions?.at(-1)?.end>captionDuration+1e-6)issues.push({code:'CAPTION_TIMING',path:`beats/${beat.id}/captionCues/${selected.locale}`,message:'Caption cues exceed the narration clock duration.',retryable:false,target});
+      if(captions?.some(c=>{const near=Math.floor(c.start*fps),first=near/fps>=c.start?near:near+1;return first/fps>=Math.min(c.end,captionDuration??Infinity);}))issues.push({code:'CAPTION_TIMING',path:`beats/${beat.id}/captionCues/${selected.locale}`,message:'Every caption cue must cover a visible frame at the selected frame rate.',retryable:false,target});
       const act=i=>{try{const before=clone(state);before.revealed=[...new Set([...before.revealed,...revealed])];previousState=stateInBB(observeState(before,{view}));state=transition(state,actions[i]);nodeIndex++;stateStart=tick/fps;stateEvent=clone(actions[i]);}catch(e){e.path=`scenes/${scene.id}/beats/${beat.id}/actions/${i}`;throw e;}};
       const cue=start=>narration?{id:entryId===null?beat.id:`${entryId}::${beat.id}`,start,duration:audio?.duration??estimated,text:narration,audio}:null;
       if(!timing){
@@ -106,7 +111,7 @@ export function compileProject(project,packs,{output={},view='player'}={}){
     const order=project.lesson.session.hands.map(h=>h.sceneId);
     if(Array.isArray(notes))for(const frame of frames){const index=order.indexOf(frame.sceneId);frame.history=notes.filter(note=>note.current===true&&index>=0&&order.indexOf(note.sceneId)>=0&&order.indexOf(note.sceneId)<index);}
   }
-  return compileSound(compilePresentations(plan,project,{compileAnalysis,stateInBB,route}),project);
+  return compileSound(compilePresentations(plan,project,{compileAnalysis,stateInBB,route,timingBindingCurrent}),project);
 }
 export function contentHash(project){return hash({format:project.format,version:project.version,lesson:project.lesson,output:project.output,assets:project.assets,...(project.voice?{voice:project.voice}:{}),...(project.direction?{direction:project.direction}:{}),...(project.sound?{sound:project.sound}:{}),...(project.deliverables?{deliverables:project.deliverables}:{})});}
 export async function validateProject(project,packs,{directory,output={},media=false,all=false}={}){

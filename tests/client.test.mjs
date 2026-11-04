@@ -24,7 +24,7 @@ test('Localized captions fit two comfortable lines in both full-resolution deliv
   for(const aspect of ['landscape','portrait'])for(const [locale,text]of [...Object.entries(passages),['en-US','W'.repeat(72)],['en-US','GAMMA '.repeat(20)]]){
     await page.setViewportSize(aspect==='portrait'?{width:1080,height:1920}:{width:1920,height:1080});
     const plan=compileProject(fixture({sceneId:'button-vs-blind',locale,aspect,captions:true,profile:'final'}),packs),frame=structuredClone(plan.frames[0]);
-    Object.assign(frame,{start:0,duration:20,startFrame:0,endFrame:600,narration:text,narrationStart:0,narrationDuration:20,audio:{duration:20},captionCues:null});plan.frames=[frame];plan.totalFrames=600;
+    Object.assign(frame,{start:0,duration:20,startFrame:0,endFrame:600,narration:text,narrationStart:0,narrationDuration:20,audio:{duration:20},captionCues:null,speaker:locale==='zh-CN'?'老周':locale==='ja-JP'?'聞き手':'Analyst'});plan.frames=[frame];plan.totalFrames=600;
     await page.evaluate(p=>window.riverFrame.load(p),plan);await page.evaluate(()=>document.fonts.ready);
     for(const cue of subtitleCues(plan)){
       await page.evaluate(i=>window.riverFrame.render(i),Math.floor((cue.start+cue.end)/2*plan.fps));
@@ -36,6 +36,7 @@ test('Localized captions fit two comfortable lines in both full-resolution deliv
       assert.ok(geometry.font>=40,`${aspect}/${locale}: subtitles are too small`);
       assert.ok(geometry.height<=2*geometry.line+2,`${aspect}/${locale}: more than two lines`);
       assert.ok(geometry.fits,`${aspect}/${locale}: caption escapes its safe lane`);assert.equal(geometry.overlaps,false,`${aspect}/${locale}: caption covers cards or actions`);
+      assert.equal(await page.locator('.caption-speaker').innerText(),frame.speaker);
     }
   }
 });

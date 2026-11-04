@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "patterns": [
     {
       "id": "think-aloud",
@@ -23,36 +23,39 @@
       ],
       "guidance": {
         "zh-CN": [
-          "每个决定先说现在最在意什么，再比较一个真实备选，最后落到行动和下一街计划。",
-          "只根据当前已知信息推理；对手底牌与后续发牌到揭晓时才进入解说。",
-          "口气像在桌边带朋友看牌，关键决定放慢，常规弃牌一带而过。",
-          "把理由落到当前牌面上哪些更差的牌会跟、哪些会弃，以及后街出现什么牌、尺度或读数时你会改主意；短语本身不代替这个比较。"
+          "关键决定先说当前最在意什么，用具体可能继续或弃牌的牌比较真实备选，再落到行动。",
+          "新牌或对手动作出现后，更新范围判断、实际选择与后续计划；说明什么牌、尺度或读数会让你改主意。",
+          "只用当前已知信息，核对候选牌是否合法、实际成了什么牌；对手底牌与后续发牌到揭晓时才进入推理。",
+          "口气像在桌边带朋友看牌，关键决定放慢，常规动作简短；当前备选讲完再行动，随后转向下一步计划。"
         ],
         "en-US": [
-          "At decisions name the concern, compare a credible alternative, then choose and plan the next street.",
-          "Use only current information; introduce hole cards and runouts when revealed.",
-          "Sound like a player talking a friend through the hand; vary pace with decision weight.",
-          "Ground the comparison in weaker hands that call or fold and the runout, size or read that would change the next decision."
+          "At key decisions name the concern, compare credible alternatives using specific hands that continue or fold, then choose an action.",
+          "After a new card or opponent action, update the range assessment, actual choice and follow-up plan; identify a card, size or read that would change your mind.",
+          "Use only current information and check that candidate cards are legal and their made hands correct; use opposing holdings and runouts only when revealed.",
+          "Sound like a player guiding a friend, slowing at key decisions and keeping routine action brief; finish weighing the pending choice before acting, then move to the next plan."
         ],
         "ja-JP": [
-          "判断のたびに懸念、現実的な別案、選択と次のストリートの計画を話す。",
-          "未公開のハンドや後のカードは、公開されるまで推論に使わない。",
-          "友人と卓を見ているように話し、重要な判断に時間を使う。",
-          "弱いハンドがどれならコールし、どれなら降りるか、次のカード・サイズ・読みで判断がどう変わるかを具体化する。"
+          "重要な判断では懸念を示し、続行するハンドと降りるハンドを具体的に挙げて現実的な別案を比べ、行動を選ぶ。",
+          "新しいカードや相手の行動を受けて、レンジの見立て、実際の選択、次の計画を更新し、判断を変えるカード・サイズ・読みを示す。",
+          "現在の情報だけを使い、候補カードの重複や完成役を確認する。相手のハンドや後のカードは公開されてから推論に使う。",
+          "友人を案内するように、重要な判断はゆっくり、通常の進行は短く話す。保留中の選択を考え終えてから行動し、その後で次の計画へ移る。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "视角有没有偷看未来？",
-          "关键选择有没有理由、备选和后续计划？"
+          "推理是否只用当时可知信息，候选牌与成牌是否正确？",
+          "关键选择是否用具体继续/弃牌候选比较了理由与真实备选？",
+          "跨街时，新信息是否真正更新了实际选择与后续计划，而非重复同一原则？"
         ],
         "en-US": [
-          "Does reasoning respect current information?",
-          "Do key choices include a reason, alternative and follow-up?"
+          "Does reasoning use only information available then, with legal candidate cards and correct made hands?",
+          "Do key choices compare reasons and credible alternatives through specific continuing or folding hands?",
+          "Across streets, are the actual choice and follow-up plan reassessed as information changes rather than repeating the same principle?"
         ],
         "ja-JP": [
-          "未来の情報を先取りしていないか。",
-          "重要な選択に理由、別案、次の計画があるか。"
+          "その時点で知り得る情報だけを使い、候補カードと完成役は正しいか。",
+          "重要な選択では、続行・フォールドする具体的なハンドを使って理由と現実的な別案を比べているか。",
+          "複数ストリートでは、新情報によって実際の選択と次の計画が更新され、同じ原則の繰り返しになっていないか。"
         ]
       },
       "delivery": {
@@ -97,33 +100,36 @@
       ],
       "guidance": {
         "zh-CN": [
-          "开头抛出这手最难的问题，先交代位置、有效筹码和必要背景。",
-          "把事实、当时想法、事后评价说清楚；悬念来自行动与范围，不能捏造读心或结果。",
-          "揭牌后回到决策依据，给一个观众能在下一手用上的判断。"
+          "围绕一个尚未解决的具体难题开场，交代位置、有效筹码和必要背景，让观众知道还在等什么信息。",
+          "用真实行动或新信息收窄范围、升级两难并改变对局面的理解；区分事实、当时想法与事后评价，不捏造读心。",
+          "用后续行动或信息兑现开头的问题，再回到决策依据；可以不揭牌，但不能只用输赢或一句原则收尾。"
         ],
         "en-US": [
-          "Open with the genuine dilemma, then establish position, effective stacks and relevant context.",
-          "Separate facts, thoughts at the time and hindsight; earn suspense through ranges and actions.",
-          "After the reveal return to decision quality and one transferable observation."
+          "Open around a specific unresolved dilemma, establish position, effective stacks and context, and make clear what information is still awaited.",
+          "Use actual actions or new information to narrow ranges, deepen the dilemma and change the reading of the hand; distinguish facts, thoughts at the time and hindsight without inventing motives.",
+          "Pay off the opening question with a later action or information, then return to decision quality; a showdown is optional, but a result or general principle alone is not the payoff."
         ],
         "ja-JP": [
-          "本当の迷いを冒頭に置き、ポジション、有効スタック、背景を示す。",
-          "事実、当時の考え、事後評価を分け、レンジとアクションで緊張を作る。",
-          "ショーダウン後は勝敗だけでなく判断の質と応用点に戻る。"
+          "未解決の具体的な難問から始め、ポジション、有効スタック、背景と、まだ何の情報を待っているのかを示す。",
+          "実際の行動や新情報でレンジを絞り、迷いを深め、局面の見方を変える。事実、当時の考え、事後評価を分け、相手の内心を作らない。",
+          "後の行動や情報で冒頭の問いに答え、判断の根拠に戻る。ショーダウンは必須ではないが、勝敗や一般論だけを結末にしない。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "开头的问题最后是否得到回答？",
-          "有没有用输赢代替决策评价？"
+          "开头未决的问题，最后是否得到具体行动或信息的回报？",
+          "哪次行动或新信息改变了对局面的理解，而不只是换成第三人称？",
+          "当时可知、事后评价与结果是否分清，事实性动作叙述是否对齐发生时点？"
         ],
         "en-US": [
-          "Is the opening question resolved?",
-          "Is decision quality distinguished from the result?"
+          "Does a specific action or piece of information resolve the opening uncertainty?",
+          "Which action or new information changes the reading of the hand beyond changing the narrator's person?",
+          "Are information available then, hindsight and results distinguished, and factual action reports aligned with when they occur?"
         ],
         "ja-JP": [
-          "冒頭の問いを回収したか。",
-          "結果と判断の質を区別したか。"
+          "冒頭の未解決の問いに、具体的な行動や情報で答えたか。",
+          "語りを三人称に変えただけでなく、どの行動や新情報が局面の見方を変えたか。",
+          "当時の情報、事後評価、結果を分け、行動の事実を実際の発生時点に合わせて語っているか。"
         ]
       },
       "delivery": {
@@ -168,36 +174,39 @@
       ],
       "guidance": {
         "zh-CN": [
-          "提问前给齐位置、筹码、行动、牌面与必要假设，选项要可执行。",
-          "留下真实思考空白，答案前保持牌面和信息边界；不插假倒计时。",
-          "答案解释为什么，也解释最有诱惑的错误选项错在哪里。",
-          "检查整条播放顺序：新判断题的答案在留白后首次出现。重复已讲过的牌例时，明确做复习，或改变真正影响选择的条件再提问。"
+          "提问前给齐位置、筹码、行动、牌面与必要假设，给出可执行且有比较价值的选项。",
+          "条件齐全后留下真实思考空白，答案前保持待决状态与中性提示；不插假倒计时。",
+          "解答说明选择的理由，以及最有吸引力的备选在什么条件下成立或失败。",
+          "审核全节目及字幕、标题和对照措辞，答案在留白后首次出现；二选一时，排除上一题动作或暗示与上一题相反同样泄题。已解牌例应标为复习，或改变真正影响判断的条件。"
         ],
         "en-US": [
-          "Provide stacks, position, action, board and assumptions before asking; choices must be legal.",
-          "Leave actual thinking time and preserve information until the answer.",
-          "Explain the answer and why the most tempting alternative fails.",
-          "Audit the whole programme: a new decision answer first appears after the thinking pause. Mark a solved example as recall, or change a decision-relevant condition."
+          "Provide position, stacks, action, board and necessary assumptions before asking, with legal choices worth comparing.",
+          "After providing the conditions, leave actual thinking time with the action pending and prompts neutral; do not add a fake countdown.",
+          "Explain the choice and the conditions under which the most tempting alternative succeeds or fails.",
+          "Audit the whole programme, captions, titles and comparisons so the answer first appears after the pause; in a binary choice, ruling out the previous action or hinting at its opposite also leaks the answer. Mark solved examples as recall or change a decision-relevant condition."
         ],
         "ja-JP": [
-          "質問前にスタック、位置、経緯、ボード、前提を提示し、合法な選択肢を用意する。",
-          "考える無音時間を確保し、答えまでは情報を増やさない。",
-          "正解の理由と、魅力的な誤答が成立しない理由を示す。",
-          "全編の情報順を確認する。新しい問題の答えは考える時間の後に初めて示す。既出の問題は復習と明示するか、判断に関わる条件を変える。"
+          "質問前にポジション、スタック、経緯、ボード、必要な前提を揃え、合法で比較する意味のある選択肢を出す。",
+          "条件を揃えてから実際の思考時間を置き、行動は保留し、ヒントは中立に保つ。見せかけのカウントダウンは加えない。",
+          "選択の理由と、最も魅力的な別案が成立する条件・成立しない条件を説明する。",
+          "全編、字幕、見出し、比較表現を確認し、答えは思考時間の後に初めて示す。二択では前問の行動を除外したり、逆だとほのめかしたりするのも答えの先出しになる。既出例は復習と明示するか、判断に関わる条件を変える。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "思考空白期间是否没有提前揭答案？",
-          "选项与引擎合法动作是否一致？"
+          "全节目中，先前讲解、字幕、标题或二选一的排除暗示是否已经给出答案？",
+          "提问条件是否完整，选项与引擎合法动作是否一致？",
+          "观众是否在真实留白中保持独立判断，随后才得到选择与备选的解释？"
         ],
         "en-US": [
-          "Does the thinking pause avoid leaking the answer?",
-          "Are choices consistent with legal actions?"
+          "Has earlier explanation, a caption, title or elimination hint in a binary choice already supplied the answer anywhere in the programme?",
+          "Are the question's conditions complete and its choices consistent with legal actions?",
+          "Can viewers decide independently during a real pause before hearing the choice and alternatives explained?"
         ],
         "ja-JP": [
-          "考える時間に答えを先出ししていないか。",
-          "選択肢は合法なアクションか。"
+          "全編の前の解説、字幕、見出し、二択の消去ヒントで、既に答えを伝えていないか。",
+          "質問の条件は揃い、選択肢は合法なアクションか。",
+          "実際の思考時間に視聴者が独立して判断し、その後で選択と別案の説明を受けられるか。"
         ]
       },
       "delivery": {
@@ -242,33 +251,36 @@
       ],
       "guidance": {
         "zh-CN": [
-          "先说眼前的问题，再引入必要术语，用眼前筹码和牌面说明。",
-          "一次只增加一个概念；先示范，再换个小条件让观众重新判断。",
-          "术语按当地牌友的说法说，首次出现用一句人话解释，避免连续下定义。"
+          "围绕一个眼前问题和核心概念，用当前牌、筹码或关系先示范推理。",
+          "改变一个与判断有关的条件，给齐新条件后提问并留白，再解释；换牌例后直接公布结果仍是示范。",
+          "让画面里的具体牌、金额或关系承载解释；术语用当地牌友的说法，首次用一句人话说明。"
         ],
         "en-US": [
-          "Start with the immediate problem and introduce terminology only when useful.",
-          "Add one concept at a time; demonstrate, then test a small variation.",
-          "Use local table language and one plain explanation on first use."
+          "Focus on one immediate problem and core concept, first demonstrating the reasoning with the current cards, chips or relationships.",
+          "Change a decision-relevant condition, provide the new premises, then ask and pause before explaining; announcing the result in a new example is still demonstration.",
+          "Make visible cards, amounts or relationships carry the explanation; use local table language and one plain explanation when a term first appears."
         ],
         "ja-JP": [
-          "目の前の問題から始め、必要になってから用語を導入する。",
-          "一度に一概念を扱い、実演後に条件を少し変えて再判断する。",
-          "現地の自然なポーカー用語を使い、初出だけ簡潔に説明する。"
+          "一つの目の前の問題と中心概念に絞り、現在のカード、チップ、関係を使って考え方を実演する。",
+          "判断に関わる条件を一つ変え、新しい前提を揃えて質問し、間を置いてから説明する。別の例ですぐ結果を言うだけなら、まだ実演である。",
+          "画面の具体的なカード、金額、関係に説明を担わせ、現地の自然な用語を使う。初出の用語は平易に一言で説明する。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "是否只围绕一个核心概念？",
-          "观众是否获得一次独立判断的机会？"
+          "讲解是否始终围绕同一个核心概念，并用具体局面说明？",
+          "新条件给齐后，观众是否能在答案与暗示出现前独立判断？",
+          "迁移题是否引入未解过的相关条件，并解释它为何改变或保留判断？"
         ],
         "en-US": [
-          "Does the lesson stay on one core concept?",
-          "Can the viewer make an independent follow-up decision?"
+          "Does the lesson stay on one core concept and demonstrate it in a concrete situation?",
+          "After receiving the new conditions, can viewers decide before any answer or hint appears?",
+          "Does the transfer task introduce an unsolved relevant condition and explain why it changes or preserves the decision?"
         ],
         "ja-JP": [
-          "中心概念は一つか。",
-          "視聴者が自分で判断する機会があるか。"
+          "一つの中心概念に集中し、具体的な局面で説明しているか。",
+          "新条件が揃ってから、答えやヒントが出る前に視聴者が自分で判断できるか。",
+          "応用問題には未解決の関連条件があり、判断が変わるか維持されるかを説明しているか。"
         ]
       },
       "delivery": {
@@ -313,33 +325,39 @@
       ],
       "guidance": {
         "zh-CN": [
-          "先固定模型与待解释的问题，再从牌型分布、阻断和下注目标推出逻辑。",
-          "精确频率、EV 与 GTO 最优性需要匹配的求解或解析证据；定性示例明确按定性讲。",
-          "换一个可控条件做对照，说明结论何时变化；旁白承载范围解释，桌面仍是正常客户端。"
+          "先固定牌面、范围、权重与问题，再从具体候选牌及其胜负关系解释判断。",
+          "讲阻断时，指出带花色的具体组合怎样因已知牌被移除；逐项确认它属于当前模型的价值牌还是诈唬牌。",
+          "把移除前后的组合数或加权数量与总数分母连起来，让画面展示这条因果；牌类百分比不能代替具体组合差。",
+          "精确频率、EV 与 GTO 最优性需要匹配的求解或解析证据；定性按定性讲，改变已声明的一个条件来说明适用边界。"
         ],
         "en-US": [
-          "Fix the model and question, then explain distribution, blockers and betting objectives.",
-          "Exact frequencies, EV and optimality require matched solver or analytical evidence.",
-          "Vary one condition to expose the boundary; keep the client authentic."
+          "Fix the board, range, weights and question, then explain the decision through specific candidate hands and which hands beat which.",
+          "When explaining blockers, identify the exact card combinations, including suits, removed by known cards and check whether each is value or a bluff in this model.",
+          "Connect the remaining combination counts or weighted counts to the total denominator and show that causal link; hand-class percentages cannot replace the actual combination difference.",
+          "Exact frequencies, EV and GTO optimality require matched solver or analytical evidence; label qualitative claims accordingly and vary one declared condition to expose the boundary."
         ],
         "ja-JP": [
-          "モデルと問いを固定し、ハンド分布、ブロッカー、ベット目的を説明する。",
-          "正確な頻度、EV、最適性には対応する計算根拠を付ける。",
-          "一条件だけ変え、結論が変わる境界を示す。"
+          "ボード、レンジ、重み、問いを固定し、具体的な候補ハンドとその勝敗関係から判断を説明する。",
+          "ブロッカーを説明するときは、既知カードで除かれるコンボをスートまで特定し、このモデルでバリューかブラフかを一つずつ確かめる。",
+          "除去前後のコンボ数や重み付きの数を総数の分母につなぎ、その因果を画面で示す。ハンド分類の割合だけで具体的なコンボ差を代用しない。",
+          "正確な頻度、EV、GTO最適性には対応する計算根拠が必要である。定性的な説明はそう明示し、宣言した一条件を変えて適用の境界を示す。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "数值是否有匹配证据？",
-          "是否讲清模型与适用边界？"
+          "被阻断的具体组合是否确实存在于当前范围，价值与诈唬有没有分清？",
+          "讲稿和画面是否解释了移除前后数量、权重和分母的变化，而非只给矩阵百分比？",
+          "数值是否有匹配证据，对照是否只改变已声明条件并说明适用边界？"
         ],
         "en-US": [
-          "Are numerical claims backed by matched evidence?",
-          "Are model assumptions and limits stated?"
+          "Do the exact blocked combinations exist in this range, with value and bluffs correctly distinguished?",
+          "Do script and visuals explain the changes in counts, weights and denominator rather than show only matrix percentages?",
+          "Are numbers supported by matched evidence, with comparisons changing only declared conditions and stating the limits?"
         ],
         "ja-JP": [
-          "数値に対応した根拠があるか。",
-          "モデルと適用範囲を明示したか。"
+          "除かれる具体的なコンボは現在のレンジに実在し、バリューとブラフを正しく分けているか。",
+          "台本と画面は行列の割合だけでなく、除去前後の数、重み、分母の変化を説明しているか。",
+          "数値に対応する根拠があり、比較は宣言した条件だけを変え、適用の境界を示しているか。"
         ]
       },
       "delivery": {
@@ -385,33 +403,39 @@
       ],
       "guidance": {
         "zh-CN": [
-          "先给正常打法基线，再交代观察到了什么，以及样本有多有限。",
-          "把调整写成如果……那么……；区分读牌假设与事实。",
-          "演示对手不配合时如何退回基线，避免拿一次摊牌给人永久贴标签。"
+          "先给正常打法的具体基线动作，再交代观察与样本分母；真实记录和设计的假设情境要分清，不虚构历史。",
+          "先检查范围、合法权重和价格能否跨过行动门槛，再示范观察或假设触发的实际偏离，不能只说重新考虑。",
+          "把偏离写成有条件的调整，并展示反读或新证据让它失效时如何退回基线；一次摊牌不能永久定性对手。",
+          "处在零 EV 或等值边界时说明无差异；若仍偏好某动作，交代额外依据，不能把相等说成严格更好。"
         ],
         "en-US": [
-          "State the baseline, the observed tendency and how limited the sample is.",
-          "Phrase deviations as conditional hypotheses and distinguish reads from facts.",
-          "Show when to return to baseline if the opponent does not cooperate."
+          "State a concrete baseline action, then the observation and sample denominator; distinguish real records from a designed hypothetical situation without inventing history.",
+          "First check that the range, legal weights and price can cross an action threshold, then demonstrate an actual deviation triggered by the observation or assumption rather than merely reconsidering.",
+          "Make the deviation conditional and show a return to baseline when a counter-read or new evidence defeats it; one showdown cannot permanently label an opponent.",
+          "At zero EV or an equal-value boundary, explain indifference; any remaining action preference needs an additional reason, not a claim of strict superiority."
         ],
         "ja-JP": [
-          "基準戦略、観察した傾向、サンプルの限界を示す。",
-          "調整を条件付きで述べ、リードと事実を区別する。",
-          "読みが外れたときに基準へ戻る条件を示す。"
+          "まず基準となる具体的な行動を示し、観察とサンプルの分母を説明する。実際の記録と設計した仮定の状況を分け、履歴を作らない。",
+          "レンジ、許される重み、価格によって行動の境界を越えられるか先に確かめ、単なる再検討でなく、観察や仮定から実際の変更を示す。",
+          "変更を条件付きとし、反対の読みや新証拠で成立しなくなったときに基準へ戻る様子を示す。一度のショーダウンで相手を決めつけない。",
+          "EVがゼロ、または両案が等価の境界では無差別であると説明する。それでも一方を選ぶなら追加の根拠を示し、厳密に優れているとは言わない。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "调整依赖的观察/假设是否明确？",
-          "有没有反例和撤回条件？"
+          "基线与实际偏离是否不同，所选模型在合法条件下是否真能跨过决策边界？",
+          "调整依赖的真实观察或设定假设是否明确，样本分母是否合适？",
+          "是否演示反读后的撤回；若涉及零 EV 边界，是否正确说明无差异？"
         ],
         "en-US": [
-          "Are the read and assumptions explicit?",
-          "Is there a counterexample and a reset condition?"
+          "Do baseline and actual deviation differ, and can this model genuinely cross the decision boundary under legal conditions?",
+          "Are the real observation or designed assumption and the appropriate sample denominator explicit?",
+          "Is a reset after a counter-read demonstrated, with any zero-EV boundary correctly described as indifference?"
         ],
         "ja-JP": [
-          "調整の観察と仮定が明確か。",
-          "反例と撤回条件があるか。"
+          "基準と実際の変更は異なり、このモデルは許される条件の下で本当に判断の境界を越えられるか。",
+          "変更の根拠が実際の観察か設定した仮定かを明示し、サンプルの分母は適切か。",
+          "反対の読みで基準へ戻る様子を示し、EVゼロの境界に触れる場合は無差別と正しく説明しているか。"
         ]
       },
       "delivery": {
@@ -455,33 +479,39 @@
       ],
       "guidance": {
         "zh-CN": [
-          "开场说明能看到哪些信息；底牌公开型与未知底牌型解说保持各自信息契约。",
-          "常规动作简短交代，重要下注、加注和发牌处再补原因；用 timing 让旁白跨动作连续。",
-          "多人底池点名行动者和位置，局势升温时提高能量，结算后自然回落。"
+          "开场说明能看到哪些信息，保持底牌公开或未知的边界；对玩家想法的重建应说明是推测。",
+          "围绕一段真实推进的行动链，让同一旁白时钟跨过动作和发牌；常规动作简短，关键下注或转折再解释压力变化。",
+          "说已经下注、跟注或发牌时，画面须已发生该事实，字幕也不能抢跑；预判或回看备选要明确换时态。",
+          "多人底池点名行动者和位置，口气与能量跟随真实局势，结算后自然回落。"
         ],
         "en-US": [
-          "Declare visible information and consistently use cards-up or cards-down knowledge.",
-          "Call routine action briefly, add reasons at meaningful bets and runouts; time narration across actions.",
-          "Identify actors in multiway pots and let vocal energy follow actual stakes."
+          "Declare visible information at the start and keep the cards-up or cards-down boundary; identify reconstructed player thoughts as inference.",
+          "Follow a genuinely advancing action chain with one narration clock spanning actions and deals; call routine action briefly and explain changing pressure at key bets or turns.",
+          "Report a bet, call or deal as completed only after it occurs on screen, with captions equally aligned; clearly signal predictions or retrospective alternatives.",
+          "Name actors and positions in multiway pots, letting tone and energy follow the actual situation and settle after resolution."
         ],
         "ja-JP": [
-          "見える情報を宣言し、ハンド公開型と非公開型を混ぜない。",
-          "通常の進行は短く、重要なベットやカードで理由を補い、音声はアクションをまたいで続ける。",
-          "マルチウェイでは行動者を明確にし、局面に応じて声の熱量を変える。"
+          "冒頭で見える情報を宣言し、ハンド公開型か非公開型かの境界を守る。プレイヤーの思考の再構成は推測と示す。",
+          "実際に進む一連の行動を追い、一つのナレーション時計で行動と配札をまたぐ。通常の進行は短く、重要なベットや転機で圧力の変化を説明する。",
+          "ベット、コール、配札を完了した事実として伝えるのは画面で起きた後にし、字幕も合わせる。予測や過去の別案は時点の切り替えを明示する。",
+          "マルチウェイでは行動者とポジションを示し、実際の局面に合わせて口調や熱量を変え、決着後は落ち着かせる。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "旁白是否连续覆盖真实推进的动作？",
-          "未知信息有没有被当成已知？"
+          "旁白是否连续覆盖真实推进的动作，而非每批动作结束后停下讲课？",
+          "首次报告动作已完成时，画面是否已经发生，字幕有没有提前？",
+          "行动态势、行动者与位置是否清楚，未知信息有没有被当成已知？"
         ],
         "en-US": [
-          "Does narration continue over advancing action?",
-          "Is commentary consistent with its information contract?"
+          "Does narration span genuinely advancing actions rather than pause for a lecture after each batch?",
+          "When an action is first reported as complete, has it occurred on screen, without an earlier caption?",
+          "Are the action, actors and positions clear, without treating unknown information as known?"
         ],
         "ja-JP": [
-          "進行中も音声が途切れず続くか。",
-          "情報の公開範囲を守っているか。"
+          "行動のまとまりが終わるたびに講義へ止まるのでなく、実際に進む行動をまたいで語りが続くか。",
+          "行動の完了を初めて伝えるとき、画面で既に起きており、字幕も先出ししていないか。",
+          "局面、行動者、ポジションが明確で、未知の情報を既知として扱っていないか。"
         ]
       },
       "delivery": {
@@ -525,33 +555,36 @@
       ],
       "guidance": {
         "zh-CN": [
-          "为两人定义稳定角色、称呼与独立音色参考，每个 beat 标出 speaker。",
-          "提问要推进理解：追问条件、反例或动作意义；专家回应当前问题，不轮流念同一段。",
-          "两人轮次依次播放，避免配音互相盖住；若需重叠对白，预混外部音频后导入。"
+          "为两人固定角色和称呼，每个 beat 标出 speaker，画面让观众辨认当前是谁；配音时使用独立音色参考。",
+          "提问者提出一个值得认真回答的异议、备选或反例；专家用本手具体候选牌与条件回应，必要时收窄或修正原判断。",
+          "每轮承接上一轮，形成追问、条件回应与理解更新；同步展示所指的牌、条件或对照，不轮流念同一份说明。"
         ],
         "en-US": [
-          "Define stable roles, names and distinct speaker references; label each beat with speaker.",
-          "Questions should ask about conditions, alternatives or meaning; answers address them directly.",
-          "Sequence turns cleanly; import externally mixed audio for overlapping dialogue."
+          "Keep roles and names stable, label each beat with speaker and visibly identify who is speaking; use distinct speaker references when voicing.",
+          "Have the questioner raise a credible objection, alternative or counterexample; answer with this hand's specific candidates and conditions, narrowing or revising the claim when needed.",
+          "Build each turn on the last through follow-up, conditional response and updated understanding; show the referenced cards, conditions or comparison rather than alternate readings of one explanation."
         ],
         "ja-JP": [
-          "役割、呼び名、別々の話者参照を固定し、各ビートに speaker を付ける。",
-          "条件、別案、意味を掘り下げる質問と、それに直接答える説明を組む。",
-          "発話は順番に置き、重ねる会話は外部でミックスして取り込む。"
+          "役割と呼び名を固定し、各ビートに speaker を付け、誰が話しているかを画面でも示す。音声制作時は別々の話者参照を使う。",
+          "聞き手は検討に値する異論、別案、反例を出す。解説者はこのハンドの具体的な候補と条件で答え、必要なら主張を限定・修正する。",
+          "前の発言を受け、追問、条件付きの応答、理解の更新をつなげる。指しているカード、条件、比較も示し、一つの説明を交互に読むだけにしない。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "是否真有两个固定的说话者/独立声源？",
-          "追问有没有带来新信息？"
+          "角色是否稳定且画面可辨，配音时是否有独立声源？",
+          "反驳或追问是否有价值，回应是否给出具体条件并真正解决它？",
+          "两人的理解是否随对话更新，所指候选牌或对照是否可见？"
         ],
         "en-US": [
-          "Are two stable speakers and distinct references present?",
-          "Does the question add useful information?"
+          "Are roles stable and visibly identifiable, with distinct sources when voiced?",
+          "Is the objection or follow-up meaningful, and does the response resolve it through concrete conditions?",
+          "Does understanding evolve through the exchange, with referenced candidate hands or comparisons visible?"
         ],
         "ja-JP": [
-          "二人の話者と別音源があるか。",
-          "質問が理解を前進させるか。"
+          "役割は安定して画面でも判別でき、音声がある場合は別音源を使っているか。",
+          "異論や追問に意味があり、具体的な条件を示す応答で答えているか。",
+          "対話によって理解が更新され、指している候補ハンドや比較が見えるか。"
         ]
       },
       "delivery": {
@@ -594,33 +627,39 @@
       ],
       "guidance": {
         "zh-CN": [
-          "先把实际线走清楚，指出真正分歧的决定；对照保持有效筹码、底池和已知信息一致。",
-          "用分支或重复场景播放备选线，旁白明确这是如果换一种打法；原始事实与假设分开。",
-          "评价比较下注目标、后续局面与证据，不能只比较谁最后赢。"
+          "指出真正分歧的决定，对照起点的牌面、有效筹码、底池、已知信息及已声明范围与权重保持一致。",
+          "从同一起点用分支或重复场景实际走出两种合法动作及后果，明确区分真实发生与假设路线；一个 EV 数字不等于已演示两条路线。",
+          "用本手具体候选牌解释两种行动各自投入什么、保留或放弃什么及后续取舍，结合匹配证据评价，不只比较最终输赢。",
+          "换范围、权重、价格或牌面的内容另作条件对照；它能补充边界，不能代替同一模型下的行动线比较。"
         ],
         "en-US": [
-          "Establish the actual line and divergence; keep stack, pot and information matched at the decision.",
-          "Play alternatives as branches or repeated scenes and name the counterfactual.",
-          "Compare betting objectives and later decisions, not simply showdown winners."
+          "Identify the true divergence and match the board, effective stacks, pot, known information and any declared range and weights at the decision.",
+          "Use branches or repeated scenes to actually play two legal actions and their consequences from that same point, distinguishing fact from counterfactual; one EV number does not demonstrate two lines.",
+          "Use this hand's specific candidates to explain each action's investment, what it preserves or gives up and later trade-offs, with matched evidence rather than final winners alone.",
+          "Treat changes in range, weights, price or board as separate condition comparisons; they can add boundaries but cannot replace an action-line comparison within one model."
         ],
         "ja-JP": [
-          "実際のラインと分岐点を示し、スタック、ポット、情報を揃える。",
-          "代案は分岐や再生シーンで示し、仮定であることを言葉で示す。",
-          "勝敗だけでなくベット目的と後続判断を比較する。"
+          "本当の分岐点を示し、判断時点のボード、有効スタック、ポット、既知情報、宣言したレンジと重みを揃える。",
+          "同じ起点から分岐や再生シーンで二つの合法な行動と結果を実際に進め、事実と仮定を区別する。EVの数値一つだけでは二つのラインを示したことにならない。",
+          "このハンドの具体的な候補を使い、各行動の投入、残すもの・手放すもの、その後の取捨を説明する。最終勝者だけでなく対応する根拠で評価する。",
+          "レンジ、重み、価格、ボードの変更は別の条件比較として扱う。境界の補足にはなるが、同一モデル内の行動ライン比較の代わりにはしない。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "对照起点是否一致、变量是否明确？",
-          "反事实是否被说成真实发生？"
+          "两路线是否从相同牌面、筹码、底池、信息及已声明范围权重出发？",
+          "是否实际演示两种行动与成本、后果，而非把换范围后的结论称为路线？",
+          "假设是否清楚标明，具体行动取舍是否讲清且未用一次胜负代替评价？"
         ],
         "en-US": [
-          "Are comparison state and changed variables explicit?",
-          "Is the alternative identified as counterfactual?"
+          "Do both lines start from the same board, stacks, pot, information and any declared range weights?",
+          "Are two actions, costs and consequences actually demonstrated rather than conclusions under changed ranges labelled as lines?",
+          "Are counterfactuals labelled and concrete trade-offs explained without using one outcome as the evaluation?"
         ],
         "ja-JP": [
-          "比較の起点と変更条件が明確か。",
-          "仮定を実話として扱っていないか。"
+          "両ラインは同じボード、スタック、ポット、情報、宣言したレンジの重みから始まるか。",
+          "二つの行動、コスト、結果を実際に示し、レンジを変えた結論をラインと呼んでいないか。",
+          "仮定を明示し、具体的な取捨を説明し、一度の勝敗を評価の代わりにしていないか。"
         ]
       },
       "delivery": {
@@ -664,33 +703,36 @@
       ],
       "guidance": {
         "zh-CN": [
-          "先给贯穿问题，再选最能体现差异的几手：一个标准例、一个变化例、一个边界或反例。",
-          "每手只补新的变量，章节之间点明筹码、桌型和假设变化；通过 output.sequence 串联。",
-          "结尾提炼识别条件与行动触发点，不把所有例子压成统一口诀。"
+          "先给贯穿问题，按常态、变化或边界选择有信息增量的例子；首例建立必要候选牌、胜负关系或因果前提。",
+          "后例只补新变量及必要背景，说明什么保留、什么改变，并让画面直接显示它怎样改变判断；不重念全套公式和指标。",
+          "串联各例后提炼识别条件、行动触发点与失效边界，帮助观众在另一手认出问题，不压成统一口诀。"
         ],
         "en-US": [
-          "Choose a recurring question and a standard example, variation and boundary or counterexample.",
-          "Each hand adds a variable; announce changes in stacks, format and assumptions between chapters.",
-          "End with recognition conditions and action triggers, not a universal slogan."
+          "Choose a recurring question and informative examples of a normal case, variation or boundary; establish necessary candidate hands, winning relationships or causal premises in the first example.",
+          "Later examples add only the new variable and needed context, stating what stays fixed and what changes and showing its effect on the decision; do not recite every formula and metric again.",
+          "Connect the examples to recognition conditions, action triggers and limits so viewers can spot the issue in another hand, rather than compressing them into a universal slogan."
         ],
         "ja-JP": [
-          "共通の問いを立て、標準例、変化例、境界や反例を選ぶ。",
-          "各ハンドで変える条件を明示し、スタック、形式、前提の変化をつなぐ。",
-          "最後は普遍的な決まり文句でなく、見分ける条件と行動の契機を示す。"
+          "共通の問いを立て、通常例、変化例、境界から情報が増える例を選ぶ。最初の例で必要な候補ハンド、勝敗関係、因果の前提を作る。",
+          "後の例は新しい変数と必要な背景だけを補い、固定する点と変える点、その判断への影響を画面で示す。全ての式や指標を読み直さない。",
+          "各例をつなぎ、別のハンドでも問題を見分けられる条件、行動のきっかけ、成立しなくなる境界をまとめる。一律の決まり文句には縮めない。"
         ]
       },
       "checks": {
         "zh-CN": [
-          "各例是否真的新增变量或反例？",
-          "多手切换时是否重新交代必要背景？"
+          "首例是否建立推理前提，后例是否只增加有用的新变量或反例？",
+          "画面是否让观众直接比较变了什么、什么没变，而非同款静态矩阵配重复公式？",
+          "切换时必要背景是否齐全，最后能否说出识别条件、行动触发点与边界？"
         ],
         "en-US": [
-          "Does each example add a variable or counterexample?",
-          "Are relevant conditions re-established between hands?"
+          "Does the first example establish the reasoning premises, with later examples adding only a useful variable or counterexample?",
+          "Can viewers directly compare what changes and what stays fixed, rather than see the same static matrix with repeated formulas?",
+          "Is needed context provided at transitions, ending with recognition conditions, action triggers and limits?"
         ],
         "ja-JP": [
-          "各例が条件や反例を追加しているか。",
-          "ハンド間で必要な前提を説明したか。"
+          "最初の例で推論の前提を作り、後の例は有用な新変数や反例だけを追加しているか。",
+          "同じ静的な行列と式の繰り返しでなく、変わる点と固定する点を直接比べられるか。",
+          "切り替え時の必要な背景を揃え、最後に識別条件、行動のきっかけ、適用の境界を示しているか。"
         ]
       },
       "delivery": {

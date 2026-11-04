@@ -7,6 +7,8 @@ Run from the repository root, three directories above this skill. Use `node bin/
 
 **For drawing/cameras, matrices, solver imports, condition variants, continuous sessions, practice, sound or delivery packages, read [complete production](references/full-production.md).** That reference links the exact domain contracts and gives composable commands. Use the same project and six methods; choose creative structure freely.
 
+**When voice is deferred, follow the [silent editorial pass](references/narrative-modes.md#silent-editorial-pass).** Complete scripts, readable captions, role identity and timed action/reveal plans can be rehearsed before synthesis; missing voice does not excuse unfinished reasoning or invisible explanation.
+
 ## Create and deliver
 
 1. Match the requested teaching outcome before generating speech: the chosen scene and reasoning must demonstrate what the user asked to learn. **For GTO or quantitative strategy teaching, read [strategy evidence](references/strategy-evidence.md) before choosing the scene.** Distinguish a designed model from a sourced hand review, and the original table size from players remaining in a pot. Choose the topic, narrative, length and model freely within that outcome. **Before writing a styled lesson, read [narrative modes](references/narrative-modes.md), discover the catalog and save the chosen brief.** Use a custom or combined brief when it better fits the request; style is independent of table size, hand selection and language. For authentic-client output, use plausible table/player names; course headings belong in narration or director labels.
@@ -27,12 +29,15 @@ Validate/render options `--locale`, `--aspect`, `--scene`, `--branch`, `--profil
 {"method":"seek","params":{"beatId":"decision","view":"player"}}
 {"method":"seek","params":{"frameId":"bet::0","view":"player"}}
 {"method":"export","params":{"kind":"plan"}}
+{"method":"export","params":{"kind":"storyboard"}}
 {"method":"export","params":{"destination":"/absolute/new-portable-project"}}
 {"method":"voice","params":{"action":"status"}}
 {"method":"voice","params":{"action":"generate","requestId":"voice-batch-1","expectedRevision":1}}
 ```
 
 `load` reopens the same project's saved state, takes no parameters, adds no revision. `seek.beatId` takes an authored beat ID; `seek.frameId` takes a compiled frame ID such as `bet::0`. Use exactly one. `observe`/`seek` default to player visibility; use `view:"director"` for authoring. `apply` is atomic across commands. `export` defaults to the whole v2 manifest; a destination copies manifest/assets/evidence into a new directory. Move project directories normally while their studio is stopped.
+
+`export kind:"storyboard"` projects the same selected plan into compact narration, public-state, action-time and visible-analysis records. Use it for full-script editorial checks; retain the full plan for exact frame work. A mode label, an accepted draft or a self-written handoff is not evidence that its intended mechanism appears on screen.
 
 `node bin/river.mjs serve --project <directory> --port 4174` opens the director UI. CLI sessions detect this runtime and share its Director/cursor. Observe returns `previewUrl`; `?view=client` opens a clean client. Edits pause playback and save the canonical project.
 

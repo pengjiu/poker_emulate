@@ -111,7 +111,7 @@ export function subtitleCues(plan){
 export function narrationAt(plan,index){
   const frame=frameAt(plan,index);if(!frame?.narration)return null;
   const start=frame.narrationStart??frame.start,duration=frame.narrationDuration??frame.audio?.duration??frame.duration,elapsed=(index-Math.round(start*plan.fps))/plan.fps;
-  return elapsed>=0&&elapsed<duration?{id:frame.narrationId??frame.id,text:frame.narration,start,duration,elapsed,audio:frame.audio,captionCues:frame.captionCues??null}:null;
+  return elapsed>=0&&elapsed<duration?{id:frame.narrationId??frame.id,speaker:frame.speaker??null,text:frame.narration,start,duration,elapsed,audio:frame.audio,captionCues:frame.captionCues??null}:null;
 }
 const captionWeight=text=>[...text].reduce((n,c)=>n+(/[^\x00-\x7F]|[MW@%]/u.test(c)?2:/[A-Z0-9mw]/u.test(c)?1.5:1),0);
 const captionWords=new Intl.Segmenter(undefined,{granularity:'word'});
@@ -228,7 +228,7 @@ export function renderFrame(plan,index,options={}){
   const cue=narrationAt(plan,i),elapsed=cue?.elapsed??0,explicit=cue?.captionCues?.find(c=>elapsed>=c.start&&elapsed<c.end);
   const passage=cue?.captionCues?(explicit?{text:explicit.text,elapsed:elapsed-explicit.start,duration:explicit.end-explicit.start}:null):cue?{text:cue.text,elapsed,duration:cue.duration}:null;
   const text=passage?captionPages(passage.text,plan.aspect==='portrait').find(p=>passage.elapsed/passage.duration<p.endFraction)?.text??'':'';
-  return mark(`<div class="output-frame captions-on ${plan.aspect}"><div class="game-surface">${markup}</div><div class="caption-lane">${text?`<span class="caption-text">${esc(text)}</span>`:''}</div></div>`);
+  return mark(`<div class="output-frame captions-on ${plan.aspect}"><div class="game-surface">${markup}</div><div class="caption-lane">${text?`${cue?.speaker?`<span class="caption-speaker">${esc(cue.speaker)}</span>`:''}<span class="caption-text">${esc(text)}</span>`:''}</div></div>`);
 }
 
 /** Deterministic layout from this frame's actual semantic objects, shared by preview/export. */

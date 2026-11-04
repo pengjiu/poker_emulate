@@ -157,7 +157,7 @@ function continuation(scene,start,end,route) {
 
 // Resolve once in the compiler. Every emitted frame is a complete, seekable view;
 // neither the player nor FFmpeg needs to replay presentation events.
-export function compilePresentations(plan, project, {compileAnalysis, stateInBB, route}) {
+export function compilePresentations(plan, project, {compileAnalysis, stateInBB, route, timingBindingCurrent}) {
   if (!project.lesson.scenes.some(scene => [...scene.beats, ...(scene.branches ?? []).flatMap(b => b.beats)].some(beat => beat.presentation))) return plan;
   const issues = plan.issues, resolved = new Map(), analyses = new Map(), comparisons=new Map(), timing = new Map(), output = [];
   const at = seconds => Math.ceil(seconds * plan.fps - 1e-9);
@@ -207,8 +207,8 @@ export function compilePresentations(plan, project, {compileAnalysis, stateInBB,
       const speech = frames.find(f => f.narration);
       const origin = speech ? at(speech.narrationStart ?? speech.start) : first;
       const binding = value.cues?.[plan.locale];
-      if (value.cues && Object.keys(value.cues).length && !binding) issue('PRESENTATION_STALE', `${path}/cues/${plan.locale}`, 'Review cue timing for this language; another language cannot supply it.');
-      if (binding && beat.narration?.[plan.locale] && (!beat.audio?.[plan.locale] || binding.audioHash !== beat.audio[plan.locale].assetId)) issue('PRESENTATION_STALE', `${path}/cues/${plan.locale}`, 'Review the presentation cues against the current audio through presentation.cues.');
+      if (Object.values(value.cues ?? {}).some(b => b.cues.length) && !binding) issue('PRESENTATION_STALE', `${path}/cues/${plan.locale}`, 'Review cue timing for this language; another language cannot supply it.');
+      if (binding?.cues.length && beat.narration?.[plan.locale] && !timingBindingCurrent(beat, plan.locale, binding.audioHash)) issue('PRESENTATION_STALE', `${path}/cues/${plan.locale}`, 'Review the presentation cues against the current audio or explicit rehearsal estimate through presentation.cues.');
       const cues = (binding?.cues ?? []).map(cue => ({...cue, tick: origin + at(cue.at)}));
       base.layoutSections=[...new Set([...(base.show??[]),...cues.flatMap(c=>c.show??[])])];
       if (cues.some(cue => cue.tick >= end) || new Set(cues.map(c => c.tick)).size !== cues.length) issue('PRESENTATION_TIMING', `${path}/cues/${plan.locale}`, 'Every cue must cover a distinct visible frame inside this passage.');
